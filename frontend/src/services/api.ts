@@ -1,4 +1,10 @@
 import axios from 'axios';
+import type {
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+  RegistrationResponseJSON,
+  AuthenticationResponseJSON,
+} from '@simplewebauthn/browser';
 
 // In dev: VITE_API_URL is empty, Vite proxy forwards /api → backend
 // In production: VITE_API_URL=https://book-api.tdnet.xyz
@@ -166,6 +172,22 @@ export const api = {
     },
     logout: async (): Promise<void> => {
       await axiosInstance.post('/auth/logout');
+    },
+    webAuthnRegistrationOptions: async (): Promise<PublicKeyCredentialCreationOptionsJSON> => {
+      const response = await axiosInstance.post('/auth/webauthn/register/start');
+      return response.data;
+    },
+    webAuthnRegistrationVerify: async (credential: RegistrationResponseJSON): Promise<{ verified: boolean }> => {
+      const response = await axiosInstance.post('/auth/webauthn/register/finish', credential);
+      return response.data;
+    },
+    webAuthnAuthOptions: async (username: string): Promise<PublicKeyCredentialRequestOptionsJSON> => {
+      const response = await axiosInstance.post('/auth/webauthn/authenticate/start', { username });
+      return response.data;
+    },
+    webAuthnAuthVerify: async (username: string, response: AuthenticationResponseJSON): Promise<{ token: string; user: AuthUser }> => {
+      const resp = await axiosInstance.post('/auth/webauthn/authenticate/finish', { username, response });
+      return resp.data;
     },
   },
 
