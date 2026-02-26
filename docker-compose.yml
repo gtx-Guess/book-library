@@ -1,0 +1,61 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "4000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-}
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports:
+      - "4001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://booktracker:booktracker_password@database:5432/booktracker
+      - NODE_ENV=development
+      - PORT=3001
+      - GOOGLE_BOOKS_API_KEY=${GOOGLE_BOOKS_API_KEY:-}
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-in-production}
+      - OWNER_PASSWORD=${OWNER_PASSWORD:-changeme}
+    restart: unless-stopped
+
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: booktracker
+      POSTGRES_PASSWORD: booktracker_password
+      POSTGRES_DB: booktracker
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booktracker -d booktracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - database
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

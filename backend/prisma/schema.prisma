@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  username        String   @unique
+  passwordHash    String
+  role            String   // 'owner' | 'demo'
+  createdAt       DateTime @default(now())
+
+  completedBooks  CompletedBook[]
+  dnfBooks        DNFBook[]
+  wantToReadBooks WantToReadBook[]
+  yearlyGoals     YearlyGoal[]
+}
+
+model Book {
+  id              String   @id @default(cuid())
+  googleBooksId   String?  @unique
+  title           String
+  authors         String[]
+  description     String?
+  coverImage      String?
+  pageCount       Int?
+  publisher       String?
+  publishedDate   String?
+  categories      String[]
+  createdAt       DateTime @default(now())
+
+  completedBooks  CompletedBook[]
+  dnfBooks        DNFBook[]
+  wantToReadBooks WantToReadBook[]
+}
+
+model CompletedBook {
+  id              String   @id @default(cuid())
+  bookId          String
+  book            Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  isSeeded        Boolean  @default(false)
+  completedDate   DateTime
+  year            Int
+  pageCount       Int?
+  rating          Int?
+  own             Boolean?
+  willPurchase    String?
+  link            String?
+  createdAt       DateTime @default(now())
+
+  @@index([year])
+  @@index([userId, year])
+}
+
+model YearlyGoal {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  year            Int
+  goalCount       Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, year])
+}
+
+model DNFBook {
+  id              String   @id @default(cuid())
+  bookId          String
+  book            Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  isSeeded        Boolean  @default(false)
+  own             Boolean?
+  willPurchase    String?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+}
+
+model WantToReadBook {
+  id              String   @id @default(cuid())
+  bookId          String
+  book            Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  isSeeded        Boolean  @default(false)
+  own             Boolean?
+  willPurchase    String?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+}

@@ -1,0 +1,32 @@
+# Environment variables (secrets)
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build output
+dist/
+build/
+*/dist/
+*/build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Excel exports
+**/excel exports/
+
+# Misc one-off scripts
+clear-dnf-books.js
+import-books.js
+import-dnf-books.js
+remove-duplicates.js
+backend/update-maybe-books.js
