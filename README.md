@@ -1,53 +1,98 @@
-# Book Tracker
+# Book Library
 
-A mobile-first web application for tracking books read throughout the year.
+A mobile-first web app for tracking books — what you've read, what you've abandoned, and what's on your list.
 
 ## Features
 
-- 📚 Search and add books via Google Books API
-- ✅ Mark books as finished with completion date
-- 🎯 Set annual reading goals
-- 📊 Track progress toward yearly goals
-- 📱 Mobile-first responsive design
-- 🏠 Self-hosted with Docker
+- Search and add books via Google Books API
+- Track completed books with completion date and rating
+- Set and track annual reading goals
+- DNF (Did Not Finish) list
+- Want to Read list
+- Stats across all years
+- JWT-based auth with owner and demo accounts
+- Demo account includes a seeded library and a 10-book cap per list
+- Self-hosted with Docker Compose
 
 ## Quick Start
 
-1. **Navigate to the project**
-   ```bash
-   cd /root/claude-development/book-tracker
-   ```
+### 1. Set up environment variables
 
-2. **Set up environment variables (optional)**
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your Google Books API key (optional)
-   ```
+```bash
+cp .env.example .env
+```
 
-3. **Build and run with Docker Compose**
-   ```bash
-   docker-compose up -d --build
-   ```
+Edit `.env` and fill in your values:
 
-4. **Access the app**
-   - App: `http://localhost:3000` or `http://192.168.x.x:3000`
-   - pgAdmin: `http://localhost:5050` (Email: admin@booktracker.local, Password: admin)
-   - API: `http://localhost:3001/health` (health check)
+```env
+GOOGLE_BOOKS_API_KEY=your_key_here   # Get one at console.cloud.google.com
+JWT_SECRET=your_long_random_secret   # Run: openssl rand -base64 48
+OWNER_PASSWORD=your_password
+
+# For public/production deployment only
+VITE_API_URL=https://your-api-domain.com
+```
+
+### 2. Build and run
+
+```bash
+docker compose up -d --build
+```
+
+### 3. Seed the database (first run)
+
+```bash
+docker compose exec backend npx ts-node prisma/seed.ts
+```
+
+### 4. Access the app
+
+| Service  | URL |
+|----------|-----|
+| App      | `http://localhost:4000` |
+| API      | `http://localhost:4001` |
+| pgAdmin  | `http://localhost:5050` (admin@admin.com / admin) |
+
+Log in with username `owner` and whatever you set as `OWNER_PASSWORD`.
 
 ## Architecture
 
-- **Frontend**: React with Vite, mobile-first design
-- **Backend**: Node.js/Express REST API
-- **Database**: PostgreSQL with Prisma ORM
+- **Frontend**: React + TypeScript + Vite (dev server via Docker)
+- **Backend**: Node.js + Express + Prisma ORM
+- **Database**: PostgreSQL 16
+- **Auth**: JWT (7-day tokens), bcrypt password hashing
 - **Deployment**: Docker Compose
 
-## Development
+## Production / Public Deployment
 
-See individual README files in `/backend` and `/frontend` directories for development setup.
+The app is designed for a two-domain setup:
 
-## Data Management
+- `book.yourdomain.com` → frontend (port 4000)
+- `book-api.yourdomain.com` → backend (port 4001)
 
-Books are organized by year. Each year has:
-- Separate reading goal
-- Separate library of completed books
-- Previous years are archived and remain accessible
+Set `VITE_API_URL=https://book-api.yourdomain.com` in your `.env`, then force-recreate the frontend container to pick it up:
+
+```bash
+docker compose up -d --force-recreate frontend
+```
+
+Use Nginx Proxy Manager (or similar) to reverse proxy both domains with SSL via Let's Encrypt.
+
+## Accounts
+
+| Account | Username | Password |
+|---------|----------|----------|
+| Owner   | `owner`  | Set via `OWNER_PASSWORD` in `.env` |
+| Demo    | `demo`   | `demo` |
+
+The demo account has a pre-seeded read-only library and a cap of 10 user-added books per list.
+
+## Applying env var changes
+
+Docker Compose doesn't reload env vars on `restart`. Use:
+
+```bash
+docker compose up -d --force-recreate backend
+# or
+docker compose up -d --force-recreate frontend
+```
