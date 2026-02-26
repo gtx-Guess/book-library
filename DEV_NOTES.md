@@ -2,7 +2,7 @@
 
 ## Docker Setup
 
-This project uses a **development-focused Docker setup** similar to the budget-app pattern:
+This project uses a **development-focused Docker setup**:
 
 ### Key Features
 
@@ -11,12 +11,12 @@ This project uses a **development-focused Docker setup** similar to the budget-a
    - Node modules are kept in container to avoid conflicts
 
 2. **Dev Servers** - Running in development mode with hot-reload
-   - Frontend: Vite dev server on port 3000
-   - Backend: tsx watch mode on port 3001
+   - Frontend: Vite dev server on port 4000
+   - Backend: tsx watch mode on port 4001
 
 3. **Database Tools** - pgAdmin included for easy database management
    - Access at `http://localhost:5050`
-   - Default login: admin@booktracker.local / admin
+   - Default login: admin@admin.com / admin
 
 4. **Health Checks** - Database has health check to ensure backend waits for it
 
@@ -36,7 +36,7 @@ This project uses a **development-focused Docker setup** similar to the budget-a
 
 ### Database Schema Changes
 1. Edit `backend/prisma/schema.prisma`
-2. Create migration: `docker-compose exec backend npx prisma migrate dev --name your_change`
+2. Create migration: `docker compose exec backend npx prisma migrate dev --name your_change`
 3. Backend will auto-reload with new schema
 
 ### Adding Dependencies
@@ -45,49 +45,49 @@ This project uses a **development-focused Docker setup** similar to the budget-a
 ```bash
 cd frontend
 npm install package-name
-docker-compose restart frontend
+docker compose up -d --force-recreate frontend
 ```
 
 **Backend:**
 ```bash
 cd backend
 npm install package-name
-docker-compose restart backend
+docker compose up -d --force-recreate backend
 ```
 
 ## Container Management
 
 **View logs:**
 ```bash
-docker-compose logs -f [service_name]
+docker compose logs -f [service_name]
 ```
 
 **Restart a service:**
 ```bash
-docker-compose restart [service_name]
+docker compose up -d --force-recreate [service_name]
 ```
 
 **Rebuild after Dockerfile changes:**
 ```bash
-docker-compose up -d --build [service_name]
+docker compose up -d --build [service_name]
 ```
 
 **Stop everything:**
 ```bash
-docker-compose down
+docker compose down
 ```
 
 **Clean start (removes volumes):**
 ```bash
-docker-compose down -v
-docker-compose up -d --build
+docker compose down -v
+docker compose up -d --build
 ```
 
 ## Database Access
 
 ### Via pgAdmin
 1. Open `http://localhost:5050`
-2. Login with admin@booktracker.local / admin
+2. Login with admin@admin.com / admin
 3. Add server:
    - Host: database
    - Port: 5432
@@ -97,34 +97,37 @@ docker-compose up -d --build
 
 ### Via Command Line
 ```bash
-docker-compose exec database psql -U booktracker -d booktracker
+docker compose exec database psql -U booktracker -d booktracker
 ```
 
 ### Via Prisma Studio
 ```bash
-docker-compose exec backend npx prisma studio
+docker compose exec backend npx prisma studio
 ```
 
 ## Port Mapping
 
-- `3000` - Frontend (Vite dev server)
-- `3001` - Backend (Express API)
+- `4000` - Frontend (Vite dev server)
+- `4001` - Backend (Express API)
 - `5432` - PostgreSQL database
 - `5050` - pgAdmin (bound to 127.0.0.1 only)
 
 ## Environment Variables
 
-Backend environment is configured in docker-compose.yml:
+Backend environment is configured in docker-compose.yml and `.env`:
 - `DATABASE_URL` - PostgreSQL connection string
 - `NODE_ENV` - Set to "development"
-- `PORT` - Backend port (3001)
-- `GOOGLE_BOOKS_API_KEY` - Optional, from .env file
+- `PORT` - Backend port (4001)
+- `GOOGLE_BOOKS_API_KEY` - Required for reliable book search (rate limited without it)
+- `JWT_SECRET` - Secret for signing JWT tokens
+- `OWNER_PASSWORD` - Password for the owner account
+
+> **Note:** Changes to `.env` require `docker compose up -d --force-recreate <service>` — a plain `restart` won't pick them up.
 
 ## Architecture
 
-This matches your existing apps (like budget-app):
 - Development-focused with hot-reload
 - Volume mounting for instant updates
 - Single-stage Dockerfiles
 - Health checks for dependencies
-- Admin tools included (pgAdmin vs phpMyAdmin)
+- pgAdmin for database management
