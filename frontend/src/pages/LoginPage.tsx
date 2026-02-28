@@ -1,6 +1,7 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { isPlatformAuthenticatorAvailable } from '../utils/webauthn';
 
 export default function LoginPage() {
   const { login, loginAsDemo, loginWithFaceId } = useAuth();
@@ -10,6 +11,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
   const [faceIdLoading, setFaceIdLoading] = useState(false);
+  const [platformAvailable, setPlatformAvailable] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+
+  useEffect(() => {
+    isPlatformAuthenticatorAvailable().then((available) => {
+      setPlatformAvailable(available);
+      // If no biometrics, show password form immediately
+      if (!available) setShowPasswordForm(true);
+    });
+  }, []);
 
   const handleOwnerLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -19,7 +30,7 @@ export default function LoginPage() {
       await login('owner', password);
       const alreadyRegistered = localStorage.getItem('webauthn_registered') === 'true';
       const skippedThisSession = sessionStorage.getItem('webauthn_setup_skipped') === 'true';
-      if (!alreadyRegistered && !skippedThisSession) {
+      if (platformAvailable && !alreadyRegistered && !skippedThisSession) {
         navigate('/setup-face-id', { replace: true });
       } else {
         navigate('/', { replace: true });
@@ -91,6 +102,7 @@ export default function LoginPage() {
         border: '1px solid #2a2a4a',
         padding: '2.5rem 2rem',
       }}>
+
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📚</div>
@@ -107,69 +119,97 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Face ID Button */}
-        <button
-          onClick={handleFaceIdLogin}
-          disabled={faceIdLoading}
-          style={{
-            width: '100%',
-            padding: '1rem',
-            background: faceIdLoading ? '#1a3a2e' : '#064e3b',
-            color: faceIdLoading ? '#4a8a6a' : '#6ee7b7',
-            border: '1px solid #065f46',
-            borderRadius: '10px',
-            fontSize: '1rem',
-            fontWeight: '600',
-            cursor: faceIdLoading ? 'not-allowed' : 'pointer',
-            marginBottom: '0.75rem',
-            transition: 'background 0.2s',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-          }}
-        >
-          {faceIdLoading ? 'Authenticating...' : '🔒 Sign in with Face ID'}
-        </button>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          marginBottom: '1rem',
-        }}>
-          <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
-          <span style={{ color: '#4a4a6a', fontSize: '0.85rem' }}>or</span>
-          <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
-        </div>
+        {/* Face ID — primary action when available */}
+        {platformAvailable && (
+          <button
+            onClick={handleFaceIdLogin}
+            disabled={faceIdLoading}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              background: faceIdLoading ? '#1a3a2e' : '#064e3b',
+              color: faceIdLoading ? '#4a8a6a' : '#6ee7b7',
+              border: '1px solid #065f46',
+              borderRadius: '10px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: faceIdLoading ? 'not-allowed' : 'pointer',
+              marginBottom: '0.75rem',
+              transition: 'background 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            {faceIdLoading ? 'Authenticating...' : '🔒 Sign in with Face ID'}
+          </button>
+        )}
 
-        {/* Demo Button */}
-        <button
-          onClick={handleDemoLogin}
-          disabled={demoLoading}
-          style={{
-            width: '100%',
-            padding: '1rem',
-            background: demoLoading ? '#3a3a6a' : '#4f46e5',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '10px',
-            fontSize: '1rem',
-            fontWeight: '600',
-            cursor: demoLoading ? 'not-allowed' : 'pointer',
-            marginBottom: '0.75rem',
-            transition: 'background 0.2s',
-          }}
-        >
-          {demoLoading ? 'Loading demo...' : 'Try the Demo →'}
-        </button>
-        <p style={{
-          textAlign: 'center',
-          color: '#6b6b8a',
-          fontSize: '0.8rem',
-          marginBottom: '1.5rem',
-        }}>
-          Explore with a pre-loaded 2025 reading library
-        </p>
+        {/* Password toggle — subtle link when Face ID is available */}
+        {platformAvailable && (
+          <button
+            onClick={() => { setShowPasswordForm(!showPasswordForm); setError(''); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#6b6b8a',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              width: '100%',
+              textAlign: 'center',
+              marginBottom: showPasswordForm ? '1.25rem' : '1.5rem',
+              padding: '0.25rem',
+              textDecoration: 'underline',
+              textDecorationColor: '#3a3a5a',
+            }}
+          >
+            {showPasswordForm ? 'Hide password form' : 'Use password instead'}
+          </button>
+        )}
+
+        {/* Password form */}
+        {showPasswordForm && (
+          <form onSubmit={handleOwnerLogin} style={{ marginBottom: '1.5rem' }}>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              style={{
+                width: '100%',
+                padding: '0.85rem 1rem',
+                background: '#0f0f1f',
+                border: '1px solid #2a2a4a',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '1rem',
+                marginBottom: '0.75rem',
+                boxSizing: 'border-box',
+                outline: 'none',
+              }}
+            />
+            <button
+              type="submit"
+              disabled={loading || !password}
+              style={{
+                width: '100%',
+                padding: '0.85rem',
+                background: loading || !password ? '#1f1f3a' : '#2d2d5a',
+                color: loading || !password ? '#4a4a6a' : '#a0a0d0',
+                border: '1px solid #3a3a6a',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: '500',
+                cursor: loading || !password ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+        )}
 
         {/* Divider */}
         <div style={{
@@ -183,57 +223,36 @@ export default function LoginPage() {
           <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
         </div>
 
-        {/* Owner Login */}
-        <form onSubmit={handleOwnerLogin}>
-          <label style={{
-            display: 'block',
-            color: '#8b8ba7',
-            fontSize: '0.8rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '0.75rem',
-          }}>
-            Owner Access
-          </label>
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            style={{
-              width: '100%',
-              padding: '0.85rem 1rem',
-              background: '#0f0f1f',
-              border: '1px solid #2a2a4a',
-              borderRadius: '8px',
-              color: '#fff',
-              fontSize: '1rem',
-              marginBottom: '0.75rem',
-              boxSizing: 'border-box',
-              outline: 'none',
-            }}
-          />
-          <button
-            type="submit"
-            disabled={loading || !password}
-            style={{
-              width: '100%',
-              padding: '0.85rem',
-              background: loading || !password ? '#1f1f3a' : '#2d2d5a',
-              color: loading || !password ? '#4a4a6a' : '#a0a0d0',
-              border: '1px solid #3a3a6a',
-              borderRadius: '8px',
-              fontSize: '1rem',
-              fontWeight: '500',
-              cursor: loading || !password ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+        {/* Demo */}
+        <button
+          onClick={handleDemoLogin}
+          disabled={demoLoading}
+          style={{
+            width: '100%',
+            padding: '1rem',
+            background: demoLoading ? '#3a3a6a' : '#4f46e5',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '10px',
+            fontSize: '1rem',
+            fontWeight: '600',
+            cursor: demoLoading ? 'not-allowed' : 'pointer',
+            marginBottom: '0.5rem',
+            transition: 'background 0.2s',
+          }}
+        >
+          {demoLoading ? 'Loading demo...' : 'Try the Demo →'}
+        </button>
+        <p style={{
+          textAlign: 'center',
+          color: '#6b6b8a',
+          fontSize: '0.8rem',
+          margin: 0,
+        }}>
+          Explore with a pre-loaded 2025 reading library
+        </p>
 
+        {/* Error */}
         {error && (
           <p style={{
             marginTop: '1rem',
