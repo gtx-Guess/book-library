@@ -53,10 +53,10 @@ const generalLimiter = rateLimit({
   message: { error: 'Too many requests, please slow down' },
 });
 
-// Auth rate limit — 10 attempts per 15 minutes per IP (brute force protection)
+// Auth rate limit — 30 attempts per 15 minutes per IP (brute force protection)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 30,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many login attempts, please try again later' },

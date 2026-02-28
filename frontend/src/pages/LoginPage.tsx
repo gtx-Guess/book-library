@@ -24,8 +24,13 @@ export default function LoginPage() {
       } else {
         navigate('/', { replace: true });
       }
-    } catch {
-      setError('Invalid password');
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 429) {
+        setError('Too many login attempts. Please wait a few minutes and try again.');
+      } else {
+        setError('Invalid password');
+      }
     } finally {
       setLoading(false);
     }
@@ -37,8 +42,13 @@ export default function LoginPage() {
     try {
       await loginAsDemo();
       navigate('/', { replace: true });
-    } catch {
-      setError('Failed to load demo. Please try again.');
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 429) {
+        setError('Too many login attempts. Please wait a few minutes and try again.');
+      } else {
+        setError('Failed to load demo. Please try again.');
+      }
     } finally {
       setDemoLoading(false);
     }
