@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+import morgan from 'morgan';
 import dotenv from 'dotenv';
 import booksRouter from './routes/books';
 import goalsRouter from './routes/goals';
@@ -14,10 +15,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy - trust only the first proxy (nginx proxy manager)
+app.set('trust proxy', 1);
+
 const allowedOrigins = [
   'http://localhost:4000',
   'http://192.168.0.86:4000',
   'https://book.tdnet.xyz',
+  'https://dev.book.tdnet.xyz',
+  'http://dev.book.tdnet.xyz',
 ];
 
 app.use(cors({
@@ -32,6 +38,11 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+
+// Request logging (dev only)
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 // General API rate limit — 200 requests per minute per IP
 const generalLimiter = rateLimit({
@@ -62,6 +73,7 @@ const searchLimiter = rateLimit({
 
 app.use('/api', generalLimiter);
 app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/webauthn/authenticate', authLimiter);
 app.use('/api/books/search', searchLimiter);
 
 app.get('/health', (req, res) => {

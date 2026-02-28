@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
-    allowedHosts: ['book.tdnet.xyz'],
+    allowedHosts: ['book.tdnet.xyz', 'dev.book.tdnet.xyz'],
     watch: {
       usePolling: true,
     },

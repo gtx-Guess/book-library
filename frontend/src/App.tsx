@@ -13,6 +13,7 @@ import DNFPage from './pages/DNFPage';
 import AddDNFPage from './pages/AddDNFPage';
 import WantToReadPage from './pages/WantToReadPage';
 import AddWantToReadPage from './pages/AddWantToReadPage';
+import FaceIdSetupPage from './pages/FaceIdSetupPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/add-dnf" element={<AddDNFPage />} />
             <Route path="/want-to-read" element={<WantToReadPage />} />
             <Route path="/add-want-to-read" element={<AddWantToReadPage />} />
+            <Route path="/setup-face-id" element={<FaceIdSetupPage />} />
           </Route>
         </Routes>
       </Router>

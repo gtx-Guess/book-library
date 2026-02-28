@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
-  const { login, loginAsDemo } = useAuth();
+  const { login, loginAsDemo, loginWithFaceId } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
+  const [faceIdLoading, setFaceIdLoading] = useState(false);
 
   const handleOwnerLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -16,7 +17,13 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login('owner', password);
-      navigate('/', { replace: true });
+      const alreadyRegistered = localStorage.getItem('webauthn_registered') === 'true';
+      const skippedThisSession = sessionStorage.getItem('webauthn_setup_skipped') === 'true';
+      if (!alreadyRegistered && !skippedThisSession) {
+        navigate('/setup-face-id', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch {
       setError('Invalid password');
     } finally {
@@ -34,6 +41,25 @@ export default function LoginPage() {
       setError('Failed to load demo. Please try again.');
     } finally {
       setDemoLoading(false);
+    }
+  };
+
+  const handleFaceIdLogin = async () => {
+    setError('');
+    setFaceIdLoading(true);
+    try {
+      await loginWithFaceId();
+      navigate('/', { replace: true });
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        setError('Face ID cancelled.');
+      } else if (err instanceof Error && err.message?.includes('No WebAuthn credentials')) {
+        setError('No Face ID set up yet. Please sign in with your password first.');
+      } else {
+        setError('Face ID sign-in failed. Please use your password.');
+      }
+    } finally {
+      setFaceIdLoading(false);
     }
   };
 
@@ -69,6 +95,41 @@ export default function LoginPage() {
           <p style={{ color: '#8b8ba7', fontSize: '0.9rem' }}>
             Your personal reading journal
           </p>
+        </div>
+
+        {/* Face ID Button */}
+        <button
+          onClick={handleFaceIdLogin}
+          disabled={faceIdLoading}
+          style={{
+            width: '100%',
+            padding: '1rem',
+            background: faceIdLoading ? '#1a3a2e' : '#064e3b',
+            color: faceIdLoading ? '#4a8a6a' : '#6ee7b7',
+            border: '1px solid #065f46',
+            borderRadius: '10px',
+            fontSize: '1rem',
+            fontWeight: '600',
+            cursor: faceIdLoading ? 'not-allowed' : 'pointer',
+            marginBottom: '0.75rem',
+            transition: 'background 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          {faceIdLoading ? 'Authenticating...' : '🔒 Sign in with Face ID'}
+        </button>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          marginBottom: '1rem',
+        }}>
+          <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
+          <span style={{ color: '#4a4a6a', fontSize: '0.85rem' }}>or</span>
+          <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
         </div>
 
         {/* Demo Button */}

@@ -30,3 +30,7 @@ import-books.js
 import-dnf-books.js
 remove-duplicates.js
 backend/update-maybe-books.js
+
+# Local development certificates
+certs/
+nginx.conf
