@@ -1,7 +1,6 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { isPlatformAuthenticatorAvailable } from '../utils/webauthn';
 
 export default function LoginPage() {
   const { login, loginAsDemo, loginWithFaceId } = useAuth();
@@ -11,11 +10,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
   const [faceIdLoading, setFaceIdLoading] = useState(false);
-  const [platformAvailable, setPlatformAvailable] = useState(false);
-
-  useEffect(() => {
-    isPlatformAuthenticatorAvailable().then(setPlatformAvailable);
-  }, []);
 
   const handleOwnerLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,7 +19,7 @@ export default function LoginPage() {
       await login('owner', password);
       const alreadyRegistered = localStorage.getItem('webauthn_registered') === 'true';
       const skippedThisSession = sessionStorage.getItem('webauthn_setup_skipped') === 'true';
-      if (platformAvailable && !alreadyRegistered && !skippedThisSession) {
+      if (!alreadyRegistered && !skippedThisSession) {
         navigate('/setup-face-id', { replace: true });
       } else {
         navigate('/', { replace: true });
@@ -103,44 +97,40 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Face ID Button — only shown on supported devices */}
-        {platformAvailable && (
-          <>
-            <button
-              onClick={handleFaceIdLogin}
-              disabled={faceIdLoading}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                background: faceIdLoading ? '#1a3a2e' : '#064e3b',
-                color: faceIdLoading ? '#4a8a6a' : '#6ee7b7',
-                border: '1px solid #065f46',
-                borderRadius: '10px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                cursor: faceIdLoading ? 'not-allowed' : 'pointer',
-                marginBottom: '0.75rem',
-                transition: 'background 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              {faceIdLoading ? 'Authenticating...' : '🔒 Sign in with Face ID'}
-            </button>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              marginBottom: '1rem',
-            }}>
-              <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
-              <span style={{ color: '#4a4a6a', fontSize: '0.85rem' }}>or</span>
-              <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
-            </div>
-          </>
-        )}
+        {/* Face ID Button */}
+        <button
+          onClick={handleFaceIdLogin}
+          disabled={faceIdLoading}
+          style={{
+            width: '100%',
+            padding: '1rem',
+            background: faceIdLoading ? '#1a3a2e' : '#064e3b',
+            color: faceIdLoading ? '#4a8a6a' : '#6ee7b7',
+            border: '1px solid #065f46',
+            borderRadius: '10px',
+            fontSize: '1rem',
+            fontWeight: '600',
+            cursor: faceIdLoading ? 'not-allowed' : 'pointer',
+            marginBottom: '0.75rem',
+            transition: 'background 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          {faceIdLoading ? 'Authenticating...' : '🔒 Sign in with Face ID'}
+        </button>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          marginBottom: '1rem',
+        }}>
+          <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
+          <span style={{ color: '#4a4a6a', fontSize: '0.85rem' }}>or</span>
+          <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
+        </div>
 
         {/* Demo Button */}
         <button
