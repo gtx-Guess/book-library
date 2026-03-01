@@ -4,13 +4,15 @@ A mobile-first web app for tracking books — what you've read, what you've aban
 
 ## Features
 
-- Search and add books via Google Books API
-- Track completed books with completion date and rating
-- Set and track annual reading goals
-- DNF (Did Not Finish) list
-- Want to Read list
+- Search and add books via Google Books API                                                                
+- Manually add books not found in search
+- Track completed books with completion date and half-star ratings (0-10)                                  
+- Set and track annual reading goals                                                                       
+- DNF (Did Not Finish) list                                                                                
+- Want to Read list                                       
 - Stats across all years
 - JWT-based auth with owner and demo accounts
+- WebAuthn / Face ID login support
 - Demo account includes a seeded library and a 10-book cap per list
 - Self-hosted with Docker Compose
 
