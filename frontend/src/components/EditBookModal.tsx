@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import InlineStars from './InlineStars';
 
 interface EditBookModalProps {
   bookTitle: string;
   currentOwn?: boolean;
   currentWillPurchase?: string;
   currentLink?: string;
-  onConfirm: (data: { own?: boolean; willPurchase?: string; link?: string }) => void;
+  currentRating?: number;
+  hideRating?: boolean;
+  onConfirm: (data: { own?: boolean; willPurchase?: string; link?: string; rating?: number | null }) => void;
   onDelete: () => void;
   onCancel: () => void;
 }
@@ -15,6 +18,8 @@ export default function EditBookModal({
   currentOwn,
   currentWillPurchase,
   currentLink,
+  currentRating,
+  hideRating,
   onConfirm,
   onDelete,
   onCancel,
@@ -26,11 +31,14 @@ export default function EditBookModal({
     currentWillPurchase || ''
   );
   const [link, setLink] = useState(currentLink || '');
+  const [rating, setRating] = useState(
+    currentRating !== undefined ? currentRating.toString() : ''
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data: { own?: boolean; willPurchase?: string; link?: string } = {};
+    const data: { own?: boolean; willPurchase?: string; link?: string; rating?: number | null } = {};
 
     if (own !== '') {
       data.own = own === 'yes';
@@ -43,8 +51,13 @@ export default function EditBookModal({
     if (link.trim()) {
       data.link = link.trim();
     } else if (currentLink) {
-      // If link was cleared, set it to empty string to remove it
       data.link = '';
+    }
+
+    if (rating.trim()) {
+      data.rating = Math.min(10, Math.max(0, parseFloat(rating)));
+    } else if (currentRating !== undefined) {
+      data.rating = null;
     }
 
     onConfirm(data);
@@ -123,6 +136,23 @@ export default function EditBookModal({
               <option value="no">No</option>
             </select>
           </label>
+
+          {!hideRating && (
+            <div style={{ marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <span style={{ fontWeight: '600' }}>Rating (Optional)</span>
+                <InlineStars rating={rating.trim() && !isNaN(parseFloat(rating)) ? Math.min(10, Math.max(0, parseFloat(rating))) : undefined} />
+              </div>
+              <input
+                type="text"
+                inputMode="decimal"
+                className="input"
+                placeholder="e.g. 7.5"
+                value={rating}
+                onChange={(e) => setRating(e.target.value.slice(0, 3))}
+              />
+            </div>
+          )}
 
           <label style={{ display: 'block', marginBottom: '1.5rem' }}>
             <span

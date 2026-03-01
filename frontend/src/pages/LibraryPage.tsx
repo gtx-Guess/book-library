@@ -4,6 +4,7 @@ import { api, CompletedBook, PaginatedBooks } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import RatingDisplay from '../components/RatingDisplay';
 import AddLinkModal from '../components/AddLinkModal';
+import BookCover from '../components/BookCover';
 import EditBookModal from '../components/EditBookModal';
 import homeIcon from '../assets/home.png';
 
@@ -132,7 +133,7 @@ export default function LibraryPage() {
     setBookToEdit(book);
   };
 
-  const handleConfirmEdit = async (data: { own?: boolean; willPurchase?: string; link?: string }) => {
+  const handleConfirmEdit = async (data: { own?: boolean; willPurchase?: string; link?: string; rating?: number | null }) => {
     if (!bookToEdit) return;
 
     try {
@@ -187,7 +188,7 @@ export default function LibraryPage() {
     }
 
     if (filterRating) {
-      const ratingNum = parseInt(filterRating);
+      const ratingNum = parseFloat(filterRating);
       if (!book.rating || book.rating !== ratingNum) {
         return false;
       }
@@ -419,7 +420,7 @@ export default function LibraryPage() {
                     onChange={(e) => setFilterRating(e.target.value)}
                   >
                     <option value="">All Ratings</option>
-                    {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(rating => (
+                    {[10, 9.5, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1, 0.5].map(rating => (
                       <option key={rating} value={rating}>{rating}/10</option>
                     ))}
                   </select>
@@ -531,18 +532,7 @@ export default function LibraryPage() {
                 )}
 
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                  {completedBook.book.coverImage && (
-                    <img
-                      src={completedBook.book.coverImage}
-                      alt={completedBook.book.title}
-                      style={{
-                        width: '80px',
-                        height: '120px',
-                        objectFit: 'cover',
-                        borderRadius: '4px',
-                      }}
-                    />
-                  )}
+                  <BookCover src={completedBook.book.coverImage} title={completedBook.book.title} width={80} height={120} />
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                       <h3 style={{ fontSize: '1.1rem', margin: 0 }}>
@@ -707,6 +697,7 @@ export default function LibraryPage() {
           currentOwn={bookToEdit.own ?? undefined}
           currentWillPurchase={bookToEdit.willPurchase ?? undefined}
           currentLink={bookToEdit.link ?? undefined}
+          currentRating={bookToEdit.rating ?? undefined}
           onConfirm={handleConfirmEdit}
           onDelete={handleDeleteFromEdit}
           onCancel={handleCancelEdit}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BookCover from './BookCover';
 
 interface Props {
   book: {
@@ -48,18 +49,7 @@ export default function ConfirmDNFModal({ book, onConfirm, onCancel }: Props) {
         <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Add DNF Book</h2>
 
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-          {book.coverImage && (
-            <img
-              src={book.coverImage}
-              alt={book.title}
-              style={{
-                width: '80px',
-                height: '120px',
-                objectFit: 'cover',
-                borderRadius: '4px',
-              }}
-            />
-          )}
+          <BookCover src={book.coverImage} title={book.title} width={80} height={120} />
           <div style={{ flex: 1 }}>
             <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{book.title}</h3>
             {book.authors.length > 0 && (

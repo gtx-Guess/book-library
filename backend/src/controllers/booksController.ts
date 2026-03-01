@@ -112,7 +112,7 @@ export async function updateCompletedBook(req: Request, res: Response) {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
-    const { link, own, willPurchase } = req.body;
+    const { link, own, willPurchase, rating } = req.body;
 
     const record = await prisma.completedBook.findUnique({ where: { id } });
 
@@ -128,6 +128,7 @@ export async function updateCompletedBook(req: Request, res: Response) {
     if (link !== undefined) updateData.link = link || null;
     if (own !== undefined) updateData.own = own;
     if (willPurchase !== undefined) updateData.willPurchase = willPurchase;
+    if (rating !== undefined) updateData.rating = rating;
 
     const completedBook = await prisma.completedBook.update({
       where: { id },

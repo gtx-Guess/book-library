@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, DNFBook } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
+import BookCover from '../components/BookCover';
 import EditBookModal from '../components/EditBookModal';
 
 export default function DNFPage() {
@@ -377,18 +378,7 @@ export default function DNFPage() {
                 )}
 
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                  {dnfBook.book.coverImage && (
-                    <img
-                      src={dnfBook.book.coverImage}
-                      alt={dnfBook.book.title}
-                      style={{
-                        width: '80px',
-                        height: '120px',
-                        objectFit: 'cover',
-                        borderRadius: '4px',
-                      }}
-                    />
-                  )}
+                  <BookCover src={dnfBook.book.coverImage} title={dnfBook.book.title} width={80} height={120} />
                   <div style={{ flex: 1 }}>
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
                       {dnfBook.book.title}
@@ -469,6 +459,7 @@ export default function DNFPage() {
           currentOwn={bookToEdit.own ?? undefined}
           currentWillPurchase={bookToEdit.willPurchase ?? undefined}
           currentLink={undefined}
+          hideRating
           onConfirm={handleConfirmEdit}
           onDelete={handleDeleteFromEdit}
           onCancel={handleCancelEdit}

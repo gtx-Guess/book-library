@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api, GoogleBookResult } from '../services/api';
 import { getBookFromOpenLibrary } from '../services/openLibrary';
 import ConfirmBookModal from '../components/ConfirmBookModal';
+import ManualBookModal, { ManualBookData } from '../components/ManualBookModal';
+import BookCover from '../components/BookCover';
 import homeIcon from '../assets/home.png';
 
 const STORAGE_KEY = 'addBookPage_searchState';
@@ -20,6 +22,8 @@ export default function AddBookPage() {
     googleBook: GoogleBookResult;
     pageCount?: number;
   } | null>(null);
+  const [showManualModal, setShowManualModal] = useState(false);
+  const [manualBook, setManualBook] = useState<ManualBookData | null>(null);
 
   // Restore search state from localStorage on mount
   useEffect(() => {
@@ -152,6 +156,46 @@ export default function AddBookPage() {
     setSelectedBook(null);
   };
 
+  const handleManualBookSubmit = (book: ManualBookData) => {
+    setShowManualModal(false);
+    setManualBook(book);
+  };
+
+  const handleConfirmManualAdd = async (pageCount: number | undefined, completedDate: string, rating: number | undefined, own: boolean | undefined, willPurchase: string | undefined, link: string | undefined) => {
+    if (!manualBook) return;
+
+    try {
+      const completedDateTime = new Date(completedDate + 'T12:00:00').toISOString();
+
+      await api.addCompletedBook({
+        title: manualBook.title,
+        authors: manualBook.authors,
+        pageCount,
+        publishedDate: manualBook.publishedDate,
+        publisher: manualBook.publisher,
+        categories: [],
+        rating,
+        own,
+        willPurchase,
+        link,
+        completedDate: completedDateTime,
+      });
+
+      localStorage.removeItem(STORAGE_KEY);
+
+      const currentYear = new Date().getFullYear();
+      if (targetYear === currentYear) {
+        navigate('/');
+      } else {
+        navigate(`/year/${targetYear}`);
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || 'Failed to add book';
+      setError(errorMessage);
+      setManualBook(null);
+    }
+  };
+
   return (
     <div className="container">
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem', position: 'relative' }}>
@@ -203,26 +247,38 @@ export default function AddBookPage() {
       </form>
 
       {searchResults.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1rem',
+          }}
+        >
+          <span className="text-secondary" style={{ fontSize: '0.85rem' }}>
+            {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+          </span>
+          <button
+            className="btn btn-secondary"
+            style={{ fontSize: '0.85rem', padding: '0.4rem 0.85rem' }}
+            onClick={() => setShowManualModal(true)}
+          >
+            + Add Manually
+          </button>
+        </div>
+      )}
+
+      {searchResults.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {searchResults.map((book) => (
             <div key={book.id} className="card">
               <div style={{ display: 'flex', gap: '1rem' }}>
-                {(book.volumeInfo.imageLinks?.thumbnail ||
-                  book.volumeInfo.imageLinks?.smallThumbnail) && (
-                  <img
-                    src={
-                      book.volumeInfo.imageLinks.thumbnail ||
-                      book.volumeInfo.imageLinks.smallThumbnail
-                    }
-                    alt={book.volumeInfo.title}
-                    style={{
-                      width: '80px',
-                      height: '120px',
-                      objectFit: 'cover',
-                      borderRadius: '4px',
-                    }}
-                  />
-                )}
+                <BookCover
+                  src={book.volumeInfo.imageLinks?.thumbnail || book.volumeInfo.imageLinks?.smallThumbnail}
+                  title={book.volumeInfo.title}
+                  width={80}
+                  height={120}
+                />
                 <div style={{ flex: 1 }}>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
                     {book.volumeInfo.title}
@@ -256,6 +312,20 @@ export default function AddBookPage() {
         </div>
       )}
 
+      {searchResults.length === 0 && (
+        <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #2a2a4a' }}>
+          <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+            Can't find your book?
+          </p>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setShowManualModal(true)}
+          >
+            + Add Manually
+          </button>
+        </div>
+      )}
+
       {selectedBook && (
         <ConfirmBookModal
           book={{
@@ -276,6 +346,30 @@ export default function AddBookPage() {
           }
           onConfirm={handleConfirmAdd}
           onCancel={handleCancelModal}
+        />
+      )}
+
+      {showManualModal && (
+        <ManualBookModal
+          onSubmit={handleManualBookSubmit}
+          onCancel={() => setShowManualModal(false)}
+        />
+      )}
+
+      {manualBook && (
+        <ConfirmBookModal
+          book={{
+            title: manualBook.title,
+            authors: manualBook.authors,
+            pageCount: manualBook.pageCount,
+          }}
+          defaultDate={
+            targetYear === new Date().getFullYear()
+              ? new Date().toISOString().split('T')[0]
+              : `${targetYear}-12-31`
+          }
+          onConfirm={handleConfirmManualAdd}
+          onCancel={() => setManualBook(null)}
         />
       )}
     </div>
