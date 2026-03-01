@@ -49,9 +49,10 @@ export default function HomePage() {
     <div className="container">
       {/* Welcome Header */}
       <header style={{ marginBottom: '2rem', textAlign: 'center', position: 'relative' }}>
-        {/* Logout button */}
+        {/* Logout button — desktop only */}
         <button
           onClick={logout}
+          className="sign-out-desktop"
           style={{
             position: 'absolute',
             right: 0,
@@ -231,6 +232,23 @@ export default function HomePage() {
           </button>
         </div>
       )}
+
+      {/* Sign out — mobile only, at the bottom */}
+      <div className="sign-out-mobile mt-4" style={{ textAlign: 'center' }}>
+        <button
+          onClick={logout}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '0.85rem',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            padding: '0.5rem',
+          }}
+        >
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }
