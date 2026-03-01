@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, YearlyStats } from '../services/api';
 import RatingDisplay from '../components/RatingDisplay';
+import BookCover from '../components/BookCover';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function HomePage() {
@@ -113,19 +114,7 @@ export default function HomePage() {
             Last Book Added
           </h2>
           <div style={{ display: 'flex', gap: '1rem' }}>
-            {stats.lastBook.coverImage && (
-              <img
-                src={stats.lastBook.coverImage}
-                alt={stats.lastBook.title}
-                style={{
-                  width: '70px',
-                  height: '105px',
-                  objectFit: 'cover',
-                  borderRadius: '4px',
-                  flexShrink: 0,
-                }}
-              />
-            )}
+            <BookCover src={stats.lastBook.coverImage} title={stats.lastBook.title} width={70} height={105} />
             <div style={{ flex: 1 }}>
               <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', fontWeight: '600' }}>
                 {stats.lastBook.title}

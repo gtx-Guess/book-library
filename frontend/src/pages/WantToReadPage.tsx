@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, WantToReadBook } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
+import BookCover from '../components/BookCover';
 import ConfirmBookModal from '../components/ConfirmBookModal';
 
 export default function WantToReadPage() {
@@ -301,18 +302,7 @@ export default function WantToReadPage() {
             {filteredBooks.map((wantToReadBook) => (
               <div key={wantToReadBook.id} className="card">
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                  {wantToReadBook.book.coverImage && (
-                    <img
-                      src={wantToReadBook.book.coverImage}
-                      alt={wantToReadBook.book.title}
-                      style={{
-                        width: '80px',
-                        height: '120px',
-                        objectFit: 'cover',
-                        borderRadius: '4px',
-                      }}
-                    />
-                  )}
+                  <BookCover src={wantToReadBook.book.coverImage} title={wantToReadBook.book.title} width={80} height={120} />
                   <div style={{ flex: 1 }}>
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
                       {wantToReadBook.book.title}

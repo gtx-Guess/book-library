@@ -78,7 +78,7 @@ model CompletedBook {
   completedDate   DateTime
   year            Int
   pageCount       Int?
-  rating          Int?
+  rating          Float?
   own             Boolean?
   willPurchase    String?
   link            String?

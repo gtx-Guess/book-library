@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, GoogleBookResult } from '../services/api';
 import ConfirmWantToReadModal from '../components/ConfirmWantToReadModal';
+import ManualBookModal, { ManualBookData } from '../components/ManualBookModal';
+import BookCover from '../components/BookCover';
 import homeIcon from '../assets/home.png';
 
 const STORAGE_KEY = 'addWantToReadPage_searchState';
@@ -14,6 +16,8 @@ export default function AddWantToReadPage() {
   const [error, setError] = useState('');
   const [loadingBookId, setLoadingBookId] = useState<string | null>(null);
   const [selectedBook, setSelectedBook] = useState<GoogleBookResult | null>(null);
+  const [showManualModal, setShowManualModal] = useState(false);
+  const [manualBook, setManualBook] = useState<ManualBookData | null>(null);
 
   // Restore search state from localStorage on mount
   useEffect(() => {
@@ -97,6 +101,35 @@ export default function AddWantToReadPage() {
     setSelectedBook(null);
   };
 
+  const handleManualBookSubmit = (book: ManualBookData) => {
+    setShowManualModal(false);
+    setManualBook(book);
+  };
+
+  const handleConfirmManualWantToRead = async () => {
+    if (!manualBook) return;
+
+    try {
+      await api.addWantToReadBook({
+        title: manualBook.title,
+        authors: manualBook.authors,
+        pageCount: manualBook.pageCount,
+        publishedDate: manualBook.publishedDate,
+        publisher: manualBook.publisher,
+        categories: [],
+        own: undefined,
+        willPurchase: undefined,
+      });
+
+      localStorage.removeItem(STORAGE_KEY);
+      navigate('/want-to-read');
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || 'Failed to add book to want to read list';
+      setError(errorMessage);
+      setManualBook(null);
+    }
+  };
+
   return (
     <div className="container">
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem', position: 'relative' }}>
@@ -148,26 +181,31 @@ export default function AddWantToReadPage() {
       </form>
 
       {searchResults.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <span className="text-secondary" style={{ fontSize: '0.85rem' }}>
+            {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+          </span>
+          <button
+            className="btn btn-secondary"
+            style={{ fontSize: '0.85rem', padding: '0.4rem 0.85rem' }}
+            onClick={() => setShowManualModal(true)}
+          >
+            + Add Manually
+          </button>
+        </div>
+      )}
+
+      {searchResults.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {searchResults.map((book) => (
             <div key={book.id} className="card">
               <div style={{ display: 'flex', gap: '1rem' }}>
-                {(book.volumeInfo.imageLinks?.thumbnail ||
-                  book.volumeInfo.imageLinks?.smallThumbnail) && (
-                  <img
-                    src={
-                      book.volumeInfo.imageLinks.thumbnail ||
-                      book.volumeInfo.imageLinks.smallThumbnail
-                    }
-                    alt={book.volumeInfo.title}
-                    style={{
-                      width: '80px',
-                      height: '120px',
-                      objectFit: 'cover',
-                      borderRadius: '4px',
-                    }}
-                  />
-                )}
+                <BookCover
+                  src={book.volumeInfo.imageLinks?.thumbnail || book.volumeInfo.imageLinks?.smallThumbnail}
+                  title={book.volumeInfo.title}
+                  width={80}
+                  height={120}
+                />
                 <div style={{ flex: 1 }}>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
                     {book.volumeInfo.title}
@@ -201,6 +239,17 @@ export default function AddWantToReadPage() {
         </div>
       )}
 
+      {searchResults.length === 0 && (
+        <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #2a2a4a' }}>
+          <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+            Can't find your book?
+          </p>
+          <button className="btn btn-secondary" onClick={() => setShowManualModal(true)}>
+            + Add Manually
+          </button>
+        </div>
+      )}
+
       {selectedBook && (
         <ConfirmWantToReadModal
           book={{
@@ -213,6 +262,21 @@ export default function AddWantToReadPage() {
           }}
           onConfirm={handleConfirmAdd}
           onCancel={handleCancelModal}
+        />
+      )}
+
+      {showManualModal && (
+        <ManualBookModal
+          onSubmit={handleManualBookSubmit}
+          onCancel={() => setShowManualModal(false)}
+        />
+      )}
+
+      {manualBook && (
+        <ConfirmWantToReadModal
+          book={{ title: manualBook.title, authors: manualBook.authors, pageCount: manualBook.pageCount }}
+          onConfirm={handleConfirmManualWantToRead}
+          onCancel={() => setManualBook(null)}
         />
       )}
     </div>

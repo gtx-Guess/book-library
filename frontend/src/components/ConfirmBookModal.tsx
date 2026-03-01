@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import BookCover from './BookCover';
+import InlineStars from './InlineStars';
 
 interface ConfirmBookModalProps {
   book: {
@@ -35,9 +37,7 @@ export default function ConfirmBookModal({
     const finalPageCount = pageCount.trim()
       ? parseInt(pageCount, 10)
       : undefined;
-    const finalRating = rating.trim()
-      ? parseInt(rating, 10)
-      : undefined;
+    const finalRating = rating.trim() ? Math.min(10, Math.max(0, parseFloat(rating))) : undefined;
     const finalOwn = own === 'yes' ? true : own === 'no' ? false : undefined;
     const finalWillPurchase = willPurchase === '' ? undefined : willPurchase;
     const finalLink = link.trim() || undefined;
@@ -72,19 +72,7 @@ export default function ConfirmBookModal({
 
         {/* Book Preview */}
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-          {book.coverImage && (
-            <img
-              src={book.coverImage}
-              alt={book.title}
-              style={{
-                width: '60px',
-                height: '90px',
-                objectFit: 'cover',
-                borderRadius: '4px',
-                flexShrink: 0,
-              }}
-            />
-          )}
+          <BookCover src={book.coverImage} title={book.title} width={60} height={90} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', fontWeight: '600' }}>
               {book.title}
@@ -160,33 +148,20 @@ export default function ConfirmBookModal({
             </span>
           </label>
 
-          <label style={{ display: 'block', marginBottom: '1rem' }}>
-            <span
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontWeight: '600',
-              }}
-            >
-              Rating (Optional)
-            </span>
+          <div style={{ marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <span style={{ fontWeight: '600' }}>Rating (Optional)</span>
+              <InlineStars rating={rating.trim() && !isNaN(parseFloat(rating)) ? Math.min(10, Math.max(0, parseFloat(rating))) : undefined} />
+            </div>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               className="input"
-              placeholder="Rate this book out of 10"
+              placeholder="e.g. 7.5"
               value={rating}
-              onChange={(e) => setRating(e.target.value)}
-              min="0"
-              max="10"
-              step="1"
+              onChange={(e) => setRating(e.target.value.slice(0, 3))}
             />
-            <span
-              className="text-secondary"
-              style={{ fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}
-            >
-              How would you rate this book? (0-10)
-            </span>
-          </label>
+          </div>
 
           <label style={{ display: 'block', marginBottom: '1rem' }}>
             <span
