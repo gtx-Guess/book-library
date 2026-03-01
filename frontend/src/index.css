@@ -160,3 +160,10 @@ a {
   border-radius: 0.5rem;
   margin-bottom: 1rem;
 }
+
+.sign-out-mobile { display: none; }
+
+@media (max-width: 480px) {
+  .sign-out-desktop { display: none !important; }
+  .sign-out-mobile { display: block; }
+}
