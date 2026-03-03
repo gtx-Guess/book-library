@@ -214,17 +214,17 @@ const SEEDED_WANT_TO_READ_BOOKS = [
 async function main() {
   console.log('Seeding database...');
 
-  // Create owner user (only set password on first creation)
-  let owner = await prisma.user.findUnique({ where: { username: 'owner' } });
-  if (!owner) {
-    const ownerPassword = process.env.OWNER_PASSWORD || 'changeme';
-    const ownerHash = await bcrypt.hash(ownerPassword, 12);
-    owner = await prisma.user.create({
-      data: { username: 'owner', passwordHash: ownerHash, role: 'owner' },
+  // Create admin user (only set password on first creation)
+  let admin = await prisma.user.findUnique({ where: { username: 'admin' } });
+  if (!admin) {
+    const adminPassword = process.env.ADMIN_PASSWORD || 'changeme';
+    const adminHash = await bcrypt.hash(adminPassword, 12);
+    admin = await prisma.user.create({
+      data: { username: 'admin', passwordHash: adminHash, role: 'admin' },
     });
-    console.log(`Owner user created: ${owner.id}`);
+    console.log(`Admin user created: ${admin.id}`);
   } else {
-    console.log(`Owner user exists: ${owner.id}`);
+    console.log(`Admin user exists: ${admin.id}`);
   }
 
   // Create demo user (always reset demo password to 'demo')
@@ -236,26 +236,26 @@ async function main() {
   });
   console.log(`Demo user: ${demo.id}`);
 
-  // Assign any existing books without a userId to the owner
+  // Assign any existing books without a userId to the admin
   const unassignedCompleted = await prisma.completedBook.updateMany({
     where: { userId: '' },
-    data: { userId: owner.id },
+    data: { userId: admin.id },
   });
   const unassignedDnf = await prisma.dNFBook.updateMany({
     where: { userId: '' },
-    data: { userId: owner.id },
+    data: { userId: admin.id },
   });
   const unassignedWantToRead = await prisma.wantToReadBook.updateMany({
     where: { userId: '' },
-    data: { userId: owner.id },
+    data: { userId: admin.id },
   });
   const unassignedGoals = await prisma.yearlyGoal.updateMany({
     where: { userId: '' },
-    data: { userId: owner.id },
+    data: { userId: admin.id },
   });
 
   if (unassignedCompleted.count || unassignedDnf.count || unassignedWantToRead.count || unassignedGoals.count) {
-    console.log(`Assigned existing records to owner`);
+    console.log(`Assigned existing records to admin`);
   }
 
   // Seed demo 2025 completed books

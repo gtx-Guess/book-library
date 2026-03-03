@@ -6,6 +6,10 @@ const prisma = new PrismaClient();
 
 export async function generateInviteCode(req: Request, res: Response) {
   try {
+    if (req.user!.role === 'demo') {
+      return res.status(403).json({ error: 'Demo account cannot generate invite codes' });
+    }
+
     const userId = req.user!.id;
     const maxUses = req.body.maxUses ?? 5;
 

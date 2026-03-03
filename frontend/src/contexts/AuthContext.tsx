@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loginWithFaceId = async (username?: string) => {
-    const resolvedUsername = username || localStorage.getItem('last_webauthn_username') || 'owner';
+    const resolvedUsername = username || localStorage.getItem('last_webauthn_username') || 'admin';
     const { startAuthentication } = await import('@simplewebauthn/browser');
     const options = await api.auth.webAuthnAuthOptions(resolvedUsername);
     const response = await startAuthentication({ optionsJSON: options });

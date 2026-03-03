@@ -21,7 +21,7 @@ const RP_ID = process.env.WEBAUTHN_RP_ID || 'book.tdnet.xyz';
 const ORIGIN = process.env.WEBAUTHN_ORIGIN || 'https://book.tdnet.xyz';
 const CHALLENGE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-// POST /api/auth/webauthn/register/start  (requires JWT — owner only)
+// POST /api/auth/webauthn/register/start  (requires JWT — not demo)
 export async function webAuthnRegisterStart(req: Request, res: Response) {
   try {
     const userId = req.user!.id;
@@ -72,7 +72,7 @@ export async function webAuthnRegisterStart(req: Request, res: Response) {
   }
 }
 
-// POST /api/auth/webauthn/register/finish  (requires JWT — owner only)
+// POST /api/auth/webauthn/register/finish  (requires JWT — not demo)
 export async function webAuthnRegisterFinish(req: Request, res: Response) {
   try {
     const userId = req.user!.id;
