@@ -9,6 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
 const JWT_EXPIRES_IN = '7d';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,30}$/;
+const RESERVED_USERNAMES = ['admin', 'demo', 'owner'];
 
 export async function login(req: Request, res: Response) {
   try {
@@ -56,6 +57,10 @@ export async function register(req: Request, res: Response) {
 
     if (!USERNAME_REGEX.test(username)) {
       return res.status(400).json({ error: 'Username must be 3-30 characters, alphanumeric and underscores only' });
+    }
+
+    if (RESERVED_USERNAMES.includes(username.toLowerCase())) {
+      return res.status(400).json({ error: 'That username is reserved' });
     }
 
     if (password.length < 8) {
