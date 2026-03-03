@@ -16,6 +16,7 @@ import AddWantToReadPage from './pages/AddWantToReadPage';
 import FaceIdSetupPage from './pages/FaceIdSetupPage';
 import RegisterPage from './pages/RegisterPage';
 import InviteCodesPage from './pages/InviteCodesPage';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route path="/add-want-to-read" element={<AddWantToReadPage />} />
             <Route path="/setup-face-id" element={<FaceIdSetupPage />} />
             <Route path="/invite-codes" element={<InviteCodesPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Route>
         </Routes>
       </Router>

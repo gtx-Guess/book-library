@@ -174,6 +174,18 @@ export default function HomePage() {
         </div>
       )}
 
+      {user?.role === 'admin' && (
+        <div style={{ marginBottom: '1rem' }}>
+          <button
+            className="btn btn-secondary btn-full"
+            onClick={() => navigate('/admin')}
+            style={{ fontSize: '1.1rem', padding: '1rem' }}
+          >
+            Admin Dashboard
+          </button>
+        </div>
+      )}
+
       {/* Action Buttons */}
       <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
         <button
