@@ -36,7 +36,7 @@ Node.js/Express API with PostgreSQL database.
 
 ## Database Schema
 
-- **User** - Owner and demo accounts with hashed passwords
+- **User** - Admin, user, and demo accounts with hashed passwords
 - **CompletedBook** - Books marked as finished with date, rating, and notes
 - **DNFBook** - Books that were not finished
 - **WantToReadBook** - Reading queue

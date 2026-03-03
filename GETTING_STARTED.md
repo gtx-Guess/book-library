@@ -14,7 +14,7 @@ A full-stack book tracking web application with:
   - Mobile-first responsive design
   - Book search interface
   - Progress tracking and yearly stats
-  - Login page with owner and demo accounts
+  - Login page with admin and demo accounts
 
 - **Docker Setup**
   - Full Docker Compose configuration
@@ -25,18 +25,18 @@ A full-stack book tracking web application with:
 
 ```bash
 cp .env.example .env
-# Edit .env — set JWT_SECRET, OWNER_PASSWORD, and GOOGLE_BOOKS_API_KEY
+# Edit .env — set JWT_SECRET, ADMIN_PASSWORD, and GOOGLE_BOOKS_API_KEY
 docker compose up -d --build
 docker compose exec backend npx ts-node prisma/seed.ts
 ```
 
-Then open `http://localhost:4000` and log in with username `owner`.
+Then open `http://localhost:4000` and log in with username `admin`.
 
 ## First Time Setup
 
 1. **Log in**
    - Go to `http://localhost:4000`
-   - Enter username `owner` and your `OWNER_PASSWORD`
+   - Enter username `admin` and your `ADMIN_PASSWORD`
 
 2. **Set Your Reading Goal**
    - Click "Set Goal" on the home page
@@ -55,10 +55,10 @@ Then open `http://localhost:4000` and log in with username `owner`.
 
 | Account | Username | Password |
 |---------|----------|----------|
-| Owner   | `owner`  | Your `OWNER_PASSWORD` from `.env` |
+| Admin   | `admin`  | Your `ADMIN_PASSWORD` from `.env` |
 | Demo    | `demo`   | `demo` |
 
-The demo account has a pre-seeded read-only library and a 10-book cap per list.
+Users can be invited via invite codes. The demo account has a pre-seeded read-only library and a 10-book cap per list.
 
 ## Access from Other Devices
 

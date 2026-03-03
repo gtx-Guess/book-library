@@ -4,7 +4,7 @@ React + TypeScript + Vite mobile-first web app.
 
 ## Pages
 
-- **Login** - Owner login and demo access
+- **Login** - User login and demo access
 - **Home** - Reading progress, yearly goal, quick actions
 - **Library** - All completed books for the current year
 - **History** - Browse books by past year

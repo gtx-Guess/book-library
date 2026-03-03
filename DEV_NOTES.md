@@ -120,7 +120,7 @@ Backend environment is configured in docker-compose.yml and `.env`:
 - `PORT` - Backend port (4001)
 - `GOOGLE_BOOKS_API_KEY` - Required for reliable book search (rate limited without it)
 - `JWT_SECRET` - Secret for signing JWT tokens
-- `OWNER_PASSWORD` - Password for the owner account
+- `ADMIN_PASSWORD` - Password for the admin account
 
 > **Note:** Changes to `.env` require `docker compose up -d --force-recreate <service>` — a plain `restart` won't pick them up.
 

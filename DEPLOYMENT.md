@@ -12,7 +12,7 @@
    ```env
    GOOGLE_BOOKS_API_KEY=your_key_here
    JWT_SECRET=your_long_random_secret   # openssl rand -base64 48
-   OWNER_PASSWORD=your_password
+   ADMIN_PASSWORD=your_password
    ```
 
 2. **Build and start services**
@@ -28,7 +28,7 @@
 4. **Access the app**
    - Open browser to `http://localhost:4000`
    - Or use your server's IP: `http://192.168.x.x:4000`
-   - Log in with username `owner` and your `OWNER_PASSWORD`
+   - Log in with username `admin` and your `ADMIN_PASSWORD`
 
 ## Database Management
 

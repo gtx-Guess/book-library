@@ -11,7 +11,7 @@ model User {
   id              String   @id @default(cuid())
   username        String   @unique
   passwordHash    String
-  role            String   // 'owner' | 'demo' | 'user'
+  role            String   // 'admin' | 'user' | 'demo'
   displayName     String?
   invitedById     String?
   invitedBy       InviteCode? @relation("InviteCodeUsedBy", fields: [invitedById], references: [id])
