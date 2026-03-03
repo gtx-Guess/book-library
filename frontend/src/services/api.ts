@@ -171,6 +171,39 @@ export interface WantToReadBook {
   userId: string;
 }
 
+export interface AdminUser {
+  id: string;
+  username: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  invitedBy: string | null;
+  completedBooks: number;
+  dnfBooks: number;
+  wantToReadBooks: number;
+}
+
+export interface PlatformStats {
+  totalUsers: number;
+  totalBooks: number;
+  totalDNF: number;
+  totalWantToRead: number;
+  totalInviteCodes: number;
+  registrationsByMonth: Record<string, number>;
+  topUsers: Array<{ id: string; username: string; completedBooks: number }>;
+}
+
+export interface AdminInviteCode {
+  id: string;
+  code: string;
+  creatorUsername: string;
+  maxUses: number;
+  useCount: number;
+  isActive: boolean;
+  createdAt: string;
+  usedByUsernames: string[];
+}
+
 export const api = {
   auth: {
     login: async (username: string, password: string): Promise<{ token: string; user: AuthUser }> => {
@@ -350,5 +383,31 @@ export const api = {
 
   deleteWantToReadBook: async (id: string): Promise<void> => {
     await axiosInstance.delete(`/want-to-read/${id}`);
+  },
+
+  admin: {
+    getStats: async (): Promise<PlatformStats> => {
+      const response = await axiosInstance.get('/admin/stats');
+      return response.data;
+    },
+    getUsers: async (): Promise<AdminUser[]> => {
+      const response = await axiosInstance.get('/admin/users');
+      return response.data;
+    },
+    toggleUserActive: async (id: string): Promise<{ id: string; username: string; isActive: boolean }> => {
+      const response = await axiosInstance.patch(`/admin/users/${id}/toggle-active`);
+      return response.data;
+    },
+    resetUserPassword: async (id: string, newPassword: string): Promise<{ message: string }> => {
+      const response = await axiosInstance.post(`/admin/users/${id}/reset-password`, { newPassword });
+      return response.data;
+    },
+    getInviteCodes: async (): Promise<AdminInviteCode[]> => {
+      const response = await axiosInstance.get('/admin/invite-codes');
+      return response.data;
+    },
+    deactivateInviteCode: async (id: string): Promise<void> => {
+      await axiosInstance.patch(`/admin/invite-codes/${id}/deactivate`);
+    },
   },
 };

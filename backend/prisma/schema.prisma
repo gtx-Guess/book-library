@@ -14,6 +14,7 @@ model User {
   role            String   // 'admin' | 'user' | 'demo'
   displayName     String?
   invitedById     String?
+  isActive        Boolean  @default(true)
   invitedBy       InviteCode? @relation("InviteCodeUsedBy", fields: [invitedById], references: [id])
   createdAt       DateTime @default(now())
 

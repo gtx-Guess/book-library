@@ -9,6 +9,7 @@ import statsRouter from './routes/stats';
 import dnfRouter from './routes/dnf';
 import wantToReadRouter from './routes/wantToRead';
 import authRouter from './routes/auth';
+import adminRouter from './routes/admin';
 
 dotenv.config();
 
@@ -87,6 +88,7 @@ app.use('/api/goals', goalsRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/dnf', dnfRouter);
 app.use('/api/want-to-read', wantToReadRouter);
+app.use('/api/admin', adminRouter);
 
 app.listen(PORT, () => {
   console.log(`✅ Backend server running on port ${PORT}`);

@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
+const prisma = new PrismaClient();
 
 interface JwtPayload {
   userId: string;
@@ -9,7 +11,7 @@ interface JwtPayload {
   role: string;
 }
 
-export function authenticate(req: Request, res: Response, next: NextFunction) {
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -20,6 +22,16 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 
   try {
     const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
+
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { isActive: true },
+    });
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({ error: 'Account is deactivated' });
+    }
+
     req.user = {
       id: payload.userId,
       username: payload.username,
