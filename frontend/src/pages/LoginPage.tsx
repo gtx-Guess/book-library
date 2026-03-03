@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
   const [faceIdLoading, setFaceIdLoading] = useState(false);
+  const [hasBiometrics, setHasBiometrics] = useState(false);
   const [platformAvailable, setPlatformAvailable] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
@@ -19,6 +20,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     isPlatformAuthenticatorAvailable().then((available) => {
+      setHasBiometrics(available);
       setPlatformAvailable(available && !!lastWebAuthnUser);
       // If no biometrics or no registered user, show password form immediately
       if (!available || !lastWebAuthnUser) setShowPasswordForm(true);
@@ -38,7 +40,7 @@ export default function LoginPage() {
       }
       const alreadyRegistered = localStorage.getItem(`webauthn_registered_${username}`) === 'true';
       const skippedThisSession = sessionStorage.getItem('webauthn_setup_skipped') === 'true';
-      if (platformAvailable && !alreadyRegistered && !skippedThisSession) {
+      if (hasBiometrics && !alreadyRegistered && !skippedThisSession) {
         navigate('/setup-face-id', { replace: true });
       } else {
         navigate('/', { replace: true });
@@ -83,7 +85,11 @@ export default function LoginPage() {
       if (err instanceof Error && err.name === 'NotAllowedError') {
         setError('Face ID cancelled.');
       } else if (err instanceof Error && err.message?.includes('No WebAuthn credentials')) {
-        setError('No Face ID set up yet. Please sign in with your password first.');
+        // Username in localStorage may be stale (e.g. account renamed) — clear it
+        localStorage.removeItem('last_webauthn_username');
+        setPlatformAvailable(false);
+        setShowPasswordForm(true);
+        setError('No Face ID set up for that account. Please sign in with your password.');
       } else {
         setError('Face ID sign-in failed. Please use your password.');
       }
