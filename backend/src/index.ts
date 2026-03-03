@@ -73,6 +73,7 @@ const searchLimiter = rateLimit({
 
 app.use('/api', generalLimiter);
 app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/webauthn/authenticate', authLimiter);
 app.use('/api/books/search', searchLimiter);
 

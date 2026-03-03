@@ -214,18 +214,20 @@ const SEEDED_WANT_TO_READ_BOOKS = [
 async function main() {
   console.log('Seeding database...');
 
-  // Create owner user
-  const ownerPassword = process.env.OWNER_PASSWORD || 'changeme';
-  const ownerHash = await bcrypt.hash(ownerPassword, 12);
+  // Create owner user (only set password on first creation)
+  let owner = await prisma.user.findUnique({ where: { username: 'owner' } });
+  if (!owner) {
+    const ownerPassword = process.env.OWNER_PASSWORD || 'changeme';
+    const ownerHash = await bcrypt.hash(ownerPassword, 12);
+    owner = await prisma.user.create({
+      data: { username: 'owner', passwordHash: ownerHash, role: 'owner' },
+    });
+    console.log(`Owner user created: ${owner.id}`);
+  } else {
+    console.log(`Owner user exists: ${owner.id}`);
+  }
 
-  const owner = await prisma.user.upsert({
-    where: { username: 'owner' },
-    update: { passwordHash: ownerHash },
-    create: { username: 'owner', passwordHash: ownerHash, role: 'owner' },
-  });
-  console.log(`Owner user: ${owner.id}`);
-
-  // Create demo user
+  // Create demo user (always reset demo password to 'demo')
   const demoHash = await bcrypt.hash('demo', 12);
   const demo = await prisma.user.upsert({
     where: { username: 'demo' },

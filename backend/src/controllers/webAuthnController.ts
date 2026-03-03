@@ -27,8 +27,8 @@ export async function webAuthnRegisterStart(req: Request, res: Response) {
     const userId = req.user!.id;
     const username = req.user!.username;
 
-    if (req.user!.role !== 'owner') {
-      return res.status(403).json({ error: 'WebAuthn registration is only available for the owner account' });
+    if (req.user!.role === 'demo') {
+      return res.status(403).json({ error: 'WebAuthn registration is not available for the demo account' });
     }
 
     const existingCredentials = await prisma.webAuthnCredential.findMany({
@@ -77,7 +77,7 @@ export async function webAuthnRegisterFinish(req: Request, res: Response) {
   try {
     const userId = req.user!.id;
 
-    if (req.user!.role !== 'owner') {
+    if (req.user!.role === 'demo') {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
