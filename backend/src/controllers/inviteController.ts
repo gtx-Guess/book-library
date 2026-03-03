@@ -11,7 +11,7 @@ export async function generateInviteCode(req: Request, res: Response) {
     }
 
     const userId = req.user!.id;
-    const maxUses = req.body.maxUses ?? 5;
+    const maxUses = req.body.maxUses ?? 20;
 
     if (typeof maxUses !== 'number' || maxUses < 1 || maxUses > 100) {
       return res.status(400).json({ error: 'maxUses must be between 1 and 100' });
