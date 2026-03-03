@@ -1,11 +1,12 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { isPlatformAuthenticatorAvailable } from '../utils/webauthn';
 
 export default function LoginPage() {
   const { login, loginAsDemo, loginWithFaceId } = useAuth();
   const navigate = useNavigate();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,21 +15,28 @@ export default function LoginPage() {
   const [platformAvailable, setPlatformAvailable] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
+  const lastWebAuthnUser = localStorage.getItem('last_webauthn_username');
+
   useEffect(() => {
     isPlatformAuthenticatorAvailable().then((available) => {
-      setPlatformAvailable(available);
-      // If no biometrics, show password form immediately
-      if (!available) setShowPasswordForm(true);
+      setPlatformAvailable(available && !!lastWebAuthnUser);
+      // If no biometrics or no registered user, show password form immediately
+      if (!available || !lastWebAuthnUser) setShowPasswordForm(true);
     });
   }, []);
 
-  const handleOwnerLogin = async (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await login('owner', password);
-      const alreadyRegistered = localStorage.getItem('webauthn_registered') === 'true';
+      await login(username, password);
+      // Migrate old key to user-specific key
+      if (localStorage.getItem('webauthn_registered') === 'true' && !localStorage.getItem(`webauthn_registered_${username}`)) {
+        localStorage.setItem(`webauthn_registered_${username}`, 'true');
+        localStorage.removeItem('webauthn_registered');
+      }
+      const alreadyRegistered = localStorage.getItem(`webauthn_registered_${username}`) === 'true';
       const skippedThisSession = sessionStorage.getItem('webauthn_setup_skipped') === 'true';
       if (platformAvailable && !alreadyRegistered && !skippedThisSession) {
         navigate('/setup-face-id', { replace: true });
@@ -40,7 +48,7 @@ export default function LoginPage() {
       if (status === 429) {
         setError('Too many login attempts. Please wait a few minutes and try again.');
       } else {
-        setError('Invalid password');
+        setError('Invalid username or password');
       }
     } finally {
       setLoading(false);
@@ -142,7 +150,7 @@ export default function LoginPage() {
               gap: '0.5rem',
             }}
           >
-            {faceIdLoading ? 'Authenticating...' : '🔒 Sign in with Face ID'}
+            {faceIdLoading ? 'Authenticating...' : `🔒 Sign in as ${lastWebAuthnUser} with Face ID`}
           </button>
         )}
 
@@ -170,7 +178,26 @@ export default function LoginPage() {
 
         {/* Password form */}
         {showPasswordForm && (
-          <form onSubmit={handleOwnerLogin} style={{ marginBottom: '1.5rem' }}>
+          <form onSubmit={handleLogin} style={{ marginBottom: '1.5rem' }}>
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+              style={{
+                width: '100%',
+                padding: '0.85rem 1rem',
+                background: '#0f0f1f',
+                border: '1px solid #2a2a4a',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '1rem',
+                marginBottom: '0.75rem',
+                boxSizing: 'border-box',
+                outline: 'none',
+              }}
+            />
             <input
               type="password"
               placeholder="Password"
@@ -192,17 +219,17 @@ export default function LoginPage() {
             />
             <button
               type="submit"
-              disabled={loading || !password}
+              disabled={loading || !username || !password}
               style={{
                 width: '100%',
                 padding: '0.85rem',
-                background: loading || !password ? '#1f1f3a' : '#2d2d5a',
-                color: loading || !password ? '#4a4a6a' : '#a0a0d0',
+                background: loading || !username || !password ? '#1f1f3a' : '#2d2d5a',
+                color: loading || !username || !password ? '#4a4a6a' : '#a0a0d0',
                 border: '1px solid #3a3a6a',
                 borderRadius: '8px',
                 fontSize: '1rem',
                 fontWeight: '500',
-                cursor: loading || !password ? 'not-allowed' : 'pointer',
+                cursor: loading || !username || !password ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s',
               }}
             >
@@ -251,6 +278,21 @@ export default function LoginPage() {
         }}>
           Explore with a pre-loaded 2025 reading library
         </p>
+
+        {/* Register link */}
+        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+          <Link
+            to="/register"
+            style={{
+              color: '#6b6b8a',
+              fontSize: '0.85rem',
+              textDecoration: 'underline',
+              textDecorationColor: '#3a3a5a',
+            }}
+          >
+            Have an invite code? Create an account
+          </Link>
+        </div>
 
         {/* Error */}
         {error && (

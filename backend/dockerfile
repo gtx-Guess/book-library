@@ -23,5 +23,5 @@ COPY . .
 # Expose port
 EXPOSE 3001
 
-# Start dev server with automatic migrations
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
+# Start dev server with Prisma client generation, migrations, and seeding
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npx prisma db seed && npm run dev"]

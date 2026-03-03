@@ -14,6 +14,8 @@ import AddDNFPage from './pages/AddDNFPage';
 import WantToReadPage from './pages/WantToReadPage';
 import AddWantToReadPage from './pages/AddWantToReadPage';
 import FaceIdSetupPage from './pages/FaceIdSetupPage';
+import RegisterPage from './pages/RegisterPage';
+import InviteCodesPage from './pages/InviteCodesPage';
 
 function App() {
   return (
@@ -21,6 +23,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/add" element={<AddBookPage />} />
@@ -34,6 +37,7 @@ function App() {
             <Route path="/want-to-read" element={<WantToReadPage />} />
             <Route path="/add-want-to-read" element={<AddWantToReadPage />} />
             <Route path="/setup-face-id" element={<FaceIdSetupPage />} />
+            <Route path="/invite-codes" element={<InviteCodesPage />} />
           </Route>
         </Routes>
       </Router>

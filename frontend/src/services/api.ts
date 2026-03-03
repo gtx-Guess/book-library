@@ -37,6 +37,17 @@ export interface AuthUser {
   role: string;
 }
 
+export interface InviteCode {
+  id: string;
+  code: string;
+  creatorId: string;
+  maxUses: number;
+  useCount: number;
+  isActive: boolean;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
 export interface Book {
   id: string;
   googleBooksId?: string;
@@ -188,6 +199,25 @@ export const api = {
     webAuthnAuthVerify: async (username: string, response: AuthenticationResponseJSON): Promise<{ token: string; user: AuthUser }> => {
       const resp = await axiosInstance.post('/auth/webauthn/authenticate/finish', { username, response });
       return resp.data;
+    },
+    register: async (username: string, password: string, inviteCode: string): Promise<{ token: string; user: AuthUser }> => {
+      const response = await axiosInstance.post('/auth/register', { username, password, inviteCode });
+      return response.data;
+    },
+  },
+
+  inviteCodes: {
+    generate: async (maxUses?: number): Promise<InviteCode> => {
+      const response = await axiosInstance.post('/auth/invite-codes', maxUses ? { maxUses } : {});
+      return response.data;
+    },
+    getMine: async (): Promise<InviteCode[]> => {
+      const response = await axiosInstance.get('/auth/invite-codes');
+      return response.data;
+    },
+    deactivate: async (id: string): Promise<InviteCode> => {
+      const response = await axiosInstance.patch(`/auth/invite-codes/${id}/deactivate`);
+      return response.data;
     },
   },
 

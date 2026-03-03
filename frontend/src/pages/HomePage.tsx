@@ -86,7 +86,7 @@ export default function HomePage() {
         )}
 
         <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-          {user?.role === 'demo' ? 'Welcome! 👋' : 'Welcome Dami 👋'}
+          {user?.role === 'demo' ? 'Welcome! 👋' : `Welcome ${user?.username} 👋`}
         </h1>
         <p className="text-secondary" style={{ fontSize: '1rem' }}>
           Your reading journey in {currentYear}
@@ -229,6 +229,18 @@ export default function HomePage() {
             onClick={() => navigate(`/goal/${currentYear}/edit`)}
           >
             Set Reading Goal
+          </button>
+        </div>
+      )}
+
+      {user?.role !== 'demo' && (
+        <div className="mt-3">
+          <button
+            className="btn btn-secondary btn-full"
+            onClick={() => navigate('/invite-codes')}
+            style={{ fontSize: '1.1rem', padding: '1rem' }}
+          >
+            🔗 Invite Codes
           </button>
         </div>
       )}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function FaceIdSetupPage() {
-  const { registerFaceId } = useAuth();
+  const { registerFaceId, user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,7 +13,10 @@ export default function FaceIdSetupPage() {
     setError('');
     try {
       await registerFaceId();
-      localStorage.setItem('webauthn_registered', 'true');
+      if (user) {
+        localStorage.setItem(`webauthn_registered_${user.username}`, 'true');
+        localStorage.setItem('last_webauthn_username', user.username);
+      }
       navigate('/', { replace: true });
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'NotAllowedError') {

@@ -5,10 +5,11 @@ interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string, inviteCode: string) => Promise<void>;
   loginAsDemo: () => Promise<void>;
   logout: () => void;
   registerFaceId: () => Promise<void>;
-  loginWithFaceId: () => Promise<void>;
+  loginWithFaceId: (username?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -33,6 +34,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     const { token, user: u } = await api.auth.login(username, password);
     localStorage.setItem('auth_token', token);
+    if (u.role !== 'demo') {
+      localStorage.setItem('last_webauthn_username', u.username);
+    }
+    setUser(u);
+  };
+
+  const register = async (username: string, password: string, inviteCode: string) => {
+    const { token, user: u } = await api.auth.register(username, password, inviteCode);
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('last_webauthn_username', u.username);
     setUser(u);
   };
 
@@ -52,17 +63,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!result.verified) throw new Error('Registration failed');
   };
 
-  const loginWithFaceId = async () => {
+  const loginWithFaceId = async (username?: string) => {
+    const resolvedUsername = username || localStorage.getItem('last_webauthn_username') || 'owner';
     const { startAuthentication } = await import('@simplewebauthn/browser');
-    const options = await api.auth.webAuthnAuthOptions('owner');
+    const options = await api.auth.webAuthnAuthOptions(resolvedUsername);
     const response = await startAuthentication({ optionsJSON: options });
-    const { token, user: u } = await api.auth.webAuthnAuthVerify('owner', response);
+    const { token, user: u } = await api.auth.webAuthnAuthVerify(resolvedUsername, response);
     localStorage.setItem('auth_token', token);
+    localStorage.setItem('last_webauthn_username', u.username);
     setUser(u);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, loginAsDemo, logout, registerFaceId, loginWithFaceId }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, loginAsDemo, logout, registerFaceId, loginWithFaceId }}>
       {children}
     </AuthContext.Provider>
   );
