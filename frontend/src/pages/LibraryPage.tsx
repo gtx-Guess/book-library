@@ -561,9 +561,9 @@ export default function LibraryPage() {
                     <p className="text-secondary" style={{ fontSize: '0.85rem' }}>
                       Finished: {formatDate(completedBook.completedDate)}
                     </p>
-                    {completedBook.book.pageCount && (
+                    {(completedBook.pageCount ?? completedBook.book.pageCount) && (
                       <p className="text-secondary" style={{ fontSize: '0.85rem' }}>
-                        {completedBook.book.pageCount} pages
+                        {completedBook.pageCount ?? completedBook.book.pageCount} pages
                       </p>
                     )}
                     {completedBook.rating && (
