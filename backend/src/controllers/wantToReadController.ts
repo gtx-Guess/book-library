@@ -75,6 +75,14 @@ export const addWantToReadBook = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'This book is already in your "DNF list"' });
     }
 
+    const existingCurrentlyReading = await prisma.currentlyReadingBook.findFirst({
+      where: { bookId: book.id, userId },
+    });
+
+    if (existingCurrentlyReading) {
+      return res.status(400).json({ error: 'This book is already in your "Currently Reading" list' });
+    }
+
     const wantToReadBook = await prisma.wantToReadBook.create({
       data: { bookId: book.id, userId, own, willPurchase },
       include: { book: true },
