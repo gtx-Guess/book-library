@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
-import homeIcon from '../assets/home.png';
 
 export default function GoalSettingsPage() {
   const navigate = useNavigate();
@@ -71,20 +70,6 @@ export default function GoalSettingsPage() {
           ←
         </button>
         <h1 style={{ fontSize: '1.5rem' }}>Set Reading Goal</h1>
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            position: 'absolute',
-            right: 0,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0.5rem',
-          }}
-          title="Home"
-        >
-          <img src={homeIcon} alt="Home" style={{ width: '24px', height: '24px' }} />
-        </button>
       </div>
 
       {error && <div className="error">{error}</div>}

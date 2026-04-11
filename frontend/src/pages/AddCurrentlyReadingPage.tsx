@@ -4,7 +4,6 @@ import { api, GoogleBookResult } from '../services/api';
 import ConfirmCurrentlyReadingModal from '../components/ConfirmCurrentlyReadingModal';
 import ManualBookModal, { ManualBookData } from '../components/ManualBookModal';
 import BookCover from '../components/BookCover';
-import homeIcon from '../assets/home.png';
 
 const STORAGE_KEY = 'addCurrentlyReadingPage_searchState';
 
@@ -149,20 +148,6 @@ export default function AddCurrentlyReadingPage() {
           ←
         </button>
         <h1 style={{ fontSize: '1.5rem' }}>Add to Currently Reading</h1>
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            position: 'absolute',
-            right: 0,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0.5rem',
-          }}
-          title="Home"
-        >
-          <img src={homeIcon} alt="Home" style={{ width: '24px', height: '24px' }} />
-        </button>
       </div>
 
       {error && <div className="error">{error}</div>}

@@ -4,7 +4,6 @@ import { api, GoogleBookResult } from '../services/api';
 import ConfirmDNFModal from '../components/ConfirmDNFModal';
 import ManualBookModal, { ManualBookData } from '../components/ManualBookModal';
 import BookCover from '../components/BookCover';
-import homeIcon from '../assets/home.png';
 
 const STORAGE_KEY = 'addDNFPage_searchState';
 
@@ -147,20 +146,6 @@ export default function AddDNFPage() {
           ←
         </button>
         <h1 style={{ fontSize: '1.5rem' }}>Add DNF Book</h1>
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            position: 'absolute',
-            right: 0,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0.5rem',
-          }}
-          title="Home"
-        >
-          <img src={homeIcon} alt="Home" style={{ width: '24px', height: '24px' }} />
-        </button>
       </div>
 
       {error && <div className="error">{error}</div>}
