@@ -14,10 +14,10 @@ const menuItems = [
 ];
 
 const radialPositions = [
-  { x: -80, y: -110 },  // top-left (finished)
-  { x: 80, y: -110 },   // top-right (reading)
-  { x: -110, y: -40 },  // left (want to read)
-  { x: 110, y: -40 },   // right (dnf)
+  { x: -90, y: -100 },  // upper-left (finished)
+  { x: -30, y: -130 },  // upper-center-left (reading)
+  { x: 30, y: -130 },   // upper-center-right (want to read)
+  { x: 90, y: -100 },   // upper-right (dnf)
 ];
 
 export default function QuickAddMenu({ onClose }: QuickAddMenuProps) {
