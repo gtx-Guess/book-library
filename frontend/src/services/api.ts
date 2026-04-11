@@ -171,6 +171,19 @@ export interface WantToReadBook {
   userId: string;
 }
 
+export interface CurrentlyReadingBook {
+  id: string;
+  bookId: string;
+  book: Book;
+  startedDate?: string;
+  currentPage?: number;
+  own?: boolean;
+  willPurchase?: string;
+  createdAt: string;
+  isSeeded: boolean;
+  userId: string;
+}
+
 export interface AdminUser {
   id: string;
   username: string;
@@ -383,6 +396,39 @@ export const api = {
 
   deleteWantToReadBook: async (id: string): Promise<void> => {
     await axiosInstance.delete(`/want-to-read/${id}`);
+  },
+
+  getAllCurrentlyReadingBooks: async (): Promise<CurrentlyReadingBook[]> => {
+    const response = await axiosInstance.get('/currently-reading');
+    return response.data;
+  },
+
+  addCurrentlyReadingBook: async (data: {
+    googleBooksId?: string;
+    title: string;
+    authors?: string[];
+    description?: string;
+    coverImage?: string;
+    pageCount?: number;
+    publisher?: string;
+    publishedDate?: string;
+    categories?: string[];
+    own?: boolean;
+    willPurchase?: string;
+    startedDate?: string;
+    currentPage?: number;
+  }): Promise<CurrentlyReadingBook> => {
+    const response = await axiosInstance.post('/currently-reading', data);
+    return response.data;
+  },
+
+  updateCurrentlyReadingBook: async (id: string, data: { own?: boolean; willPurchase?: string; startedDate?: string; currentPage?: number }): Promise<CurrentlyReadingBook> => {
+    const response = await axiosInstance.patch(`/currently-reading/${id}`, data);
+    return response.data;
+  },
+
+  deleteCurrentlyReadingBook: async (id: string): Promise<void> => {
+    await axiosInstance.delete(`/currently-reading/${id}`);
   },
 
   admin: {
