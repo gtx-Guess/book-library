@@ -16,15 +16,21 @@ export default function BottomNav() {
       <nav style={{
         position: 'fixed',
         bottom: 0,
-        left: 0,
-        right: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: 600,
         background: 'var(--nav-bg)',
         borderTop: '1px solid var(--nav-border)',
+        borderLeft: '1px solid var(--nav-border)',
+        borderRight: '1px solid var(--nav-border)',
+        borderRadius: '16px 16px 0 0',
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
         padding: '10px 0 env(safe-area-inset-bottom, 18px)',
         zIndex: 100,
+        boxShadow: '0 -2px 10px var(--shadow)',
       }}>
         {/* Home */}
         <button

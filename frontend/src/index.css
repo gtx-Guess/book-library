@@ -22,7 +22,7 @@
   --card-hover: #f1f5f9;
 }
 
-[data-theme="dark"] {
+:root[data-theme="dark"] {
   --background: #0f0f0f;
   --surface: #1a1a2e;
   --text: #f1f5f9;
