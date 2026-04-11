@@ -18,8 +18,8 @@ export default function BottomNav() {
         bottom: 0,
         left: 0,
         right: 0,
-        background: '#1a1a2e',
-        borderTop: '1px solid #2a2a4a',
+        background: 'var(--nav-bg)',
+        borderTop: '1px solid var(--nav-border)',
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
@@ -39,7 +39,7 @@ export default function BottomNav() {
           }}
         >
           <div style={{ fontSize: 20 }}>🏠</div>
-          <div style={{ fontSize: 9, color: isHome ? '#2563eb' : '#94a3b8', marginTop: 2 }}>Home</div>
+          <div style={{ fontSize: 9, color: isHome ? 'var(--primary)' : 'var(--text-secondary)', marginTop: 2 }}>Home</div>
         </button>
 
         {/* Quick Add */}
@@ -83,7 +83,7 @@ export default function BottomNav() {
           }}
         >
           <div style={{ fontSize: 20 }}>⚙️</div>
-          <div style={{ fontSize: 9, color: isSettings ? '#2563eb' : '#94a3b8', marginTop: 2 }}>Settings</div>
+          <div style={{ fontSize: 9, color: isSettings ? 'var(--primary)' : 'var(--text-secondary)', marginTop: 2 }}>Settings</div>
         </button>
       </nav>
     </>

@@ -7,14 +7,33 @@
 :root {
   --primary: #2563eb;
   --primary-dark: #1e40af;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --success: #10b981;
+  --danger: #ef4444;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --input-bg: var(--surface);
+  --nav-bg: #ffffff;
+  --nav-border: #e2e8f0;
+  --scrim: rgba(0, 0, 0, 0.4);
+  --card-hover: #f1f5f9;
+}
+
+[data-theme="dark"] {
   --background: #0f0f0f;
   --surface: #1a1a2e;
   --text: #f1f5f9;
   --text-secondary: #94a3b8;
   --border: #2a2a4a;
-  --success: #10b981;
-  --danger: #ef4444;
   --shadow: rgba(0, 0, 0, 0.3);
+  --input-bg: rgba(15, 15, 30, 0.6);
+  --nav-bg: #1a1a2e;
+  --nav-border: #2a2a4a;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --card-hover: #252540;
 }
 
 body {
@@ -110,7 +129,7 @@ a {
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 1.5rem;
-  box-shadow: none;
+  box-shadow: 0 1px 3px var(--shadow);
 }
 
 .input {
@@ -119,7 +138,7 @@ a {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 1rem;
-  background: rgba(15, 15, 30, 0.6);
+  background: var(--input-bg);
   color: var(--text);
 }
 

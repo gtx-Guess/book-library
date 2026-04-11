@@ -40,7 +40,7 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 1rem', color: '#94a3b8' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 1rem', color: 'var(--text-secondary)' }}>
         Loading...
       </div>
     );
@@ -50,7 +50,7 @@ export default function HomePage() {
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '1rem' }}>
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
-        <h1 style={{ fontSize: '1.5rem', color: '#f1f5f9', margin: 0 }}>
+        <h1 style={{ fontSize: '1.5rem', color: 'var(--text)', margin: 0 }}>
           {user?.role === 'demo' ? 'Welcome! 👋' : `Welcome ${user?.username}!`}
         </h1>
         {user?.role === 'demo' && (
@@ -70,30 +70,31 @@ export default function HomePage() {
 
       {/* Consolidated Stats Card */}
       <div style={{
-        background: '#1a1a2e',
+        background: 'var(--surface)',
         borderRadius: 12,
         padding: 16,
         marginBottom: 16,
-        border: '1px solid #2a2a4a',
+        border: '1px solid var(--border)',
+        boxShadow: '0 1px 3px var(--shadow)',
       }}>
         {/* Pages Read - hero number */}
         <div style={{ textAlign: 'center', marginBottom: 14 }}>
-          <div style={{ fontSize: 32, fontWeight: 700, color: '#2563eb' }}>
+          <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--primary)' }}>
             {(stats?.totalPagesRead || 0).toLocaleString()}
           </div>
-          <div style={{ fontSize: 12, color: '#94a3b8' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
             pages read across {stats?.booksRead || 0} books
           </div>
         </div>
 
         {/* Divider */}
-        <div style={{ borderTop: '1px solid #2a2a4a', margin: '0 -16px', padding: '0 16px' }} />
+        <div style={{ borderTop: '1px solid var(--border)', margin: '0 -16px', padding: '0 16px' }} />
 
         {/* Last Book + Goal side by side */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
           {/* Last Book */}
           <div>
-            <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
               Last Finished
             </div>
             {stats?.lastBook ? (
@@ -105,12 +106,12 @@ export default function HomePage() {
                   height={46}
                 />
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#f1f5f9', lineHeight: 1.2 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', lineHeight: 1.2 }}>
                     {stats.lastBook.title.length > 20
                       ? stats.lastBook.title.substring(0, 20) + '...'
                       : stats.lastBook.title}
                   </div>
-                  <div style={{ fontSize: 10, color: '#94a3b8' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>
                     {new Date(stats.lastBook.completedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}
                   </div>
                   {stats.lastBook.rating && (
@@ -119,13 +120,13 @@ export default function HomePage() {
                 </div>
               </div>
             ) : (
-              <div style={{ fontSize: 12, color: '#64748b' }}>No books yet — start reading!</div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>No books yet — start reading!</div>
             )}
           </div>
 
           {/* Goal */}
           <div>
-            <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
               {currentYear} Goal
             </div>
             {stats?.hasGoal ? (
@@ -133,32 +134,32 @@ export default function HomePage() {
                 onClick={() => navigate(`/goal/${currentYear}`)}
                 style={{ cursor: 'pointer' }}
               >
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#2563eb' }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary)' }}>
                   {stats.booksRead}
-                  <span style={{ fontSize: 14, color: '#64748b', fontWeight: 400 }}> / {stats.goalCount}</span>
+                  <span style={{ fontSize: 14, color: 'var(--text-secondary)', fontWeight: 400 }}> / {stats.goalCount}</span>
                 </div>
                 <div style={{
-                  background: '#1e293b',
+                  background: 'var(--border)',
                   borderRadius: 99,
                   height: 6,
                   overflow: 'hidden',
                   marginTop: 6,
                 }}>
                   <div style={{
-                    background: '#2563eb',
+                    background: 'var(--primary)',
                     height: '100%',
                     width: `${Math.min(stats.progress, 100)}%`,
                     borderRadius: 99,
                   }} />
                 </div>
-                <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 3 }}>
+                <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 3 }}>
                   {stats.progress}% complete
                 </div>
               </div>
             ) : (
               <div
                 onClick={() => navigate('/settings')}
-                style={{ fontSize: 12, color: '#2563eb', cursor: 'pointer' }}
+                style={{ fontSize: 12, color: 'var(--primary)', cursor: 'pointer' }}
               >
                 Set a reading goal →
               </div>
@@ -170,7 +171,7 @@ export default function HomePage() {
       {/* Your Lists */}
       <div style={{
         fontSize: 11,
-        color: '#64748b',
+        color: 'var(--text-secondary)',
         textTransform: 'uppercase',
         letterSpacing: 0.5,
         marginBottom: 8,
@@ -189,16 +190,17 @@ export default function HomePage() {
             key={list.path}
             onClick={() => navigate(list.path)}
             style={{
-              background: '#1a1a2e',
+              background: 'var(--surface)',
               borderRadius: 10,
               padding: 14,
-              border: '1px solid #2a2a4a',
+              border: '1px solid var(--border)',
               cursor: 'pointer',
+              boxShadow: '0 1px 3px var(--shadow)',
             }}
           >
             <div style={{ fontSize: 22, marginBottom: 6 }}>{list.emoji}</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9' }}>{list.name}</div>
-            <div style={{ fontSize: 11, color: '#94a3b8' }}>{list.count} books</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{list.name}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{list.count} books</div>
           </div>
         ))}
       </div>
@@ -207,22 +209,23 @@ export default function HomePage() {
       <div
         onClick={() => navigate('/history')}
         style={{
-          background: '#1a1a2e',
+          background: 'var(--surface)',
           borderRadius: 10,
           padding: '12px 14px',
-          border: '1px solid #2a2a4a',
+          border: '1px solid var(--border)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           cursor: 'pointer',
           marginBottom: 12,
+          boxShadow: '0 1px 3px var(--shadow)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 16 }}>📈</span>
-          <span style={{ fontSize: 13, color: '#f1f5f9' }}>Reading History</span>
+          <span style={{ fontSize: 13, color: 'var(--text)' }}>Reading History</span>
         </div>
-        <span style={{ color: '#64748b', fontSize: 12 }}>→</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>→</span>
       </div>
 
       {/* Admin Dashboard */}
