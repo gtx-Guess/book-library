@@ -108,11 +108,11 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* Last Book Added */}
+      {/* Last Book Finished */}
       {stats?.lastBook && (
         <div className="card mb-3">
           <h2 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-            Last Book Added
+            Last Book Finished
           </h2>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <BookCover src={stats.lastBook.coverImage} title={stats.lastBook.title} width={70} height={105} />
