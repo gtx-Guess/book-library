@@ -9,6 +9,7 @@ import {
 import type {
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
+  AuthenticatorTransportFuture,
 } from '@simplewebauthn/server';
 import jwt from 'jsonwebtoken';
 
@@ -41,7 +42,7 @@ export async function webAuthnRegisterStart(req: Request, res: Response) {
       rpID: RP_ID,
       userName: username,
       userDisplayName: username,
-      attestation: 'none',
+      attestationType: 'none',
       authenticatorSelection: {
         authenticatorAttachment: 'platform',
         residentKey: 'preferred',
@@ -49,7 +50,7 @@ export async function webAuthnRegisterStart(req: Request, res: Response) {
       },
       excludeCredentials: existingCredentials.map((c) => ({
         id: c.credentialId,
-        transports: c.transports as AuthenticatorTransport[],
+        transports: c.transports as AuthenticatorTransportFuture[],
       })),
       timeout: 60000,
     });
@@ -151,7 +152,7 @@ export async function webAuthnAuthStart(req: Request, res: Response) {
       rpID: RP_ID,
       allowCredentials: user.webAuthnCreds.map((c) => ({
         id: c.credentialId,
-        transports: c.transports as AuthenticatorTransport[],
+        transports: c.transports as AuthenticatorTransportFuture[],
       })),
       userVerification: 'required',
       timeout: 60000,
@@ -218,7 +219,7 @@ export async function webAuthnAuthFinish(req: Request, res: Response) {
         id: credential.credentialId,
         publicKey: Buffer.from(credential.publicKey, 'base64url'),
         counter: Number(credential.counter),
-        transports: credential.transports as AuthenticatorTransport[],
+        transports: credential.transports as AuthenticatorTransportFuture[],
       },
     });
 

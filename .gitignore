@@ -33,4 +33,4 @@ backend/update-maybe-books.js
 
 # Local development certificates
 certs/
-nginx.conf
+/nginx.conf

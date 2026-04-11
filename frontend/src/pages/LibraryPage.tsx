@@ -75,10 +75,6 @@ export default function LibraryPage() {
     }
   };
 
-  const handleDeleteClick = (book: CompletedBook) => {
-    setBookToDelete(book);
-  };
-
   const handleConfirmDelete = async () => {
     if (!bookToDelete) return;
 
@@ -139,7 +135,11 @@ export default function LibraryPage() {
 
     try {
       await api.updateCompletedBook(bookToEdit.id, data);
-      const updatedFields: Partial<typeof bookToEdit> = { ...data };
+      const { rating: dataRating, ...restData } = data;
+      const updatedFields: Partial<typeof bookToEdit> = {
+        ...restData,
+        ...(dataRating !== undefined ? { rating: dataRating ?? undefined } : {}),
+      };
       if (data.completedDate) {
         const parsedDate = new Date(data.completedDate);
         updatedFields.completedDate = parsedDate.toISOString();

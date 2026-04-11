@@ -14,7 +14,7 @@ export default function AddDNFPage() {
   const [searchResults, setSearchResults] = useState<GoogleBookResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [loadingBookId, setLoadingBookId] = useState<string | null>(null);
+  const [loadingBookId] = useState<string | null>(null);
   const [selectedBook, setSelectedBook] = useState<GoogleBookResult | null>(null);
   const [showManualModal, setShowManualModal] = useState(false);
   const [manualBook, setManualBook] = useState<ManualBookData | null>(null);

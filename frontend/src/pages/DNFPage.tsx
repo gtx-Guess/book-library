@@ -37,10 +37,6 @@ export default function DNFPage() {
     }
   };
 
-  const handleDeleteClick = (book: DNFBook) => {
-    setBookToDelete(book);
-  };
-
   const handleConfirmDelete = async () => {
     if (!bookToDelete) return;
 
