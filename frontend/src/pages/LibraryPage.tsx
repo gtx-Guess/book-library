@@ -134,20 +134,24 @@ export default function LibraryPage() {
     setBookToEdit(book);
   };
 
-  const handleConfirmEdit = async (data: { own?: boolean; willPurchase?: string; link?: string; rating?: number | null }) => {
+  const handleConfirmEdit = async (data: { completedDate?: string; pageCount?: number | null; own?: boolean; willPurchase?: string; link?: string; rating?: number | null }) => {
     if (!bookToEdit) return;
 
     try {
       await api.updateCompletedBook(bookToEdit.id, data);
-      // Update the book in the local state
+      const updatedFields: Partial<typeof bookToEdit> = { ...data };
+      if (data.completedDate) {
+        updatedFields.completedDate = new Date(data.completedDate).toISOString();
+        updatedFields.year = new Date(data.completedDate).getFullYear();
+      }
       setBooks(books.map(b =>
         b.id === bookToEdit.id
-          ? { ...b, ...data }
+          ? { ...b, ...updatedFields }
           : b
       ));
       setAllBooks(allBooks.map(b =>
         b.id === bookToEdit.id
-          ? { ...b, ...data }
+          ? { ...b, ...updatedFields }
           : b
       ));
       setBookToEdit(null);
@@ -716,6 +720,8 @@ export default function LibraryPage() {
       {bookToEdit && (
         <EditBookModal
           bookTitle={bookToEdit.book.title}
+          currentCompletedDate={bookToEdit.completedDate}
+          currentPageCount={bookToEdit.pageCount ?? bookToEdit.book.pageCount ?? undefined}
           currentOwn={bookToEdit.own ?? undefined}
           currentWillPurchase={bookToEdit.willPurchase ?? undefined}
           currentLink={bookToEdit.link ?? undefined}
