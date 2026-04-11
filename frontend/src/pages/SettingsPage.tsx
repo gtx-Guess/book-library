@@ -235,15 +235,16 @@ export default function SettingsPage() {
           style={{
             position: 'fixed',
             bottom: '1.5rem',
-            right: '1.5rem',
+            left: '1rem',
+            right: '1rem',
+            maxWidth: '340px',
+            marginLeft: 'auto',
             background: 'var(--card-bg, #fff)',
             border: '1px solid var(--border)',
             borderRadius: '10px',
             padding: '1rem 1.25rem',
             boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
             zIndex: 2000,
-            minWidth: '260px',
-            maxWidth: '340px',
           }}
         >
           <p style={{ margin: 0, marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: '500' }}>
