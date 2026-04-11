@@ -262,6 +262,66 @@ export async function startSync(req: Request, res: Response) {
   }
 }
 
+export async function syncAll(req: Request, res: Response) {
+  try {
+    if (req.user!.role === 'demo') {
+      return res.status(403).json({ error: 'Sync is not available for demo accounts' });
+    }
+
+    const userId = req.user!.id;
+
+    // Find all book IDs across all lists that lack a cover image
+    const [completed, dnf, wantToRead, currentlyReading] = await Promise.all([
+      prisma.completedBook.findMany({ where: { userId }, select: { bookId: true } }),
+      prisma.dNFBook.findMany({ where: { userId }, select: { bookId: true } }),
+      prisma.wantToReadBook.findMany({ where: { userId }, select: { bookId: true } }),
+      prisma.currentlyReadingBook.findMany({ where: { userId }, select: { bookId: true } }),
+    ]);
+
+    const allBookIds = [
+      ...new Set([
+        ...completed.map((b) => b.bookId),
+        ...dnf.map((b) => b.bookId),
+        ...wantToRead.map((b) => b.bookId),
+        ...currentlyReading.map((b) => b.bookId),
+      ]),
+    ];
+
+    // Filter to books that are missing a cover image
+    const booksNeedingSync = await prisma.book.findMany({
+      where: { id: { in: allBookIds }, coverImage: null },
+      select: { id: true },
+    });
+
+    const bookIds = booksNeedingSync.map((b) => b.id);
+
+    if (bookIds.length === 0) {
+      return res.json({ syncId: null, message: 'All books already have metadata', total: 0 });
+    }
+
+    const syncId = randomUUID();
+    const job: SyncJob = {
+      userId,
+      status: 'running',
+      total: bookIds.length,
+      processed: 0,
+    };
+
+    syncJobs.set(syncId, job);
+
+    enrichBooks(syncId, bookIds).catch((err) => {
+      console.error('enrichBooks error:', err);
+      const j = syncJobs.get(syncId);
+      if (j) j.status = 'failed';
+    });
+
+    return res.status(202).json({ syncId, total: bookIds.length });
+  } catch (error) {
+    console.error('syncAll error:', error);
+    return res.status(500).json({ error: 'Failed to start sync' });
+  }
+}
+
 export async function getSyncStatus(req: Request, res: Response) {
   const { syncId } = req.params;
   const job = syncJobs.get(syncId);

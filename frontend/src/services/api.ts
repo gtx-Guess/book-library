@@ -470,6 +470,11 @@ export const api = {
     return response.data;
   },
 
+  syncAllMetadata: async (): Promise<{ syncId: string | null; total: number; message?: string }> => {
+    const response = await axiosInstance.post('/import/sync-all');
+    return response.data;
+  },
+
   admin: {
     getStats: async (): Promise<PlatformStats> => {
       const response = await axiosInstance.get('/admin/stats');

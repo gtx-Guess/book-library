@@ -20,6 +20,7 @@ export default function SettingsPage() {
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState('');
   const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
   const [toast, setToast] = useState<SyncToast | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -56,52 +57,55 @@ export default function SettingsPage() {
     }
   };
 
-  const startSync = async (bookIds: string[]) => {
-    setImportSummary(null);
-    try {
-      const { syncId } = await api.startImportSync(bookIds);
+  const startSyncPolling = (syncId: string) => {
+    setToast({ syncId, status: 'idle', total: 0, processed: 0, message: 'Starting metadata sync…' });
 
-      setToast({ syncId, status: 'idle', total: 0, processed: 0, message: 'Starting metadata sync…' });
+    pollIntervalRef.current = setInterval(async () => {
+      try {
+        const status = await api.getImportSyncStatus(syncId);
+        setToast((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: status.status,
+                total: status.total,
+                processed: status.processed,
+                message:
+                  status.status === 'running'
+                    ? `Syncing metadata… ${status.processed} / ${status.total}`
+                    : status.status === 'completed'
+                    ? 'Metadata synced successfully!'
+                    : 'Sync failed.',
+              }
+            : prev
+        );
 
-      pollIntervalRef.current = setInterval(async () => {
-        try {
-          const status = await api.getImportSyncStatus(syncId);
-          setToast((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  status: status.status,
-                  total: status.total,
-                  processed: status.processed,
-                  message:
-                    status.status === 'running'
-                      ? `Syncing metadata… ${status.processed} / ${status.total}`
-                      : status.status === 'completed'
-                      ? 'Metadata synced successfully!'
-                      : 'Sync failed.',
-                }
-              : prev
-          );
-
-          if (status.status === 'completed' || status.status === 'failed') {
-            if (pollIntervalRef.current) {
-              clearInterval(pollIntervalRef.current);
-              pollIntervalRef.current = null;
-            }
-            setTimeout(() => setToast(null), 4000);
-          }
-        } catch {
-          // 404 or any error → treat as done
+        if (status.status === 'completed' || status.status === 'failed') {
           if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
             pollIntervalRef.current = null;
           }
-          setToast((prev) =>
-            prev ? { ...prev, status: 'completed', message: 'Metadata synced successfully!' } : prev
-          );
           setTimeout(() => setToast(null), 4000);
         }
-      }, 3000);
+      } catch {
+        // 404 or any error → treat as done
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+        setToast((prev) =>
+          prev ? { ...prev, status: 'completed', message: 'Metadata synced successfully!' } : prev
+        );
+        setTimeout(() => setToast(null), 4000);
+      }
+    }, 3000);
+  };
+
+  const startSync = async (bookIds: string[]) => {
+    setImportSummary(null);
+    try {
+      const { syncId } = await api.startImportSync(bookIds);
+      startSyncPolling(syncId);
     } catch {
       setImportError('Failed to start metadata sync.');
     }
@@ -110,6 +114,24 @@ export default function SettingsPage() {
   const handleSyncMetadata = () => {
     if (!importSummary) return;
     startSync(importSummary.importedBookIds);
+  };
+
+  const handleSyncAll = async () => {
+    setSyncing(true);
+    setImportError('');
+    try {
+      const result = await api.syncAllMetadata();
+      if (!result.syncId) {
+        setToast({ syncId: '', status: 'completed', total: 0, processed: 0, message: result.message || 'All books already have metadata' });
+        setTimeout(() => setToast(null), 4000);
+      } else {
+        startSyncPolling(result.syncId);
+      }
+    } catch {
+      setImportError('Failed to start metadata sync.');
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const isDemo = user?.role === 'demo';
@@ -178,6 +200,25 @@ export default function SettingsPage() {
           </>
         )}
       </div>
+
+      {/* Sync Metadata card */}
+      {!isDemo && (
+        <div className="card mb-3">
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+            Sync Metadata
+          </h2>
+          <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>
+            Fetch cover images, descriptions, and categories from Google Books for any books that are missing them.
+          </p>
+          <button
+            className="btn btn-secondary"
+            disabled={syncing || !!toast}
+            onClick={handleSyncAll}
+          >
+            {syncing ? 'Starting…' : toast ? 'Syncing…' : 'Sync Metadata'}
+          </button>
+        </div>
+      )}
 
       {/* Import summary modal */}
       {importSummary && (
