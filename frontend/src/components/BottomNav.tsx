@@ -13,6 +13,16 @@ export default function BottomNav() {
   return (
     <>
       {quickAddOpen && <QuickAddMenu onClose={() => setQuickAddOpen(false)} />}
+      {/* Full-width backdrop behind the nav */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 70,
+        background: 'var(--background)',
+        zIndex: 99,
+      }} />
       <nav style={{
         position: 'fixed',
         bottom: 0,
