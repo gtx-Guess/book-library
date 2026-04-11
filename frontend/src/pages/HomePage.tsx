@@ -1,299 +1,240 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, YearlyStats } from '../services/api';
-import RatingDisplay from '../components/RatingDisplay';
-import BookCover from '../components/BookCover';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../services/api';
+import BookCover from '../components/BookCover';
+import RatingDisplay from '../components/RatingDisplay';
 
 export default function HomePage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
   const currentYear = new Date().getFullYear();
-  const [stats, setStats] = useState<YearlyStats | null>(null);
+
+  const [stats, setStats] = useState<any>(null);
+  const [listCounts, setListCounts] = useState({ currentlyReading: 0, wantToRead: 0, dnf: 0 });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
-    try {
-      setLoading(true);
-      const data = await api.getStats(currentYear);
-      setStats(data);
-    } catch (err) {
-      setError('Failed to load stats');
-      console.error(err);
-    } finally {
-      setLoading(false);
+    async function loadData() {
+      try {
+        const [statsData, crBooks, wtrBooks, dnfBooks] = await Promise.all([
+          api.getStats(currentYear),
+          api.getAllCurrentlyReadingBooks(),
+          api.getAllWantToReadBooks(),
+          api.getAllDNFBooks(),
+        ]);
+        setStats(statsData);
+        setListCounts({
+          currentlyReading: crBooks.length,
+          wantToRead: wtrBooks.length,
+          dnf: dnfBooks.length,
+        });
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      timeZone: 'UTC',
-    });
-  };
+    loadData();
+  }, [currentYear]);
 
   if (loading) {
     return (
-      <div className="container">
-        <div className="loading">Loading...</div>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 1rem', color: '#94a3b8' }}>
+        Loading...
       </div>
     );
   }
 
   return (
-    <div className="container">
-      {/* Welcome Header */}
-      <header style={{ marginBottom: '2rem', textAlign: 'center', position: 'relative' }}>
-        {/* Logout button — desktop only */}
-        <button
-          onClick={logout}
-          className="sign-out-desktop"
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            background: 'none',
-            border: '1px solid var(--border)',
-            borderRadius: '6px',
-            padding: '0.3rem 0.6rem',
-            fontSize: '0.75rem',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-          }}
-        >
-          Sign out
-        </button>
-
-        {/* Demo badge */}
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '1rem' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 16 }}>
+        <h1 style={{ fontSize: '1.5rem', color: '#f1f5f9', margin: 0 }}>
+          {user?.role === 'demo' ? 'Welcome! 👋' : `Welcome ${user?.username}!`}
+        </h1>
         {user?.role === 'demo' && (
-          <div style={{
+          <span style={{
             display: 'inline-block',
-            background: '#fef3c7',
-            color: '#92400e',
-            padding: '0.25rem 0.75rem',
-            borderRadius: '999px',
-            fontSize: '0.75rem',
-            fontWeight: '600',
-            marginBottom: '0.5rem',
+            background: '#854d0e',
+            color: '#fef08a',
+            fontSize: 11,
+            padding: '2px 8px',
+            borderRadius: 4,
+            marginTop: 4,
           }}>
             Demo Mode
-          </div>
+          </span>
         )}
-
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-          {user?.role === 'demo' ? 'Welcome! 👋' : `Welcome ${user?.username} 👋`}
-        </h1>
-        <p className="text-secondary" style={{ fontSize: '1rem' }}>
-          Your reading journey in {currentYear}
-        </p>
-      </header>
-
-      {error && <div className="error">{error}</div>}
-
-      {/* Pages Read */}
-      <div className="card mb-3" style={{ textAlign: 'center' }}>
-        <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-          Pages Read in {currentYear}
-        </h2>
-        <div style={{ fontSize: '3rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-          {stats?.totalPagesRead.toLocaleString() || 0}
-        </div>
-        <p className="text-secondary" style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
-          across {stats?.booksRead || 0} {stats?.booksRead === 1 ? 'book' : 'books'}
-        </p>
       </div>
 
-      {/* Last Book Finished */}
-      {stats?.lastBook && (
-        <div className="card mb-3">
-          <h2 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-            Last Book Finished
-          </h2>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <BookCover src={stats.lastBook.coverImage} title={stats.lastBook.title} width={70} height={105} />
-            <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', fontWeight: '600' }}>
-                {stats.lastBook.title}
-              </h3>
-              {stats.lastBook.authors.length > 0 && (
-                <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>
-                  by {stats.lastBook.authors.join(', ')}
-                </p>
-              )}
-              <p className="text-secondary" style={{ fontSize: '0.85rem' }}>
-                Finished: {formatDate(stats.lastBook.completedDate)}
-              </p>
-              {stats.lastBook.pageCount && (
-                <p className="text-secondary" style={{ fontSize: '0.85rem' }}>
-                  {stats.lastBook.pageCount} pages
-                </p>
-              )}
-              {stats.lastBook.rating && (
-                <div style={{ marginTop: '0.5rem' }}>
-                  <RatingDisplay rating={stats.lastBook.rating} />
+      {/* Consolidated Stats Card */}
+      <div style={{
+        background: '#1a1a2e',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        border: '1px solid #2a2a4a',
+      }}>
+        {/* Pages Read - hero number */}
+        <div style={{ textAlign: 'center', marginBottom: 14 }}>
+          <div style={{ fontSize: 32, fontWeight: 700, color: '#2563eb' }}>
+            {(stats?.totalPagesRead || 0).toLocaleString()}
+          </div>
+          <div style={{ fontSize: 12, color: '#94a3b8' }}>
+            pages read across {stats?.booksRead || 0} books
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ borderTop: '1px solid #2a2a4a', margin: '0 -16px', padding: '0 16px' }} />
+
+        {/* Last Book + Goal side by side */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
+          {/* Last Book */}
+          <div>
+            <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+              Last Finished
+            </div>
+            {stats?.lastBook ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <BookCover
+                  src={stats.lastBook.coverImage}
+                  title={stats.lastBook.title}
+                  width={32}
+                  height={46}
+                />
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#f1f5f9', lineHeight: 1.2 }}>
+                    {stats.lastBook.title.length > 20
+                      ? stats.lastBook.title.substring(0, 20) + '...'
+                      : stats.lastBook.title}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#94a3b8' }}>
+                    {new Date(stats.lastBook.completedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}
+                  </div>
+                  {stats.lastBook.rating && (
+                    <RatingDisplay rating={stats.lastBook.rating} />
+                  )}
                 </div>
-              )}
+              </div>
+            ) : (
+              <div style={{ fontSize: 12, color: '#64748b' }}>No books yet — start reading!</div>
+            )}
+          </div>
+
+          {/* Goal */}
+          <div>
+            <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+              {currentYear} Goal
             </div>
+            {stats?.hasGoal ? (
+              <div
+                onClick={() => navigate(`/goal/${currentYear}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#2563eb' }}>
+                  {stats.booksRead}
+                  <span style={{ fontSize: 14, color: '#64748b', fontWeight: 400 }}> / {stats.goalCount}</span>
+                </div>
+                <div style={{
+                  background: '#1e293b',
+                  borderRadius: 99,
+                  height: 6,
+                  overflow: 'hidden',
+                  marginTop: 6,
+                }}>
+                  <div style={{
+                    background: '#2563eb',
+                    height: '100%',
+                    width: `${Math.min(stats.progress, 100)}%`,
+                    borderRadius: 99,
+                  }} />
+                </div>
+                <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 3 }}>
+                  {stats.progress}% complete
+                </div>
+              </div>
+            ) : (
+              <div
+                onClick={() => navigate('/settings')}
+                style={{ fontSize: 12, color: '#2563eb', cursor: 'pointer' }}
+              >
+                Set a reading goal →
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Goal Progress (Smaller) */}
-      {stats?.hasGoal && (
-        <div
-          className="card mb-3"
-          style={{ cursor: 'pointer' }}
-          onClick={() => navigate(`/goal/${currentYear}`)}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h2 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                {currentYear} Reading Goal
-              </h2>
-              <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                {stats.booksRead} / {stats.goalCount} books
-              </div>
-              <div className="text-secondary" style={{ fontSize: '0.9rem', marginTop: '0.25rem' }}>
-                {stats.progress}% complete
-              </div>
-            </div>
-            <div
-              style={{
-                fontSize: '2rem',
-                color: 'var(--text-secondary)',
-              }}
-            >
-              →
-            </div>
+      {/* Your Lists */}
+      <div style={{
+        fontSize: 11,
+        color: '#64748b',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        marginBottom: 8,
+        fontWeight: 600,
+      }}>
+        Your Lists
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+        {[
+          { emoji: '📚', name: 'Library', count: stats?.booksRead || 0, path: `/library/${currentYear}` },
+          { emoji: '📖', name: 'Currently Reading', count: listCounts.currentlyReading, path: '/currently-reading' },
+          { emoji: '📋', name: 'Want to Read', count: listCounts.wantToRead, path: '/want-to-read' },
+          { emoji: '📕', name: 'DNF', count: listCounts.dnf, path: '/dnf' },
+        ].map((list) => (
+          <div
+            key={list.path}
+            onClick={() => navigate(list.path)}
+            style={{
+              background: '#1a1a2e',
+              borderRadius: 10,
+              padding: 14,
+              border: '1px solid #2a2a4a',
+              cursor: 'pointer',
+            }}
+          >
+            <div style={{ fontSize: 22, marginBottom: 6 }}>{list.emoji}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9' }}>{list.name}</div>
+            <div style={{ fontSize: 11, color: '#94a3b8' }}>{list.count} books</div>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
 
+      {/* Reading History */}
+      <div
+        onClick={() => navigate('/history')}
+        style={{
+          background: '#1a1a2e',
+          borderRadius: 10,
+          padding: '12px 14px',
+          border: '1px solid #2a2a4a',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          cursor: 'pointer',
+          marginBottom: 12,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 16 }}>📈</span>
+          <span style={{ fontSize: 13, color: '#f1f5f9' }}>Reading History</span>
+        </div>
+        <span style={{ color: '#64748b', fontSize: 12 }}>→</span>
+      </div>
+
+      {/* Admin Dashboard */}
       {user?.role === 'admin' && (
-        <div style={{ marginBottom: '1rem' }}>
-          <button
-            className="btn btn-secondary btn-full"
-            onClick={() => navigate('/admin')}
-            style={{ fontSize: '1.1rem', padding: '1rem' }}
-          >
-            Admin Dashboard
-          </button>
-        </div>
+        <button
+          onClick={() => navigate('/admin')}
+          className="btn btn-secondary btn-full"
+          style={{ marginBottom: 12 }}
+        >
+          🛡️ Admin Dashboard
+        </button>
       )}
-
-      {/* Action Buttons */}
-      <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
-        <button
-          className="btn btn-primary btn-full"
-          onClick={() => navigate('/add')}
-          style={{ fontSize: '1.1rem', padding: '1rem' }}
-        >
-          ➕ Add Book
-        </button>
-        <button
-          className="btn btn-secondary btn-full"
-          onClick={() => navigate(`/library/${currentYear}`)}
-          style={{ fontSize: '1.1rem', padding: '1rem' }}
-        >
-          View {currentYear} Library
-        </button>
-      </div>
-
-      <div className="mt-3">
-        <button
-          className="btn btn-secondary btn-full"
-          onClick={() => navigate('/history')}
-          style={{ fontSize: '1.1rem', padding: '1rem' }}
-        >
-          📈 View Reading History
-        </button>
-      </div>
-
-      <div className="mt-3">
-        <button
-          className="btn btn-secondary btn-full"
-          onClick={() => navigate('/want-to-read')}
-          style={{ fontSize: '1.1rem', padding: '1rem' }}
-        >
-          📚 Want to Read
-        </button>
-      </div>
-
-      <div className="mt-3">
-        <button
-          className="btn btn-secondary btn-full"
-          onClick={() => navigate('/currently-reading')}
-          style={{ fontSize: '1.1rem', padding: '1rem' }}
-        >
-          📖 Currently Reading
-        </button>
-      </div>
-
-      <div className="mt-3">
-        <button
-          className="btn btn-secondary btn-full"
-          onClick={() => navigate('/dnf')}
-          style={{ fontSize: '1.1rem', padding: '1rem' }}
-        >
-          📕 DNF
-        </button>
-      </div>
-
-      {!stats?.hasGoal && (
-        <div className="mt-3">
-          <button
-            className="btn btn-secondary btn-full"
-            onClick={() => navigate(`/goal/${currentYear}/edit`)}
-          >
-            Set Reading Goal
-          </button>
-        </div>
-      )}
-
-      {user?.role !== 'demo' && (
-        <div className="mt-3">
-          <button
-            className="btn btn-secondary btn-full"
-            onClick={() => navigate('/invite-codes')}
-            style={{ fontSize: '1.1rem', padding: '1rem' }}
-          >
-            🔗 Invite Codes
-          </button>
-        </div>
-      )}
-
-      <div className="mt-3">
-        <button
-          className="btn btn-secondary btn-full"
-          onClick={() => navigate('/settings')}
-          style={{ fontSize: '1.1rem', padding: '1rem' }}
-        >
-          ⚙️ Settings
-        </button>
-      </div>
-
-      {/* Sign out — mobile only, at the bottom */}
-      <div className="sign-out-mobile mt-4" style={{ textAlign: 'center' }}>
-        <button
-          onClick={logout}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '0.85rem',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-            padding: '0.5rem',
-          }}
-        >
-          Sign out
-        </button>
-      </div>
     </div>
   );
 }
