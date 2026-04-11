@@ -14,36 +14,6 @@ export default function BottomNav() {
     <>
       {quickAddOpen && <QuickAddMenu onClose={() => setQuickAddOpen(false)} />}
 
-      {/* Floating close button — rendered outside nav so it's above the scrim */}
-      {quickAddOpen && (
-        <button
-          aria-label="Close quick add menu"
-          onClick={() => setQuickAddOpen(false)}
-          style={{
-            position: 'fixed',
-            bottom: 'calc(env(safe-area-inset-bottom, 18px) + 10px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: '#ef4444',
-            border: 'none',
-            width: 48,
-            height: 48,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 20,
-            fontWeight: 700,
-            color: 'white',
-            cursor: 'pointer',
-            boxShadow: '0 4px 16px rgba(239,68,68,0.4)',
-            zIndex: 250,
-          }}
-        >
-          ✕
-        </button>
-      )}
-
       {/* Full-width backdrop behind the nav */}
       <div style={{
         position: 'fixed',
@@ -70,7 +40,7 @@ export default function BottomNav() {
         justifyContent: 'space-around',
         alignItems: 'center',
         padding: '10px 0 env(safe-area-inset-bottom, 18px)',
-        zIndex: 100,
+        zIndex: quickAddOpen ? 250 : 100,
         boxShadow: '0 -2px 10px var(--shadow)',
       }}>
         {/* Home */}
@@ -89,12 +59,12 @@ export default function BottomNav() {
           <div style={{ fontSize: 9, color: isHome ? 'var(--primary)' : 'var(--text-secondary)', marginTop: 2 }}>Home</div>
         </button>
 
-        {/* Quick Add — opens the menu, hidden behind scrim when open */}
+        {/* Quick Add */}
         <button
-          aria-label="Open quick add menu"
-          onClick={() => setQuickAddOpen(true)}
+          aria-label={quickAddOpen ? 'Close quick add menu' : 'Open quick add menu'}
+          onClick={() => setQuickAddOpen(!quickAddOpen)}
           style={{
-            background: '#2563eb',
+            background: quickAddOpen ? '#ef4444' : '#2563eb',
             border: 'none',
             width: 48,
             height: 48,
@@ -102,17 +72,18 @@ export default function BottomNav() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 24,
+            fontSize: quickAddOpen ? 20 : 24,
             fontWeight: 700,
             color: 'white',
             cursor: 'pointer',
             marginTop: -14,
-            boxShadow: '0 4px 12px rgba(37,99,235,0.4)',
-            transition: 'all 0.2s ease',
-            visibility: quickAddOpen ? 'hidden' : 'visible',
+            boxShadow: quickAddOpen
+              ? '0 4px 16px rgba(239,68,68,0.4)'
+              : '0 4px 12px rgba(37,99,235,0.4)',
+            transition: 'background 0.2s ease, box-shadow 0.2s ease',
           }}
         >
-          +
+          {quickAddOpen ? '✕' : '+'}
         </button>
 
         {/* Settings */}

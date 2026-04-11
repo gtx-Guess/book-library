@@ -50,8 +50,6 @@ export default function QuickAddMenu({ onClose }: QuickAddMenuProps) {
         position: 'fixed',
         inset: 0,
         background: 'var(--scrim)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
         zIndex: 200,
       }}
     >
