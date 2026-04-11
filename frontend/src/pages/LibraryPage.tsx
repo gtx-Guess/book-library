@@ -26,6 +26,7 @@ export default function LibraryPage() {
   const [bookToDelete, setBookToDelete] = useState<CompletedBook | null>(null);
   const [bookToAddLink, setBookToAddLink] = useState<CompletedBook | null>(null);
   const [bookToEdit, setBookToEdit] = useState<CompletedBook | null>(null);
+  const [filterTitle, setFilterTitle] = useState('');
   const [filterAuthor, setFilterAuthor] = useState('');
   const [filterPublisher, setFilterPublisher] = useState('');
   const [filterRating, setFilterRating] = useState('');
@@ -179,6 +180,10 @@ export default function LibraryPage() {
 
   // Filter books based on selected filters
   const filteredBooks = allBooks.filter(book => {
+    if (filterTitle && !book.book.title.toLowerCase().includes(filterTitle.toLowerCase())) {
+      return false;
+    }
+
     if (filterAuthor && !book.book.authors.includes(filterAuthor)) {
       return false;
     }
@@ -219,6 +224,7 @@ export default function LibraryPage() {
   });
 
   const clearFilters = () => {
+    setFilterTitle('');
     setFilterAuthor('');
     setFilterPublisher('');
     setFilterRating('');
@@ -226,7 +232,7 @@ export default function LibraryPage() {
     setFilterWillPurchase('');
   };
 
-  const hasActiveFilters = filterAuthor || filterPublisher || filterRating || filterOwn !== '' || filterWillPurchase !== '';
+  const hasActiveFilters = filterTitle || filterAuthor || filterPublisher || filterRating || filterOwn !== '' || filterWillPurchase !== '';
 
   // Group books by bookId and count occurrences for Grand Library
   const processedBooks = isGrandLibrary
@@ -263,7 +269,7 @@ export default function LibraryPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setPagination(prev => ({ ...prev, page: 1 }));
-  }, [filterAuthor, filterPublisher, filterRating, filterOwn, filterWillPurchase]);
+  }, [filterTitle, filterAuthor, filterPublisher, filterRating, filterOwn, filterWillPurchase]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -345,32 +351,48 @@ export default function LibraryPage() {
           <div
             style={{
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              cursor: 'pointer',
+              gap: '0.5rem',
             }}
-            onClick={() => setShowFilters(!showFilters)}
           >
-            <h2 style={{ fontSize: '1rem', fontWeight: '600' }}>
-              🔍 Filters
-              {hasActiveFilters && (
-                <span
-                  style={{
-                    marginLeft: '0.5rem',
-                    fontSize: '0.75rem',
-                    padding: '0.25rem 0.5rem',
-                    background: 'var(--primary)',
-                    color: 'white',
-                    borderRadius: '1rem',
-                  }}
-                >
-                  Active
-                </span>
-              )}
-            </h2>
-            <span style={{ fontSize: '1.5rem' }}>
+            <input
+              type="text"
+              className="input"
+              placeholder="Search by title..."
+              value={filterTitle}
+              onChange={(e) => setFilterTitle(e.target.value)}
+              style={{ flex: 1, margin: 0 }}
+            />
+            {hasActiveFilters && !filterTitle && (
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  padding: '0.2rem 0.4rem',
+                  background: 'var(--primary)',
+                  color: 'white',
+                  borderRadius: '1rem',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Filters
+              </span>
+            )}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              style={{
+                background: 'none',
+                border: '1px solid var(--border)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '1.1rem',
+                padding: '0.35rem 0.6rem',
+                lineHeight: 1,
+                color: showFilters ? 'var(--primary)' : 'var(--text-secondary)',
+              }}
+              title="Toggle filters"
+            >
               {showFilters ? '▼' : '➕'}
-            </span>
+            </button>
           </div>
 
           {showFilters && (
