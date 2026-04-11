@@ -281,6 +281,7 @@ export default function LibraryPage() {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'UTC',
     });
   };
 
