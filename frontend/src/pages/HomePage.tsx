@@ -228,6 +228,16 @@ export default function HomePage() {
       <div className="mt-3">
         <button
           className="btn btn-secondary btn-full"
+          onClick={() => navigate('/currently-reading')}
+          style={{ fontSize: '1.1rem', padding: '1rem' }}
+        >
+          📖 Currently Reading
+        </button>
+      </div>
+
+      <div className="mt-3">
+        <button
+          className="btn btn-secondary btn-full"
           onClick={() => navigate('/dnf')}
           style={{ fontSize: '1.1rem', padding: '1rem' }}
         >
@@ -257,6 +267,16 @@ export default function HomePage() {
           </button>
         </div>
       )}
+
+      <div className="mt-3">
+        <button
+          className="btn btn-secondary btn-full"
+          onClick={() => navigate('/settings')}
+          style={{ fontSize: '1.1rem', padding: '1rem' }}
+        >
+          ⚙️ Settings
+        </button>
+      </div>
 
       {/* Sign out — mobile only, at the bottom */}
       <div className="sign-out-mobile mt-4" style={{ textAlign: 'center' }}>

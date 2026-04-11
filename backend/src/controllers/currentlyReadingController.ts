@@ -3,22 +3,22 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const getAllWantToReadBooks = async (req: Request, res: Response) => {
+export const getAllCurrentlyReadingBooks = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-    const books = await prisma.wantToReadBook.findMany({
+    const books = await prisma.currentlyReadingBook.findMany({
       where: { userId },
       include: { book: true },
       orderBy: { createdAt: 'desc' },
     });
     res.json(books);
   } catch (error) {
-    console.error('Error fetching want to read books:', error);
-    res.status(500).json({ error: 'Failed to fetch want to read books' });
+    console.error('Error fetching currently reading books:', error);
+    res.status(500).json({ error: 'Failed to fetch currently reading books' });
   }
 };
 
-export const addWantToReadBook = async (req: Request, res: Response) => {
+export const addCurrentlyReadingBook = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const {
@@ -33,6 +33,8 @@ export const addWantToReadBook = async (req: Request, res: Response) => {
       categories,
       own,
       willPurchase,
+      startedDate,
+      currentPage,
     } = req.body;
 
     let book;
@@ -48,12 +50,12 @@ export const addWantToReadBook = async (req: Request, res: Response) => {
       });
     }
 
-    const existingWantToReadBook = await prisma.wantToReadBook.findFirst({
+    const existingCurrentlyReading = await prisma.currentlyReadingBook.findFirst({
       where: { bookId: book.id, userId },
     });
 
-    if (existingWantToReadBook) {
-      return res.status(400).json({ error: 'This book is already in your "Want to read list"' });
+    if (existingCurrentlyReading) {
+      return res.status(400).json({ error: 'This book is already in your "Currently Reading" list' });
     }
 
     const existingCompletedBook = await prisma.completedBook.findFirst({
@@ -75,33 +77,37 @@ export const addWantToReadBook = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'This book is already in your "DNF list"' });
     }
 
-    const existingCurrentlyReading = await prisma.currentlyReadingBook.findFirst({
+    // Remove from Want to Read list for this user
+    await prisma.wantToReadBook.deleteMany({
       where: { bookId: book.id, userId },
     });
 
-    if (existingCurrentlyReading) {
-      return res.status(400).json({ error: 'This book is already in your "Currently Reading" list' });
-    }
-
-    const wantToReadBook = await prisma.wantToReadBook.create({
-      data: { bookId: book.id, userId, own, willPurchase },
+    const currentlyReadingBook = await prisma.currentlyReadingBook.create({
+      data: {
+        bookId: book.id,
+        userId,
+        own: own !== undefined ? own : null,
+        willPurchase: willPurchase !== undefined ? willPurchase : null,
+        startedDate: startedDate ? new Date(startedDate) : null,
+        currentPage: currentPage !== undefined ? currentPage : null,
+      },
       include: { book: true },
     });
 
-    res.status(201).json(wantToReadBook);
+    res.status(201).json(currentlyReadingBook);
   } catch (error) {
-    console.error('Error adding want to read book:', error);
-    res.status(500).json({ error: 'Failed to add want to read book' });
+    console.error('Error adding currently reading book:', error);
+    res.status(500).json({ error: 'Failed to add currently reading book' });
   }
 };
 
-export const updateWantToReadBook = async (req: Request, res: Response) => {
+export const updateCurrentlyReadingBook = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
-    const { own, willPurchase } = req.body;
+    const { own, willPurchase, startedDate, currentPage } = req.body;
 
-    const record = await prisma.wantToReadBook.findUnique({ where: { id } });
+    const record = await prisma.currentlyReadingBook.findUnique({ where: { id } });
 
     if (!record || record.userId !== userId) {
       return res.status(403).json({ error: 'Not authorized' });
@@ -111,25 +117,31 @@ export const updateWantToReadBook = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Cannot modify seeded demo books' });
     }
 
-    const wantToReadBook = await prisma.wantToReadBook.update({
+    const updateData: any = {};
+    if (own !== undefined) updateData.own = own;
+    if (willPurchase !== undefined) updateData.willPurchase = willPurchase;
+    if (startedDate !== undefined) updateData.startedDate = startedDate ? new Date(startedDate) : null;
+    if (currentPage !== undefined) updateData.currentPage = currentPage;
+
+    const currentlyReadingBook = await prisma.currentlyReadingBook.update({
       where: { id },
-      data: { own, willPurchase },
+      data: updateData,
       include: { book: true },
     });
 
-    res.json(wantToReadBook);
+    res.json(currentlyReadingBook);
   } catch (error) {
-    console.error('Error updating want to read book:', error);
-    res.status(500).json({ error: 'Failed to update want to read book' });
+    console.error('Error updating currently reading book:', error);
+    res.status(500).json({ error: 'Failed to update currently reading book' });
   }
 };
 
-export const deleteWantToReadBook = async (req: Request, res: Response) => {
+export const deleteCurrentlyReadingBook = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
 
-    const record = await prisma.wantToReadBook.findUnique({ where: { id } });
+    const record = await prisma.currentlyReadingBook.findUnique({ where: { id } });
 
     if (!record || record.userId !== userId) {
       return res.status(403).json({ error: 'Not authorized' });
@@ -139,11 +151,11 @@ export const deleteWantToReadBook = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Cannot delete seeded demo books' });
     }
 
-    await prisma.wantToReadBook.delete({ where: { id } });
+    await prisma.currentlyReadingBook.delete({ where: { id } });
 
     res.status(204).send();
   } catch (error) {
-    console.error('Error deleting want to read book:', error);
-    res.status(500).json({ error: 'Failed to delete want to read book' });
+    console.error('Error deleting currently reading book:', error);
+    res.status(500).json({ error: 'Failed to delete currently reading book' });
   }
 };

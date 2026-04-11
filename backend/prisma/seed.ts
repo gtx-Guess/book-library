@@ -211,6 +211,21 @@ const SEEDED_WANT_TO_READ_BOOKS = [
   },
 ];
 
+const SEEDED_CURRENTLY_READING_BOOKS = [
+  {
+    googleBooksId: 'wrOQLV6xB-wC',
+    title: 'The Hobbit',
+    authors: ['J.R.R. Tolkien'],
+    description: 'Bilbo Baggins is a hobbit who enjoys a comfortable life, rarely traveling far from home. Then one day the wizard Gandalf arrives.',
+    coverImage: 'http://books.google.com/books/content?id=wrOQLV6xB-wC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
+    pageCount: 366,
+    publishedDate: '2012-02-15',
+    categories: ['Fiction'],
+    startedDate: new Date('2026-04-01'),
+    currentPage: 120,
+  },
+];
+
 async function main() {
   console.log('Seeding database...');
 
@@ -249,12 +264,16 @@ async function main() {
     where: { userId: '' },
     data: { userId: admin.id },
   });
+  const unassignedCurrentlyReading = await prisma.currentlyReadingBook.updateMany({
+    where: { userId: '' },
+    data: { userId: admin.id },
+  });
   const unassignedGoals = await prisma.yearlyGoal.updateMany({
     where: { userId: '' },
     data: { userId: admin.id },
   });
 
-  if (unassignedCompleted.count || unassignedDnf.count || unassignedWantToRead.count || unassignedGoals.count) {
+  if (unassignedCompleted.count || unassignedDnf.count || unassignedWantToRead.count || unassignedCurrentlyReading.count || unassignedGoals.count) {
     console.log(`Assigned existing records to admin`);
   }
 
@@ -357,6 +376,34 @@ async function main() {
     }
   }
   console.log(`Seeded ${SEEDED_WANT_TO_READ_BOOKS.length} demo Want to Read books`);
+
+  // Seed demo Currently Reading books
+  for (const bookData of SEEDED_CURRENTLY_READING_BOOKS) {
+    const { startedDate, currentPage, ...bookFields } = bookData;
+
+    const book = await prisma.book.upsert({
+      where: { googleBooksId: bookFields.googleBooksId },
+      update: {},
+      create: { ...bookFields, authors: bookFields.authors, categories: bookFields.categories },
+    });
+
+    const existing = await prisma.currentlyReadingBook.findFirst({
+      where: { bookId: book.id, userId: demo.id, isSeeded: true },
+    });
+
+    if (!existing) {
+      await prisma.currentlyReadingBook.create({
+        data: {
+          bookId: book.id,
+          userId: demo.id,
+          isSeeded: true,
+          startedDate,
+          currentPage,
+        },
+      });
+    }
+  }
+  console.log(`Seeded ${SEEDED_CURRENTLY_READING_BOOKS.length} demo Currently Reading books`);
 
   console.log('Seeding complete!');
 }

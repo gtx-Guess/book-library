@@ -78,6 +78,10 @@ export async function addCompletedBook(req: Request, res: Response) {
       where: { bookId: book.id, userId },
     });
 
+    await prisma.currentlyReadingBook.deleteMany({
+      where: { bookId: book.id, userId },
+    });
+
     res.status(201).json(completedBook);
   } catch (error) {
     console.error('Error adding completed book:', error);

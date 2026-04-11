@@ -13,10 +13,13 @@ import DNFPage from './pages/DNFPage';
 import AddDNFPage from './pages/AddDNFPage';
 import WantToReadPage from './pages/WantToReadPage';
 import AddWantToReadPage from './pages/AddWantToReadPage';
+import CurrentlyReadingPage from './pages/CurrentlyReadingPage';
+import AddCurrentlyReadingPage from './pages/AddCurrentlyReadingPage';
 import FaceIdSetupPage from './pages/FaceIdSetupPage';
 import RegisterPage from './pages/RegisterPage';
 import InviteCodesPage from './pages/InviteCodesPage';
 import AdminPage from './pages/AdminPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
@@ -37,9 +40,12 @@ function App() {
             <Route path="/add-dnf" element={<AddDNFPage />} />
             <Route path="/want-to-read" element={<WantToReadPage />} />
             <Route path="/add-want-to-read" element={<AddWantToReadPage />} />
+            <Route path="/currently-reading" element={<CurrentlyReadingPage />} />
+            <Route path="/add-currently-reading" element={<AddCurrentlyReadingPage />} />
             <Route path="/setup-face-id" element={<FaceIdSetupPage />} />
             <Route path="/invite-codes" element={<InviteCodesPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Routes>
       </Router>

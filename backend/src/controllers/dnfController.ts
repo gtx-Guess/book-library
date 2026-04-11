@@ -72,6 +72,10 @@ export async function addDNFBook(req: Request, res: Response) {
       where: { bookId: book.id, userId },
     });
 
+    await prisma.currentlyReadingBook.deleteMany({
+      where: { bookId: book.id, userId },
+    });
+
     const dnfBook = await prisma.dNFBook.create({
       data: {
         bookId: book.id,

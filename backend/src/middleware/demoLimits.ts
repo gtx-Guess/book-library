@@ -7,7 +7,7 @@ const DEMO_CAP = 10;
 const DEMO_CAP_MESSAGE =
   "This is a demo, you've reached the demo book add cap. Please delete some books to try adding them again";
 
-export function demoLimitCheck(listType: 'completed' | 'dnf' | 'wantToRead') {
+export function demoLimitCheck(listType: 'completed' | 'dnf' | 'wantToRead' | 'currentlyReading') {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || req.user.role !== 'demo') {
       return next();
@@ -26,6 +26,10 @@ export function demoLimitCheck(listType: 'completed' | 'dnf' | 'wantToRead') {
       });
     } else if (listType === 'wantToRead') {
       count = await prisma.wantToReadBook.count({
+        where: { userId, isSeeded: false },
+      });
+    } else if (listType === 'currentlyReading') {
+      count = await prisma.currentlyReadingBook.count({
         where: { userId, isSeeded: false },
       });
     }

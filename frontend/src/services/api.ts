@@ -171,6 +171,39 @@ export interface WantToReadBook {
   userId: string;
 }
 
+export interface CurrentlyReadingBook {
+  id: string;
+  bookId: string;
+  book: Book;
+  startedDate?: string;
+  currentPage?: number;
+  own?: boolean;
+  willPurchase?: string;
+  createdAt: string;
+  isSeeded: boolean;
+  userId: string;
+}
+
+export interface ImportSummary {
+  imported: {
+    completed: number;
+    currentlyReading: number;
+    wantToRead: number;
+    dnf: number;
+  };
+  skipped: {
+    duplicates: number;
+  };
+  customShelves: Array<{ name: string; count: number }>;
+  importedBookIds: string[];
+}
+
+export interface SyncStatus {
+  status: 'running' | 'completed' | 'failed';
+  total: number;
+  processed: number;
+}
+
 export interface AdminUser {
   id: string;
   username: string;
@@ -383,6 +416,63 @@ export const api = {
 
   deleteWantToReadBook: async (id: string): Promise<void> => {
     await axiosInstance.delete(`/want-to-read/${id}`);
+  },
+
+  getAllCurrentlyReadingBooks: async (): Promise<CurrentlyReadingBook[]> => {
+    const response = await axiosInstance.get('/currently-reading');
+    return response.data;
+  },
+
+  addCurrentlyReadingBook: async (data: {
+    googleBooksId?: string;
+    title: string;
+    authors?: string[];
+    description?: string;
+    coverImage?: string;
+    pageCount?: number;
+    publisher?: string;
+    publishedDate?: string;
+    categories?: string[];
+    own?: boolean;
+    willPurchase?: string;
+    startedDate?: string;
+    currentPage?: number;
+  }): Promise<CurrentlyReadingBook> => {
+    const response = await axiosInstance.post('/currently-reading', data);
+    return response.data;
+  },
+
+  updateCurrentlyReadingBook: async (id: string, data: { own?: boolean; willPurchase?: string; startedDate?: string; currentPage?: number }): Promise<CurrentlyReadingBook> => {
+    const response = await axiosInstance.patch(`/currently-reading/${id}`, data);
+    return response.data;
+  },
+
+  deleteCurrentlyReadingBook: async (id: string): Promise<void> => {
+    await axiosInstance.delete(`/currently-reading/${id}`);
+  },
+
+  importGoodReads: async (file: File): Promise<ImportSummary> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axiosInstance.post('/import/goodreads', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  startImportSync: async (bookIds: string[]): Promise<{ syncId: string }> => {
+    const response = await axiosInstance.post('/import/sync', { bookIds });
+    return response.data;
+  },
+
+  getImportSyncStatus: async (syncId: string): Promise<SyncStatus> => {
+    const response = await axiosInstance.get(`/import/sync-status/${syncId}`);
+    return response.data;
+  },
+
+  syncAllMetadata: async (): Promise<{ syncId: string | null; total: number; message?: string }> => {
+    const response = await axiosInstance.post('/import/sync-all');
+    return response.data;
   },
 
   admin: {

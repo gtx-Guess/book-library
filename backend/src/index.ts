@@ -8,8 +8,10 @@ import goalsRouter from './routes/goals';
 import statsRouter from './routes/stats';
 import dnfRouter from './routes/dnf';
 import wantToReadRouter from './routes/wantToRead';
+import currentlyReadingRouter from './routes/currentlyReading';
 import authRouter from './routes/auth';
 import adminRouter from './routes/admin';
+import importRouter from './routes/import';
 
 dotenv.config();
 
@@ -88,7 +90,9 @@ app.use('/api/goals', goalsRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/dnf', dnfRouter);
 app.use('/api/want-to-read', wantToReadRouter);
+app.use('/api/currently-reading', currentlyReadingRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/import', importRouter);
 
 app.listen(PORT, () => {
   console.log(`✅ Backend server running on port ${PORT}`);
