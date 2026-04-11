@@ -60,7 +60,7 @@ export default function BottomNav() {
 
         {/* Quick Add */}
         <button
-          aria-label="Open quick add menu"
+          aria-label={quickAddOpen ? 'Close quick add menu' : 'Open quick add menu'}
           onClick={() => setQuickAddOpen(!quickAddOpen)}
           style={{
             background: quickAddOpen ? '#ef4444' : '#2563eb',
@@ -71,7 +71,7 @@ export default function BottomNav() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 24,
+            fontSize: quickAddOpen ? 20 : 24,
             fontWeight: 700,
             color: 'white',
             cursor: 'pointer',
@@ -79,11 +79,12 @@ export default function BottomNav() {
             boxShadow: quickAddOpen
               ? '0 4px 16px rgba(239,68,68,0.4)'
               : '0 4px 12px rgba(37,99,235,0.4)',
-            transform: quickAddOpen ? 'rotate(45deg) scale(1)' : 'scale(1)',
             transition: 'all 0.2s ease',
+            position: 'relative',
+            zIndex: quickAddOpen ? 250 : 'auto',
           }}
         >
-          +
+          {quickAddOpen ? '✕' : '+'}
         </button>
 
         {/* Settings */}
