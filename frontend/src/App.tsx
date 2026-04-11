@@ -19,6 +19,7 @@ import FaceIdSetupPage from './pages/FaceIdSetupPage';
 import RegisterPage from './pages/RegisterPage';
 import InviteCodesPage from './pages/InviteCodesPage';
 import AdminPage from './pages/AdminPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
             <Route path="/setup-face-id" element={<FaceIdSetupPage />} />
             <Route path="/invite-codes" element={<InviteCodesPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Routes>
       </Router>

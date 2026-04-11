@@ -268,6 +268,16 @@ export default function HomePage() {
         </div>
       )}
 
+      <div className="mt-3">
+        <button
+          className="btn btn-secondary btn-full"
+          onClick={() => navigate('/settings')}
+          style={{ fontSize: '1.1rem', padding: '1rem' }}
+        >
+          ⚙️ Settings
+        </button>
+      </div>
+
       {/* Sign out — mobile only, at the bottom */}
       <div className="sign-out-mobile mt-4" style={{ textAlign: 'center' }}>
         <button
