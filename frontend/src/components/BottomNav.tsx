@@ -59,7 +59,7 @@ export default function BottomNav() {
           <div style={{ fontSize: 9, color: isHome ? 'var(--primary)' : 'var(--text-secondary)', marginTop: 2 }}>Home</div>
         </button>
 
-        {/* Quick Add */}
+        {/* Quick Add — hidden when menu open since the portaled X replaces it */}
         <button
           aria-label="Open quick add menu"
           onClick={() => setQuickAddOpen(true)}
@@ -69,7 +69,7 @@ export default function BottomNav() {
             width: 48,
             height: 48,
             borderRadius: '50%',
-            display: 'flex',
+            display: quickAddOpen ? 'none' : 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: 24,
@@ -82,6 +82,8 @@ export default function BottomNav() {
         >
           +
         </button>
+        {/* Spacer to keep nav layout when button is hidden */}
+        {quickAddOpen && <div style={{ width: 48, height: 48, marginTop: -14 }} />}
 
         {/* Settings */}
         <button
