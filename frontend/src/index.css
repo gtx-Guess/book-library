@@ -7,14 +7,14 @@
 :root {
   --primary: #2563eb;
   --primary-dark: #1e40af;
-  --background: #f8fafc;
-  --surface: #ffffff;
-  --text: #1e293b;
-  --text-secondary: #64748b;
-  --border: #e2e8f0;
+  --background: #0f0f0f;
+  --surface: #1a1a2e;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: #2a2a4a;
   --success: #10b981;
   --danger: #ef4444;
-  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow: rgba(0, 0, 0, 0.3);
 }
 
 body {
@@ -107,9 +107,10 @@ a {
 
 .card {
   background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px var(--shadow);
+  box-shadow: none;
 }
 
 .input {
@@ -118,13 +119,13 @@ a {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 1rem;
-  background: var(--surface);
+  background: rgba(15, 15, 30, 0.6);
   color: var(--text);
 }
 
 .input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
 .text-secondary {
@@ -155,15 +156,12 @@ a {
 
 .error {
   padding: 1rem;
-  background: #fee;
+  background: rgba(239, 68, 68, 0.1);
   color: var(--danger);
   border-radius: 0.5rem;
   margin-bottom: 1rem;
 }
 
-.sign-out-mobile { display: none; }
-
 @media (max-width: 480px) {
-  .sign-out-desktop { display: none !important; }
-  .sign-out-mobile { display: block; }
+  /* Mobile-specific styles */
 }
