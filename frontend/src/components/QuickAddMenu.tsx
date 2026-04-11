@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface QuickAddMenuProps {
   onClose: () => void;
@@ -44,15 +45,21 @@ export default function QuickAddMenu({ onClose }: QuickAddMenuProps) {
   };
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'var(--scrim)',
-        zIndex: 200,
-      }}
-    >
+    <>
+      {/* Blur scrim — covers everything */}
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'var(--scrim)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+          zIndex: 200,
+        }}
+      />
+
+      {/* Icon bubbles */}
       {menuItems.map((item, i) => (
         <button
           key={item.path}
@@ -87,6 +94,37 @@ export default function QuickAddMenu({ onClose }: QuickAddMenuProps) {
           {item.emoji}
         </button>
       ))}
-    </div>
+
+      {/* X close button — portaled to document.body to escape all stacking contexts */}
+      {createPortal(
+        <button
+          aria-label="Close quick add menu"
+          onClick={onClose}
+          style={{
+            position: 'fixed',
+            bottom: 'calc(env(safe-area-inset-bottom, 18px) + 10px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 48,
+            height: 48,
+            borderRadius: '50%',
+            background: '#ef4444',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 20,
+            fontWeight: 700,
+            color: 'white',
+            cursor: 'pointer',
+            boxShadow: '0 4px 16px rgba(239,68,68,0.4)',
+            zIndex: 9999,
+          }}
+        >
+          ✕
+        </button>,
+        document.body
+      )}
+    </>
   );
 }
