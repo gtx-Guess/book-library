@@ -460,6 +460,7 @@ export default function DNFPage() {
           currentWillPurchase={bookToEdit.willPurchase ?? undefined}
           currentLink={undefined}
           hideRating
+          hideCompletedDate
           onConfirm={handleConfirmEdit}
           onDelete={handleDeleteFromEdit}
           onCancel={handleCancelEdit}

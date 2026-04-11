@@ -112,7 +112,7 @@ export async function updateCompletedBook(req: Request, res: Response) {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
-    const { link, own, willPurchase, rating } = req.body;
+    const { link, own, willPurchase, rating, completedDate, pageCount } = req.body;
 
     const record = await prisma.completedBook.findUnique({ where: { id } });
 
@@ -129,6 +129,20 @@ export async function updateCompletedBook(req: Request, res: Response) {
     if (own !== undefined) updateData.own = own;
     if (willPurchase !== undefined) updateData.willPurchase = willPurchase;
     if (rating !== undefined) updateData.rating = rating;
+    if (completedDate !== undefined) {
+      const parsed = new Date(completedDate);
+      if (isNaN(parsed.getTime())) {
+        return res.status(400).json({ error: 'Invalid completedDate' });
+      }
+      updateData.completedDate = parsed;
+      updateData.year = parsed.getFullYear();
+    }
+    if (pageCount !== undefined) {
+      if (pageCount !== null && (typeof pageCount !== 'number' || !Number.isInteger(pageCount) || pageCount < 1)) {
+        return res.status(400).json({ error: 'Invalid pageCount' });
+      }
+      updateData.pageCount = pageCount;
+    }
 
     const completedBook = await prisma.completedBook.update({
       where: { id },
