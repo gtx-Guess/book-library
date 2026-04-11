@@ -49,7 +49,7 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '1rem' }}>
       {/* Header */}
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 16, textAlign: 'center' }}>
         <h1 style={{ fontSize: '1.5rem', color: 'var(--text)', margin: 0 }}>
           {user?.role === 'demo' ? 'Welcome! 👋' : `Welcome ${user?.username}!`}
         </h1>
