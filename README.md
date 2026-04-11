@@ -13,7 +13,12 @@ A mobile-first web app for tracking books — what you've read, what you've aban
 - Want to Read list
 - Import your library from GoodReads via CSV export
 - Background metadata sync (covers, descriptions) via Google Books API
-- Settings page for import and metadata management
+- Settings page for import, metadata, goals, security, invite codes, and sign out
+- Light and dark mode with toggle in settings
+- Persistent bottom navigation bar (Home, Quick Add, Settings) on all pages
+- Radial burst quick-add menu for adding books to any list
+- Redesigned login page with bookshelf hero illustration
+- Consolidated dashboard with stats card and list navigation grid
 - Stats across all years
 - JWT-based auth with admin, user, and demo accounts
 - WebAuthn / Face ID login support
