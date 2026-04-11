@@ -109,6 +109,7 @@ export default function BottomNav() {
             marginTop: -14,
             boxShadow: '0 4px 12px rgba(37,99,235,0.4)',
             transition: 'all 0.2s ease',
+            visibility: quickAddOpen ? 'hidden' : 'visible',
           }}
         >
           +
