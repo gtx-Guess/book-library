@@ -228,6 +228,16 @@ export default function HomePage() {
       <div className="mt-3">
         <button
           className="btn btn-secondary btn-full"
+          onClick={() => navigate('/currently-reading')}
+          style={{ fontSize: '1.1rem', padding: '1rem' }}
+        >
+          📖 Currently Reading
+        </button>
+      </div>
+
+      <div className="mt-3">
+        <button
+          className="btn btn-secondary btn-full"
           onClick={() => navigate('/dnf')}
           style={{ fontSize: '1.1rem', padding: '1rem' }}
         >
