@@ -7,7 +7,7 @@ export default function ProtectedRoute() {
 
   if (isLoading) {
     return (
-      <div className="loading">
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <p>Loading...</p>
       </div>
     );
