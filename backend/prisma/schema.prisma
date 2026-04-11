@@ -18,13 +18,14 @@ model User {
   invitedBy       InviteCode? @relation("InviteCodeUsedBy", fields: [invitedById], references: [id])
   createdAt       DateTime @default(now())
 
-  completedBooks     CompletedBook[]
-  dnfBooks           DNFBook[]
-  wantToReadBooks    WantToReadBook[]
-  yearlyGoals        YearlyGoal[]
-  webAuthnCreds      WebAuthnCredential[]
-  webAuthnChallenges WebAuthnChallenge[]
-  createdInvites     InviteCode[] @relation("InviteCodeCreator")
+  completedBooks        CompletedBook[]
+  dnfBooks              DNFBook[]
+  wantToReadBooks       WantToReadBook[]
+  currentlyReadingBooks CurrentlyReadingBook[]
+  yearlyGoals           YearlyGoal[]
+  webAuthnCreds         WebAuthnCredential[]
+  webAuthnChallenges    WebAuthnChallenge[]
+  createdInvites        InviteCode[] @relation("InviteCodeCreator")
 }
 
 model InviteCode {
@@ -81,9 +82,10 @@ model Book {
   categories      String[]
   createdAt       DateTime @default(now())
 
-  completedBooks  CompletedBook[]
-  dnfBooks        DNFBook[]
-  wantToReadBooks WantToReadBook[]
+  completedBooks        CompletedBook[]
+  dnfBooks              DNFBook[]
+  wantToReadBooks       WantToReadBook[]
+  currentlyReadingBooks CurrentlyReadingBook[]
 }
 
 model CompletedBook {
@@ -142,6 +144,22 @@ model WantToReadBook {
   own             Boolean?
   willPurchase    String?
   createdAt       DateTime @default(now())
+
+  @@index([userId])
+}
+
+model CurrentlyReadingBook {
+  id           String    @id @default(cuid())
+  bookId       String
+  book         Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  isSeeded     Boolean   @default(false)
+  startedDate  DateTime?
+  currentPage  Int?
+  own          Boolean?
+  willPurchase String?
+  createdAt    DateTime  @default(now())
 
   @@index([userId])
 }
