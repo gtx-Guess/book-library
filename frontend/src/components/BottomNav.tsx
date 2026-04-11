@@ -13,6 +13,37 @@ export default function BottomNav() {
   return (
     <>
       {quickAddOpen && <QuickAddMenu onClose={() => setQuickAddOpen(false)} />}
+
+      {/* Floating close button — rendered outside nav so it's above the scrim */}
+      {quickAddOpen && (
+        <button
+          aria-label="Close quick add menu"
+          onClick={() => setQuickAddOpen(false)}
+          style={{
+            position: 'fixed',
+            bottom: 'calc(env(safe-area-inset-bottom, 18px) + 10px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#ef4444',
+            border: 'none',
+            width: 48,
+            height: 48,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 20,
+            fontWeight: 700,
+            color: 'white',
+            cursor: 'pointer',
+            boxShadow: '0 4px 16px rgba(239,68,68,0.4)',
+            zIndex: 250,
+          }}
+        >
+          ✕
+        </button>
+      )}
+
       {/* Full-width backdrop behind the nav */}
       <div style={{
         position: 'fixed',
@@ -58,12 +89,12 @@ export default function BottomNav() {
           <div style={{ fontSize: 9, color: isHome ? 'var(--primary)' : 'var(--text-secondary)', marginTop: 2 }}>Home</div>
         </button>
 
-        {/* Quick Add */}
+        {/* Quick Add — opens the menu, hidden behind scrim when open */}
         <button
-          aria-label={quickAddOpen ? 'Close quick add menu' : 'Open quick add menu'}
-          onClick={() => setQuickAddOpen(!quickAddOpen)}
+          aria-label="Open quick add menu"
+          onClick={() => setQuickAddOpen(true)}
           style={{
-            background: quickAddOpen ? '#ef4444' : '#2563eb',
+            background: '#2563eb',
             border: 'none',
             width: 48,
             height: 48,
@@ -71,20 +102,16 @@ export default function BottomNav() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: quickAddOpen ? 20 : 24,
+            fontSize: 24,
             fontWeight: 700,
             color: 'white',
             cursor: 'pointer',
             marginTop: -14,
-            boxShadow: quickAddOpen
-              ? '0 4px 16px rgba(239,68,68,0.4)'
-              : '0 4px 12px rgba(37,99,235,0.4)',
+            boxShadow: '0 4px 12px rgba(37,99,235,0.4)',
             transition: 'all 0.2s ease',
-            position: 'relative',
-            zIndex: quickAddOpen ? 250 : 'auto',
           }}
         >
-          {quickAddOpen ? '✕' : '+'}
+          +
         </button>
 
         {/* Settings */}
