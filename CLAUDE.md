@@ -66,5 +66,3 @@ Frontend: `localhost:4000` | Backend: `localhost:4001` | pgAdmin: `localhost:505
 - **Currently Reading list** — new `CurrentlyReadingBook` model with `startedDate` and `currentPage` fields. Full CRUD (controller, routes, frontend pages). Cross-list removal: adding to completed/DNF removes from currently reading; adding to currently reading removes from want-to-read. Demo limit support.
 - **GoodReads CSV Import** — on Settings page (`/settings`). Parses GoodReads export CSV, maps `Exclusive Shelf` to lists (read→completed, did-not-finish→DNF, currently-reading→CurrentlyReading, to-read→WantToRead). Custom shelves reported in summary as not imported. Duplicate detection on re-import. Background metadata sync enriches imported books via Google Books API (covers, descriptions). Standalone "Sync Metadata" button also available on Settings page.
 - **Settings page** — new `/settings` route, first feature is import + sync. Import disabled for demo users (frontend + backend).
-
-Deferred: publisher filter toggle (pending UX clarification from end user).
