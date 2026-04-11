@@ -1,18 +1,33 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import QuickAddMenu from './QuickAddMenu';
 
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [fabCenter, setFabCenter] = useState<{ x: number; y: number } | null>(null);
+  const fabRef = useRef<HTMLButtonElement>(null);
 
   const isHome = location.pathname === '/';
   const isSettings = location.pathname === '/settings';
 
+  const handleOpen = () => {
+    if (fabRef.current) {
+      const rect = fabRef.current.getBoundingClientRect();
+      setFabCenter({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      });
+    }
+    setQuickAddOpen(true);
+  };
+
   return (
     <>
-      {quickAddOpen && <QuickAddMenu onClose={() => setQuickAddOpen(false)} />}
+      {quickAddOpen && fabCenter && (
+        <QuickAddMenu onClose={() => setQuickAddOpen(false)} fabCenter={fabCenter} />
+      )}
 
       {/* Full-width backdrop behind the nav */}
       <div style={{
@@ -61,8 +76,9 @@ export default function BottomNav() {
 
         {/* Quick Add — hidden when menu open since the portaled X replaces it */}
         <button
+          ref={fabRef}
           aria-label="Open quick add menu"
-          onClick={() => setQuickAddOpen(true)}
+          onClick={handleOpen}
           style={{
             background: '#2563eb',
             border: 'none',

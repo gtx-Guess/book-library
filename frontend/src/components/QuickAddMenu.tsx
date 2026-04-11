@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 
 interface QuickAddMenuProps {
   onClose: () => void;
+  fabCenter: { x: number; y: number };
 }
 
 const menuItems = [
@@ -20,7 +21,7 @@ const radialPositions = [
   { x: 90, y: -100 },   // upper-right (dnf)
 ];
 
-export default function QuickAddMenu({ onClose }: QuickAddMenuProps) {
+export default function QuickAddMenu({ onClose, fabCenter }: QuickAddMenuProps) {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
 
@@ -102,11 +103,8 @@ export default function QuickAddMenu({ onClose }: QuickAddMenuProps) {
           onClick={onClose}
           style={{
             position: 'fixed',
-            bottom: 'calc(env(safe-area-inset-bottom, 18px) + 6px)',
-            left: 0,
-            right: 0,
-            marginLeft: 'auto',
-            marginRight: 'auto',
+            top: fabCenter.y - 24,
+            left: fabCenter.x - 24,
             width: 48,
             height: 48,
             borderRadius: '50%',
