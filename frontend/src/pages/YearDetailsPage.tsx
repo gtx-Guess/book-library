@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api, YearlyStats } from '../services/api';
 import RatingDisplay from '../components/RatingDisplay';
 import BookCover from '../components/BookCover';
-import homeIcon from '../assets/home.png';
 
 export default function YearDetailsPage() {
   const navigate = useNavigate();
@@ -66,20 +65,6 @@ export default function YearDetailsPage() {
           <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>{yearNum}</h1>
           <p className="text-secondary" style={{ fontSize: '0.9rem' }}>Reading Year</p>
         </div>
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            position: 'absolute',
-            right: 0,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0.5rem',
-          }}
-          title="Home"
-        >
-          <img src={homeIcon} alt="Home" style={{ width: '24px', height: '24px' }} />
-        </button>
       </div>
 
       {error && <div className="error">{error}</div>}

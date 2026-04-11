@@ -6,7 +6,6 @@ import RatingDisplay from '../components/RatingDisplay';
 import AddLinkModal from '../components/AddLinkModal';
 import BookCover from '../components/BookCover';
 import EditBookModal from '../components/EditBookModal';
-import homeIcon from '../assets/home.png';
 
 export default function LibraryPage() {
   const navigate = useNavigate();
@@ -335,18 +334,6 @@ export default function LibraryPage() {
             </p>
           )}
         </div>
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0.5rem',
-          }}
-          title="Home"
-        >
-          <img src={homeIcon} alt="Home" style={{ width: '24px', height: '24px' }} />
-        </button>
       </div>
 
       {error && <div className="error">{error}</div>}
