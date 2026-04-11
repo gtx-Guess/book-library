@@ -18,11 +18,6 @@ const syncJobs = new Map<string, SyncJob>();
 
 const KNOWN_SHELVES = new Set(['read', 'did-not-finish', 'currently-reading', 'to-read']);
 
-function cleanIsbn(raw: string): string {
-  // GoodReads ISBNs come in format ="0385737947" — strip =, ", whitespace
-  return raw.replace(/[="]/g, '').trim();
-}
-
 function parseGoodReadsDate(raw: string): Date | null {
   if (!raw || !raw.trim()) return null;
   // Format: YYYY/MM/DD
@@ -37,8 +32,6 @@ interface ImportRow {
   Title: string;
   Author: string;
   'Additional Authors': string;
-  ISBN: string;
-  ISBN13: string;
   'My Rating': string;
   Publisher: string;
   'Number of Pages': string;
@@ -51,6 +44,10 @@ interface ImportRow {
 
 export async function importGoodReads(req: Request, res: Response) {
   try {
+    if (req.user!.role === 'demo') {
+      return res.status(403).json({ error: 'Import is not available for demo accounts' });
+    }
+
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
@@ -122,11 +119,11 @@ export async function importGoodReads(req: Request, res: Response) {
       const ratingRaw = parseInt(row['My Rating'], 10);
       const rating = ratingRaw > 0 ? ratingRaw : null;
 
-      // Upsert Book — find by case-insensitive title + author match
+      // Upsert Book — find by case-insensitive title + exact author list match
       let book = await prisma.book.findFirst({
         where: {
           title: { equals: title, mode: 'insensitive' },
-          authors: { hasSome: authors },
+          authors: { equals: authors },
         },
       });
 
@@ -269,7 +266,7 @@ export async function getSyncStatus(req: Request, res: Response) {
   const { syncId } = req.params;
   const job = syncJobs.get(syncId);
 
-  if (!job) {
+  if (!job || job.userId !== req.user!.id) {
     return res.status(404).json({ error: 'Sync job not found' });
   }
 
@@ -306,13 +303,23 @@ async function enrichBooks(syncId: string, bookIds: string[]): Promise<void> {
         const { description, categories, imageLinks } = first.volumeInfo;
         const coverImage = imageLinks?.thumbnail ?? imageLinks?.smallThumbnail;
 
+        // Only set googleBooksId if the book doesn't already have one
+        // and the target ID isn't already used by another book
+        let googleBooksId: string | undefined = undefined;
+        if (!book.googleBooksId && first.id) {
+          const existing = await prisma.book.findUnique({ where: { googleBooksId: first.id } });
+          if (!existing) {
+            googleBooksId = first.id;
+          }
+        }
+
         await prisma.book.update({
           where: { id: bookId },
           data: {
             coverImage: coverImage ?? undefined,
-            description: description ?? undefined,
-            categories: categories ?? undefined,
-            googleBooksId: first.id ?? undefined,
+            description: book.description || description || undefined,
+            categories: book.categories.length > 0 ? undefined : (categories ?? undefined),
+            ...(googleBooksId ? { googleBooksId } : {}),
           },
         });
       }

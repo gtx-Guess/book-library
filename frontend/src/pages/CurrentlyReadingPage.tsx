@@ -7,7 +7,6 @@ import ConfirmBookModal from '../components/ConfirmBookModal';
 
 export default function CurrentlyReadingPage() {
   const navigate = useNavigate();
-  const [books, setBooks] = useState<CurrentlyReadingBook[]>([]);
   const [allBooks, setAllBooks] = useState<CurrentlyReadingBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -26,7 +25,6 @@ export default function CurrentlyReadingPage() {
       setLoading(true);
       const data = await api.getAllCurrentlyReadingBooks();
       setAllBooks(data);
-      setBooks(data);
     } catch (err) {
       setError('Failed to load currently reading books');
       console.error(err);
@@ -44,7 +42,6 @@ export default function CurrentlyReadingPage() {
 
     try {
       await api.deleteCurrentlyReadingBook(bookToDelete.id);
-      setBooks(books.filter((b) => b.id !== bookToDelete.id));
       setAllBooks(allBooks.filter((b) => b.id !== bookToDelete.id));
       setBookToDelete(null);
     } catch (err) {
@@ -95,7 +92,6 @@ export default function CurrentlyReadingPage() {
 
       // Backend automatically removes from currently reading list
       // Update UI state to reflect the removal
-      setBooks(books.filter((b) => b.id !== bookToMarkFinished.id));
       setAllBooks(allBooks.filter((b) => b.id !== bookToMarkFinished.id));
       setBookToMarkFinished(null);
 
