@@ -37,7 +37,7 @@ backend/
 frontend/
   src/
     pages/         # HomePage, LoginPage, RegisterPage, AdminPage, LibraryPage, SettingsPage, CurrentlyReadingPage, AddCurrentlyReadingPage, etc.
-    components/    # ProtectedRoute, BookCover, ImportSummaryModal, ConfirmCurrentlyReadingModal, modals, etc.
+    components/    # ProtectedRoute, BottomNav, QuickAddMenu, BookCover, ImportSummaryModal, ConfirmCurrentlyReadingModal, modals, etc.
     contexts/      # AuthContext (user state, login/logout/register)
     services/      # api.ts (axios instance, all API calls), openLibrary.ts
 ```
@@ -49,20 +49,25 @@ frontend/
 - Routes use `authenticate` middleware; demo limits use `demoLimitCheck` middleware
 - Admin routes use `authenticate` + `requireAdmin` middleware chain
 - Backend `CMD` in Dockerfile runs `prisma migrate deploy` + `prisma db seed` on every container start
+- **Navigation:** Persistent `BottomNav` component rendered inside `ProtectedRoute` on all authenticated pages (Home, Quick Add +, Settings). The + button opens a `QuickAddMenu` radial burst overlay with `createPortal` for the close button (escapes stacking context for backdrop blur).
+- **Theming:** Light/dark mode via CSS variables on `:root` / `:root[data-theme="dark"]`. Toggle in Settings, persisted in localStorage, initialized in `index.html` before React loads to prevent flash.
 
 ## Running Locally
 ```bash
-docker compose up --build -d
+make dev
 ```
 Frontend: `localhost:4000` | Backend: `localhost:4001` | pgAdmin: `localhost:5050`
+
+Use `make clean` to nuke Docker volumes and rebuild from scratch (fixes stale `node_modules` issues).
 
 ## Database
 - `DATABASE_URL` is set in docker-compose.yml, not in `.env`
 - To run Prisma commands locally: `DATABASE_URL="postgresql://booktracker:booktracker_password@localhost:5432/booktracker" npx prisma ...`
 - Migrations auto-apply on container start
 
-## Current Branch
-`feature/currently-reading-and-import` — adds two features:
-- **Currently Reading list** — new `CurrentlyReadingBook` model with `startedDate` and `currentPage` fields. Full CRUD (controller, routes, frontend pages). Cross-list removal: adding to completed/DNF removes from currently reading; adding to currently reading removes from want-to-read. Demo limit support.
-- **GoodReads CSV Import** — on Settings page (`/settings`). Parses GoodReads export CSV, maps `Exclusive Shelf` to lists (read→completed, did-not-finish→DNF, currently-reading→CurrentlyReading, to-read→WantToRead). Custom shelves reported in summary as not imported. Duplicate detection on re-import. Background metadata sync enriches imported books via Google Books API (covers, descriptions). Standalone "Sync Metadata" button also available on Settings page.
-- **Settings page** — new `/settings` route, first feature is import + sync. Import disabled for demo users (frontend + backend).
+## UI Architecture
+- **Login page** — hero bookshelf illustration (CSS book spines), form section below. Dark themed standalone page.
+- **Dashboard (HomePage)** — consolidated stats card (pages read, last book finished, goal progress), 2x2 "Your Lists" grid with live counts, Reading History row. No action buttons — those moved to bottom nav and settings.
+- **Bottom nav bar** — persistent on all authenticated pages: Home, Quick Add (+), Settings. The + opens a radial burst menu with 4 icon bubbles (Finished, Currently Reading, Want to Read, DNF) and backdrop blur scrim.
+- **Settings page** — appearance toggle (light/dark), reading goal, Face ID/security, invite codes, GoodReads import, metadata sync, sign out.
+- **Sub-pages** — back arrow for navigation, no home icon (home is in bottom nav).
