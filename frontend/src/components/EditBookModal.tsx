@@ -3,18 +3,22 @@ import InlineStars from './InlineStars';
 
 interface EditBookModalProps {
   bookTitle: string;
+  currentCompletedDate: string;
+  currentPageCount?: number;
   currentOwn?: boolean;
   currentWillPurchase?: string;
   currentLink?: string;
   currentRating?: number;
   hideRating?: boolean;
-  onConfirm: (data: { own?: boolean; willPurchase?: string; link?: string; rating?: number | null }) => void;
+  onConfirm: (data: { completedDate?: string; pageCount?: number | null; own?: boolean; willPurchase?: string; link?: string; rating?: number | null }) => void;
   onDelete: () => void;
   onCancel: () => void;
 }
 
 export default function EditBookModal({
   bookTitle,
+  currentCompletedDate,
+  currentPageCount,
   currentOwn,
   currentWillPurchase,
   currentLink,
@@ -24,6 +28,12 @@ export default function EditBookModal({
   onDelete,
   onCancel,
 }: EditBookModalProps) {
+  const [completedDate, setCompletedDate] = useState(
+    new Date(currentCompletedDate).toISOString().split('T')[0]
+  );
+  const [pageCount, setPageCount] = useState(
+    currentPageCount !== undefined ? currentPageCount.toString() : ''
+  );
   const [own, setOwn] = useState(
     currentOwn === undefined ? '' : currentOwn ? 'yes' : 'no'
   );
@@ -38,7 +48,20 @@ export default function EditBookModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data: { own?: boolean; willPurchase?: string; link?: string; rating?: number | null } = {};
+    const data: { completedDate?: string; pageCount?: number | null; own?: boolean; willPurchase?: string; link?: string; rating?: number | null } = {};
+
+    if (completedDate) {
+      data.completedDate = completedDate;
+    }
+
+    if (pageCount.trim() !== '') {
+      const parsed = parseInt(pageCount, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        data.pageCount = parsed;
+      }
+    } else if (currentPageCount !== undefined) {
+      data.pageCount = null;
+    }
 
     if (own !== '') {
       data.own = own === 'yes';
@@ -94,6 +117,33 @@ export default function EditBookModal({
         </p>
 
         <form onSubmit={handleSubmit}>
+          <label style={{ display: 'block', marginBottom: '1rem' }}>
+            <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+              Finished Date
+            </span>
+            <input
+              type="date"
+              className="input"
+              value={completedDate}
+              onChange={(e) => setCompletedDate(e.target.value)}
+              required
+            />
+          </label>
+
+          <label style={{ display: 'block', marginBottom: '1rem' }}>
+            <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+              Page Count
+            </span>
+            <input
+              type="number"
+              className="input"
+              placeholder="e.g. 341"
+              min="1"
+              value={pageCount}
+              onChange={(e) => setPageCount(e.target.value)}
+            />
+          </label>
+
           <label style={{ display: 'block', marginBottom: '1rem' }}>
             <span
               style={{
