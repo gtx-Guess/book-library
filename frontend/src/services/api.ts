@@ -289,7 +289,7 @@ export const api = {
     return response.data;
   },
 
-  updateCompletedBook: async (id: string, data: { link?: string; own?: boolean; willPurchase?: string; rating?: number | null }): Promise<CompletedBook> => {
+  updateCompletedBook: async (id: string, data: { link?: string; own?: boolean; willPurchase?: string; rating?: number | null; completedDate?: string; pageCount?: number | null }): Promise<CompletedBook> => {
     const response = await axiosInstance.patch(`/books/completed/${id}`, data);
     return response.data;
   },
