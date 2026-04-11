@@ -137,7 +137,12 @@ export async function updateCompletedBook(req: Request, res: Response) {
       updateData.completedDate = parsed;
       updateData.year = parsed.getFullYear();
     }
-    if (pageCount !== undefined) updateData.pageCount = pageCount;
+    if (pageCount !== undefined) {
+      if (pageCount !== null && (typeof pageCount !== 'number' || !Number.isInteger(pageCount) || pageCount < 1)) {
+        return res.status(400).json({ error: 'Invalid pageCount' });
+      }
+      updateData.pageCount = pageCount;
+    }
 
     const completedBook = await prisma.completedBook.update({
       where: { id },

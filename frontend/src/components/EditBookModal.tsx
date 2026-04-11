@@ -3,13 +3,14 @@ import InlineStars from './InlineStars';
 
 interface EditBookModalProps {
   bookTitle: string;
-  currentCompletedDate: string;
+  currentCompletedDate?: string;
   currentPageCount?: number;
   currentOwn?: boolean;
   currentWillPurchase?: string;
   currentLink?: string;
   currentRating?: number;
   hideRating?: boolean;
+  hideCompletedDate?: boolean;
   onConfirm: (data: { completedDate?: string; pageCount?: number | null; own?: boolean; willPurchase?: string; link?: string; rating?: number | null }) => void;
   onDelete: () => void;
   onCancel: () => void;
@@ -24,12 +25,13 @@ export default function EditBookModal({
   currentLink,
   currentRating,
   hideRating,
+  hideCompletedDate,
   onConfirm,
   onDelete,
   onCancel,
 }: EditBookModalProps) {
   const [completedDate, setCompletedDate] = useState(
-    new Date(currentCompletedDate).toISOString().split('T')[0]
+    currentCompletedDate ? new Date(currentCompletedDate).toISOString().split('T')[0] : ''
   );
   const [pageCount, setPageCount] = useState(
     currentPageCount !== undefined ? currentPageCount.toString() : ''
@@ -50,7 +52,7 @@ export default function EditBookModal({
 
     const data: { completedDate?: string; pageCount?: number | null; own?: boolean; willPurchase?: string; link?: string; rating?: number | null } = {};
 
-    if (completedDate) {
+    if (!hideCompletedDate && completedDate) {
       data.completedDate = completedDate;
     }
 
@@ -117,18 +119,20 @@ export default function EditBookModal({
         </p>
 
         <form onSubmit={handleSubmit}>
-          <label style={{ display: 'block', marginBottom: '1rem' }}>
-            <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
-              Finished Date
-            </span>
-            <input
-              type="date"
-              className="input"
-              value={completedDate}
-              onChange={(e) => setCompletedDate(e.target.value)}
-              required
-            />
-          </label>
+          {!hideCompletedDate && (
+            <label style={{ display: 'block', marginBottom: '1rem' }}>
+              <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                Finished Date
+              </span>
+              <input
+                type="date"
+                className="input"
+                value={completedDate}
+                onChange={(e) => setCompletedDate(e.target.value)}
+                required
+              />
+            </label>
+          )}
 
           <label style={{ display: 'block', marginBottom: '1rem' }}>
             <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>

@@ -141,8 +141,9 @@ export default function LibraryPage() {
       await api.updateCompletedBook(bookToEdit.id, data);
       const updatedFields: Partial<typeof bookToEdit> = { ...data };
       if (data.completedDate) {
-        updatedFields.completedDate = new Date(data.completedDate).toISOString();
-        updatedFields.year = new Date(data.completedDate).getFullYear();
+        const parsedDate = new Date(data.completedDate);
+        updatedFields.completedDate = parsedDate.toISOString();
+        updatedFields.year = parsedDate.getFullYear();
       }
       setBooks(books.map(b =>
         b.id === bookToEdit.id

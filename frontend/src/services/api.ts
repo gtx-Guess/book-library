@@ -67,7 +67,7 @@ export interface CompletedBook {
   book: Book;
   completedDate: string;
   year: number;
-  pageCount?: number;
+  pageCount?: number | null;
   rating?: number;
   own?: boolean;
   willPurchase?: string;
