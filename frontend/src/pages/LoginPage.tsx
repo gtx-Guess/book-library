@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { isPlatformAuthenticatorAvailable } from '../utils/webauthn';
 
@@ -14,7 +14,6 @@ export default function LoginPage() {
   const [faceIdLoading, setFaceIdLoading] = useState(false);
   const [hasBiometrics, setHasBiometrics] = useState(false);
   const [platformAvailable, setPlatformAvailable] = useState(false);
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   const lastWebAuthnUser = localStorage.getItem('last_webauthn_username');
 
@@ -22,8 +21,6 @@ export default function LoginPage() {
     isPlatformAuthenticatorAvailable().then((available) => {
       setHasBiometrics(available);
       setPlatformAvailable(available && !!lastWebAuthnUser);
-      // If no biometrics or no registered user, show password form immediately
-      if (!available || !lastWebAuthnUser) setShowPasswordForm(true);
     });
   }, []);
 
@@ -88,7 +85,6 @@ export default function LoginPage() {
         // Username in localStorage may be stale (e.g. account renamed) — clear it
         localStorage.removeItem('last_webauthn_username');
         setPlatformAvailable(false);
-        setShowPasswordForm(true);
         setError('No Face ID set up for that account. Please sign in with your password.');
       } else {
         setError('Face ID sign-in failed. Please use your password.');
@@ -99,215 +95,226 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#0f0f0f',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      {/* Hero Section */}
       <div style={{
-        width: '100%',
-        maxWidth: '400px',
-        background: '#1a1a2e',
-        borderRadius: '16px',
-        border: '1px solid #2a2a4a',
-        padding: '2.5rem 2rem',
+        background: 'linear-gradient(180deg, #1a1040 0%, #0f1628 100%)',
+        padding: '40px 24px 24px',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
+        {/* Subtle glow */}
+        <div style={{
+          position: 'absolute',
+          width: 200,
+          height: 200,
+          background: 'radial-gradient(circle, rgba(37,99,235,0.15), transparent)',
+          top: -40,
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }} />
 
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📚</div>
-          <h1 style={{
-            fontSize: '1.8rem',
-            fontWeight: 'bold',
-            color: '#fff',
-            marginBottom: '0.5rem',
-          }}>
+        {/* Book spines */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 4,
+          marginBottom: 16,
+          position: 'relative',
+          zIndex: 2,
+        }}>
+          {[
+            { w: 18, h: 90, bg: 'linear-gradient(180deg,#dc2626,#991b1b)' },
+            { w: 14, h: 80, bg: 'linear-gradient(180deg,#2563eb,#1e40af)', mt: 10 },
+            { w: 20, h: 95, bg: 'linear-gradient(180deg,#059669,#047857)' },
+            { w: 12, h: 75, bg: 'linear-gradient(180deg,#d97706,#b45309)', mt: 15 },
+            { w: 22, h: 100, bg: 'linear-gradient(180deg,#7c3aed,#6d28d9)' },
+            { w: 16, h: 85, bg: 'linear-gradient(180deg,#0891b2,#0e7490)', mt: 5 },
+            { w: 18, h: 92, bg: 'linear-gradient(180deg,#e11d48,#be123c)' },
+            { w: 14, h: 78, bg: 'linear-gradient(180deg,#4f46e5,#4338ca)', mt: 12 },
+            { w: 20, h: 88, bg: 'linear-gradient(180deg,#16a34a,#15803d)', mt: 2 },
+          ].map((book, i) => (
+            <div
+              key={i}
+              style={{
+                width: book.w,
+                height: book.h,
+                background: book.bg,
+                borderRadius: 3,
+                marginTop: book.mt || 0,
+                boxShadow: '2px 2px 8px rgba(0,0,0,0.3)',
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Shelf line */}
+        <div style={{
+          height: 4,
+          background: 'linear-gradient(90deg, transparent, #4a3520, #6b4c30, #4a3520, transparent)',
+          borderRadius: 2,
+          marginBottom: 16,
+          position: 'relative',
+          zIndex: 2,
+        }} />
+
+        {/* Title */}
+        <div style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: '0 0 4px 0' }}>
             Book Tracker
           </h1>
-          <p style={{ color: '#8b8ba7', fontSize: '0.9rem' }}>
+          <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>
             Your personal reading journal
           </p>
         </div>
+      </div>
 
-        {/* Face ID — primary action when available */}
+      {/* Form Section */}
+      <div style={{ padding: '24px', maxWidth: 400, margin: '0 auto' }}>
+        {/* Face ID button */}
         {platformAvailable && (
-          <button
-            onClick={handleFaceIdLogin}
-            disabled={faceIdLoading}
-            style={{
-              width: '100%',
-              padding: '1rem',
-              background: faceIdLoading ? '#1a3a2e' : '#064e3b',
-              color: faceIdLoading ? '#4a8a6a' : '#6ee7b7',
-              border: '1px solid #065f46',
-              borderRadius: '10px',
-              fontSize: '1rem',
-              fontWeight: '600',
-              cursor: faceIdLoading ? 'not-allowed' : 'pointer',
-              marginBottom: '0.75rem',
-              transition: 'background 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            {faceIdLoading ? 'Authenticating...' : `🔒 Sign in as ${lastWebAuthnUser} with Face ID`}
-          </button>
-        )}
-
-        {/* Password toggle — subtle link when Face ID is available */}
-        {platformAvailable && (
-          <button
-            onClick={() => { setShowPasswordForm(!showPasswordForm); setError(''); }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#6b6b8a',
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              width: '100%',
-              textAlign: 'center',
-              marginBottom: showPasswordForm ? '1.25rem' : '1.5rem',
-              padding: '0.25rem',
-              textDecoration: 'underline',
-              textDecorationColor: '#3a3a5a',
-            }}
-          >
-            {showPasswordForm ? 'Hide password form' : 'Use password instead'}
-          </button>
-        )}
-
-        {/* Password form */}
-        {showPasswordForm && (
-          <form onSubmit={handleLogin} style={{ marginBottom: '1.5rem' }}>
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
-              style={{
-                width: '100%',
-                padding: '0.85rem 1rem',
-                background: '#0f0f1f',
-                border: '1px solid #2a2a4a',
-                borderRadius: '8px',
-                color: '#fff',
-                fontSize: '1rem',
-                marginBottom: '0.75rem',
-                boxSizing: 'border-box',
-                outline: 'none',
-              }}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              style={{
-                width: '100%',
-                padding: '0.85rem 1rem',
-                background: '#0f0f1f',
-                border: '1px solid #2a2a4a',
-                borderRadius: '8px',
-                color: '#fff',
-                fontSize: '1rem',
-                marginBottom: '0.75rem',
-                boxSizing: 'border-box',
-                outline: 'none',
-              }}
-            />
+          <>
             <button
-              type="submit"
-              disabled={loading || !username || !password}
+              onClick={handleFaceIdLogin}
+              disabled={faceIdLoading}
               style={{
                 width: '100%',
-                padding: '0.85rem',
-                background: loading || !username || !password ? '#1f1f3a' : '#2d2d5a',
-                color: loading || !username || !password ? '#4a4a6a' : '#a0a0d0',
-                border: '1px solid #3a3a6a',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                fontWeight: '500',
-                cursor: loading || !username || !password ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s',
+                padding: '12px',
+                borderRadius: 10,
+                border: '1px solid rgba(16,185,129,0.3)',
+                background: 'rgba(6,78,59,0.4)',
+                color: '#6ee7b7',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: faceIdLoading ? 'not-allowed' : 'pointer',
+                marginBottom: 12,
               }}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {faceIdLoading ? 'Authenticating...' : `🔒 Sign in as ${lastWebAuthnUser} with Face ID`}
             </button>
-          </form>
+
+            {/* Divider */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              margin: '12px 0',
+            }}>
+              <div style={{ flex: 1, height: 1, background: '#2a2a4a' }} />
+              <span style={{ fontSize: 11, color: '#4a4a6a' }}>or use password</span>
+              <div style={{ flex: 1, height: 1, background: '#2a2a4a' }} />
+            </div>
+          </>
         )}
+
+        {/* Password form — always visible */}
+        <form onSubmit={handleLogin}>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoComplete="username"
+            style={{
+              width: '100%',
+              padding: '11px 14px',
+              borderRadius: 10,
+              border: '1px solid #2a2a4a',
+              background: 'rgba(15,15,30,0.6)',
+              color: '#e2e8f0',
+              fontSize: 13,
+              marginBottom: 10,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            style={{
+              width: '100%',
+              padding: '11px 14px',
+              borderRadius: 10,
+              border: '1px solid #2a2a4a',
+              background: 'rgba(15,15,30,0.6)',
+              color: '#e2e8f0',
+              fontSize: 13,
+              marginBottom: 12,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+          <button
+            type="submit"
+            disabled={loading || !username || !password}
+            style={{
+              width: '100%',
+              padding: 12,
+              borderRadius: 10,
+              border: 'none',
+              background: (!username || !password) ? '#1e293b' : '#2563eb',
+              color: (!username || !password) ? '#64748b' : 'white',
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: (!username || !password) ? 'not-allowed' : 'pointer',
+              boxShadow: (username && password) ? '0 4px 16px rgba(37,99,235,0.3)' : 'none',
+            }}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
 
         {/* Divider */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '1rem',
-          marginBottom: '1.5rem',
+          gap: 12,
+          margin: '16px 0',
         }}>
-          <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
-          <span style={{ color: '#4a4a6a', fontSize: '0.85rem' }}>or</span>
-          <div style={{ flex: 1, height: '1px', background: '#2a2a4a' }} />
+          <div style={{ flex: 1, height: 1, background: '#2a2a4a' }} />
+          <span style={{ fontSize: 11, color: '#4a4a6a' }}>or</span>
+          <div style={{ flex: 1, height: 1, background: '#2a2a4a' }} />
         </div>
 
-        {/* Demo */}
+        {/* Demo button */}
         <button
           onClick={handleDemoLogin}
           disabled={demoLoading}
           style={{
             width: '100%',
-            padding: '1rem',
-            background: demoLoading ? '#3a3a6a' : '#4f46e5',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '10px',
-            fontSize: '1rem',
-            fontWeight: '600',
+            padding: 12,
+            borderRadius: 10,
+            border: '1px solid rgba(79,70,229,0.3)',
+            background: 'rgba(79,70,229,0.2)',
+            color: '#a5b4fc',
+            fontSize: 14,
+            fontWeight: 600,
             cursor: demoLoading ? 'not-allowed' : 'pointer',
-            marginBottom: '0.5rem',
-            transition: 'background 0.2s',
           }}
         >
           {demoLoading ? 'Loading demo...' : 'Try the Demo →'}
         </button>
-        <p style={{
-          textAlign: 'center',
-          color: '#6b6b8a',
-          fontSize: '0.8rem',
-          margin: 0,
-        }}>
-          Explore with a pre-loaded 2025 reading library
-        </p>
 
-        {/* Register link */}
-        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-          <Link
-            to="/register"
-            style={{
-              color: '#6b6b8a',
-              fontSize: '0.85rem',
-              textDecoration: 'underline',
-              textDecorationColor: '#3a3a5a',
-            }}
+        {/* Bottom links */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginTop: 16,
+        }}>
+          <span
+            onClick={() => navigate('/register')}
+            style={{ fontSize: 12, color: '#2563eb', cursor: 'pointer' }}
           >
-            Have an invite code? Create an account
-          </Link>
+            Have an invite code? Create account
+          </span>
         </div>
 
         {/* Error */}
         {error && (
-          <p style={{
-            marginTop: '1rem',
-            color: '#f87171',
-            fontSize: '0.9rem',
-            textAlign: 'center',
-          }}>
+          <p style={{ color: '#f87171', fontSize: 13, textAlign: 'center', marginTop: 12 }}>
             {error}
           </p>
         )}
