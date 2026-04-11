@@ -102,9 +102,11 @@ export default function QuickAddMenu({ onClose }: QuickAddMenuProps) {
           onClick={onClose}
           style={{
             position: 'fixed',
-            bottom: 'calc(env(safe-area-inset-bottom, 18px) + 10px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            bottom: 'calc(env(safe-area-inset-bottom, 18px) + 6px)',
+            left: 0,
+            right: 0,
+            marginLeft: 'auto',
+            marginRight: 'auto',
             width: 48,
             height: 48,
             borderRadius: '50%',
