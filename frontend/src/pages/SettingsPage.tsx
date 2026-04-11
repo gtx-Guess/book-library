@@ -14,7 +14,7 @@ interface SyncToast {
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [importing, setImporting] = useState(false);
@@ -25,6 +25,11 @@ export default function SettingsPage() {
   const [toast, setToast] = useState<SyncToast | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const currentYear = new Date().getFullYear();
+  const [goalInfo, setGoalInfo] = useState<{ hasGoal: boolean; booksRead: number; goalCount: number; progress: number } | null>(null);
+  const [hasWebAuthn, setHasWebAuthn] = useState(false);
+  const [inviteCodeCount, setInviteCodeCount] = useState(0);
+
   // Clean up polling on unmount
   useEffect(() => {
     return () => {
@@ -33,6 +38,40 @@ export default function SettingsPage() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    async function loadSettingsData() {
+      try {
+        const stats = await api.getStats(currentYear);
+        setGoalInfo({
+          hasGoal: stats.hasGoal,
+          booksRead: stats.booksRead,
+          goalCount: stats.goalCount,
+          progress: stats.progress,
+        });
+      } catch (err) {
+        console.error('Failed to load goal info:', err);
+      }
+
+      if (user?.role !== 'demo') {
+        try {
+          const codes = await api.inviteCodes.getMine();
+          const activeCount = codes.filter((c: any) => c.isActive).length;
+          setInviteCodeCount(activeCount);
+        } catch (err) {
+          console.error('Failed to load invite codes:', err);
+        }
+      }
+
+      try {
+        const lastUser = localStorage.getItem('last_webauthn_username');
+        setHasWebAuthn(!!lastUser);
+      } catch {
+        setHasWebAuthn(false);
+      }
+    }
+    loadSettingsData();
+  }, [currentYear, user?.role]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -160,6 +199,76 @@ export default function SettingsPage() {
         </button>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', margin: 0 }}>Settings</h1>
       </header>
+
+      {/* Reading Goal */}
+      <div className="card mb-3">
+        <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+          📊 Reading Goal
+        </h2>
+        {goalInfo?.hasGoal ? (
+          <>
+            <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+              {goalInfo.booksRead} / {goalInfo.goalCount} books · {goalInfo.progress}% complete
+            </p>
+            <button
+              className="btn btn-secondary"
+              onClick={() => navigate(`/goal/${currentYear}/edit`)}
+            >
+              Edit Goal
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+              Set a reading goal to track your progress this year.
+            </p>
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate(`/goal/${currentYear}/edit`)}
+            >
+              Set Reading Goal
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Face ID / Security */}
+      {!isDemo && (
+        <div className="card mb-3">
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+            🔒 Security
+          </h2>
+          <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+            {hasWebAuthn ? 'Face ID / passkey is configured.' : 'Set up Face ID or a passkey for quick sign-in.'}
+          </p>
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate('/setup-face-id')}
+          >
+            {hasWebAuthn ? 'Manage Face ID' : 'Set Up Face ID'}
+          </button>
+        </div>
+      )}
+
+      {/* Invite Codes */}
+      {!isDemo && (
+        <div className="card mb-3">
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+            🔗 Invite Codes
+          </h2>
+          <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+            {inviteCodeCount > 0
+              ? `You have ${inviteCodeCount} active invite code${inviteCodeCount !== 1 ? 's' : ''}.`
+              : 'Share codes with friends so they can create an account.'}
+          </p>
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate('/invite-codes')}
+          >
+            Manage Invite Codes
+          </button>
+        </div>
+      )}
 
       {/* Import from GoodReads card */}
       <div className="card mb-3">
@@ -297,6 +406,14 @@ export default function SettingsPage() {
           )}
         </div>
       )}
+      {/* Sign Out */}
+      <button
+        onClick={logout}
+        className="btn btn-danger btn-full"
+        style={{ marginTop: '1rem', marginBottom: '1rem' }}
+      >
+        Sign Out
+      </button>
     </div>
   );
 }
