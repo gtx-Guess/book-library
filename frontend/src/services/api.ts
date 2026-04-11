@@ -184,6 +184,26 @@ export interface CurrentlyReadingBook {
   userId: string;
 }
 
+export interface ImportSummary {
+  imported: {
+    completed: number;
+    currentlyReading: number;
+    wantToRead: number;
+    dnf: number;
+  };
+  skipped: {
+    duplicates: number;
+  };
+  customShelves: Array<{ name: string; count: number }>;
+  importedBookIds: string[];
+}
+
+export interface SyncStatus {
+  status: 'running' | 'completed' | 'failed';
+  total: number;
+  processed: number;
+}
+
 export interface AdminUser {
   id: string;
   username: string;
@@ -429,6 +449,25 @@ export const api = {
 
   deleteCurrentlyReadingBook: async (id: string): Promise<void> => {
     await axiosInstance.delete(`/currently-reading/${id}`);
+  },
+
+  importGoodReads: async (file: File): Promise<ImportSummary> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axiosInstance.post('/import/goodreads', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  startImportSync: async (bookIds: string[]): Promise<{ syncId: string }> => {
+    const response = await axiosInstance.post('/import/sync', { bookIds });
+    return response.data;
+  },
+
+  getImportSyncStatus: async (syncId: string): Promise<SyncStatus> => {
+    const response = await axiosInstance.get(`/import/sync-status/${syncId}`);
+    return response.data;
   },
 
   admin: {
