@@ -15,6 +15,11 @@ A mobile-first web app for tracking books — what you've read, what you've aban
 - Background metadata sync (covers, descriptions) via Google Books API
 - Settings page for import and metadata management
 - Stats across all years
+- **Social / Friends** — user profiles with bio, friend code, and favorite books shelf
+  - Add friends via friend codes or auto-friend on invite-code registration
+  - Browse friends' libraries (completed, currently reading, DNF, want to read) in read-only mode
+  - Privacy toggle to share full library or only goal + last book
+  - Admin panel for managing friendships between any users
 - JWT-based auth with admin, user, and demo accounts
 - WebAuthn / Face ID login support
 - Demo account includes a seeded library and a 10-book cap per list
