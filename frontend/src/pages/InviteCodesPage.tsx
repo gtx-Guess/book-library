@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { api, InviteCode } from '../services/api';
 
 export default function InviteCodesPage() {
@@ -74,9 +75,12 @@ export default function InviteCodesPage() {
             cursor: 'pointer',
             padding: '0',
             marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
           }}
         >
-          ← Back
+          <ArrowLeft size={16} /> Back
         </button>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Invite Codes</h1>
         <p className="text-secondary" style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>

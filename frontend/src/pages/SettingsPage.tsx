@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Moon, Sun, User, Link, Library, BarChart3, Lock } from 'lucide-react';
 import { api, ImportSummary, SyncStatus } from '../services/api';
 // UserProfile type available from '../services/api' if needed
 import { useAuth } from '../contexts/AuthContext';
@@ -213,7 +214,6 @@ export default function SettingsPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             color: 'var(--text-secondary)',
             padding: '0.25rem',
@@ -221,7 +221,7 @@ export default function SettingsPage() {
           }}
           aria-label="Back"
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', margin: 0 }}>Settings</h1>
       </header>
@@ -231,7 +231,7 @@ export default function SettingsPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-              {theme === 'dark' ? '🌙' : '☀️'} Appearance
+              {theme === 'dark' ? <Moon size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} /> : <Sun size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />} Appearance
             </h2>
             <p className="text-secondary" style={{ fontSize: '0.9rem', margin: 0 }}>
               {theme === 'dark' ? 'Dark mode' : 'Light mode'}
@@ -270,7 +270,7 @@ export default function SettingsPage() {
       {!isDemo && (
         <div className="card mb-3">
           <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-            👤 Profile
+            <User size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} /> Profile
           </h2>
           <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
             Set your display name, bio, and favorite books.
@@ -285,7 +285,7 @@ export default function SettingsPage() {
       {!isDemo && (
         <div className="card mb-3">
           <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-            🔗 Friend Code
+            <Link size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} /> Friend Code
           </h2>
           <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
             Share this code with friends so they can add you.
@@ -324,7 +324,7 @@ export default function SettingsPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-                📚 Share Library
+                <Library size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} /> Share Library
               </h2>
               <p className="text-secondary" style={{ fontSize: '0.9rem', margin: 0 }}>
                 {shareLibrary ? 'Friends can browse your lists' : 'Only your goal and last read are visible'}
@@ -358,7 +358,7 @@ export default function SettingsPage() {
       {/* Reading Goal */}
       <div className="card mb-3">
         <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-          📊 Reading Goal
+          <BarChart3 size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} /> Reading Goal
         </h2>
         {goalInfo?.hasGoal ? (
           <>
@@ -391,7 +391,7 @@ export default function SettingsPage() {
       {!isDemo && (
         <div className="card mb-3">
           <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-            🔒 Security
+            <Lock size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} /> Security
           </h2>
           <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
             {hasWebAuthn ? 'Face ID / passkey is configured.' : 'Set up Face ID or a passkey for quick sign-in.'}
@@ -409,7 +409,7 @@ export default function SettingsPage() {
       {!isDemo && (
         <div className="card mb-3">
           <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-            🔗 Invite Codes
+            <Link size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} /> Invite Codes
           </h2>
           <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
             {inviteCodeCount > 0

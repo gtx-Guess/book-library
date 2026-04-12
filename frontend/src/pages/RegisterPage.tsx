@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Library } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { isPlatformAuthenticatorAvailable } from '../utils/webauthn';
 
@@ -80,7 +81,7 @@ export default function RegisterPage() {
       }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📚</div>
+          <div style={{ marginBottom: '0.5rem' }}><Library size={40} color="#6ee7b7" /></div>
           <h1 style={{
             fontSize: '1.8rem',
             fontWeight: 'bold',

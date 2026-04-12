@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Search, BookOpen } from 'lucide-react';
 import { api, GoogleBookResult } from '../services/api';
 import ConfirmCurrentlyReadingModal from '../components/ConfirmCurrentlyReadingModal';
 import ManualBookModal, { ManualBookData } from '../components/ManualBookModal';
@@ -139,13 +140,12 @@ export default function AddCurrentlyReadingPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.5rem' }}>Add to Currently Reading</h1>
       </div>
@@ -162,7 +162,7 @@ export default function AddCurrentlyReadingPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? '...' : '🔍'}
+            {loading ? '...' : <Search size={16} />}
           </button>
         </div>
       </form>
@@ -211,7 +211,7 @@ export default function AddCurrentlyReadingPage() {
                     onClick={() => handleSelectBook(book)}
                     disabled={loadingBookId === book.id}
                   >
-                    {loadingBookId === book.id ? 'Loading...' : '📖 Add to Currently Reading'}
+                    {loadingBookId === book.id ? 'Loading...' : <><BookOpen size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />Add to Currently Reading</>}
                   </button>
                 </div>
               </div>

@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { Bell, TrendingUp, Users, Shield, Library, BookOpen, ClipboardList, BookX, HandMetal } from 'lucide-react';
 import BookCover from '../components/BookCover';
 import RatingDisplay from '../components/RatingDisplay';
+import NotificationsModal from '../components/NotificationsModal';
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -13,6 +15,8 @@ export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
   const [listCounts, setListCounts] = useState({ currentlyReading: 0, wantToRead: 0, dnf: 0 });
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -29,6 +33,14 @@ export default function HomePage() {
           wantToRead: wtrBooks.length,
           dnf: dnfBooks.length,
         });
+        if (user?.role !== 'demo') {
+          try {
+            const { count } = await api.notifications.getUnreadCount();
+            setUnreadCount(count);
+          } catch (err) {
+            // Notifications are optional
+          }
+        }
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
       } finally {
@@ -49,9 +61,38 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '1rem' }}>
       {/* Header */}
-      <div style={{ marginBottom: 16, textAlign: 'center' }}>
+      <div style={{ marginBottom: 16, textAlign: 'center', position: 'relative' }}>
+        {user?.role !== 'demo' && (
+          <button
+            onClick={() => setShowNotifications(true)}
+            className={unreadCount > 0 ? 'bell-shake' : ''}
+            style={{
+              position: 'absolute', right: 0, top: 0,
+              background: 'none', border: 'none',
+              fontSize: 20, cursor: 'pointer',
+              padding: '0.25rem', lineHeight: 1,
+              transformOrigin: 'top center',
+            }}
+            aria-label="Notifications"
+          >
+            <Bell size={20} color="var(--text-secondary)" />
+            {unreadCount > 0 && (
+              <span style={{
+                position: 'absolute', top: -4, right: -4,
+                background: '#ef4444', color: 'white',
+                fontSize: 10, fontWeight: 700,
+                minWidth: 16, height: 16,
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '0 4px',
+              }}>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+        )}
         <h1 style={{ fontSize: '1.5rem', color: 'var(--text)', margin: 0 }}>
-          {user?.role === 'demo' ? 'Welcome! 👋' : `Welcome ${user?.username}!`}
+          {user?.role === 'demo' ? <><HandMetal size={18} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />Welcome!</> : `Welcome ${user?.username}!`}
         </h1>
         {user?.role === 'demo' && (
           <span style={{
@@ -181,10 +222,10 @@ export default function HomePage() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
         {[
-          { emoji: '📚', name: `${currentYear} Library`, count: stats?.booksRead || 0, path: `/library/${currentYear}` },
-          { emoji: '📖', name: 'Currently Reading', count: listCounts.currentlyReading, path: '/currently-reading' },
-          { emoji: '📋', name: 'Want to Read', count: listCounts.wantToRead, path: '/want-to-read' },
-          { emoji: '📕', name: 'DNF', count: listCounts.dnf, path: '/dnf' },
+          { icon: Library, name: `${currentYear} Library`, count: stats?.booksRead || 0, path: `/library/${currentYear}` },
+          { icon: BookOpen, name: 'Currently Reading', count: listCounts.currentlyReading, path: '/currently-reading' },
+          { icon: ClipboardList, name: 'Want to Read', count: listCounts.wantToRead, path: '/want-to-read' },
+          { icon: BookX, name: 'DNF', count: listCounts.dnf, path: '/dnf' },
         ].map((list) => (
           <div
             key={list.path}
@@ -198,7 +239,7 @@ export default function HomePage() {
               boxShadow: '0 1px 3px var(--shadow)',
             }}
           >
-            <div style={{ fontSize: 22, marginBottom: 6 }}>{list.emoji}</div>
+            <div style={{ marginBottom: 6 }}><list.icon size={22} color="var(--primary)" /></div>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{list.name}</div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{list.count} books</div>
           </div>
@@ -221,7 +262,7 @@ export default function HomePage() {
             textAlign: 'center',
           }}
         >
-          <div style={{ fontSize: 22, marginBottom: 6 }}>📈</div>
+          <TrendingUp size={22} color="var(--primary)" style={{ marginBottom: 6 }} />
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Reading History</div>
         </div>
         {user?.role !== 'demo' && (
@@ -237,7 +278,7 @@ export default function HomePage() {
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: 22, marginBottom: 6 }}>👥</div>
+            <Users size={22} color="var(--primary)" style={{ marginBottom: 6 }} />
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Friends</div>
           </div>
         )}
@@ -250,8 +291,17 @@ export default function HomePage() {
           className="btn btn-secondary btn-full"
           style={{ marginBottom: 12 }}
         >
-          🛡️ Admin Dashboard
+          <Shield size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} /> Admin Dashboard
         </button>
+      )}
+
+      {showNotifications && (
+        <NotificationsModal onClose={() => {
+          setShowNotifications(false);
+          if (user?.role !== 'demo') {
+            api.notifications.getUnreadCount().then(({ count }) => setUnreadCount(count)).catch(() => {});
+          }
+        }} />
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Library, BookOpen, ClipboardList, BookX } from 'lucide-react';
 import { api, FriendProfile, FriendStats, FavoritesResponse } from '../services/api';
 import BookCover from '../components/BookCover';
 import RatingDisplay from '../components/RatingDisplay';
@@ -74,10 +75,10 @@ export default function FriendProfilePage() {
       <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
         <button
           onClick={() => navigate('/social')}
-          style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-secondary)', padding: '0.25rem', lineHeight: 1 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: '0.25rem', lineHeight: 1 }}
           aria-label="Back"
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', margin: 0 }}>{displayName}</h1>
       </header>
@@ -175,10 +176,10 @@ export default function FriendProfilePage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
             {[
-              { emoji: '📚', name: 'Completed', count: listCounts.completed, path: `/friends/${friendId}/completed` },
-              { emoji: '📖', name: 'Reading', count: listCounts.currentlyReading, path: `/friends/${friendId}/currently-reading` },
-              { emoji: '📋', name: 'Want to Read', count: listCounts.wantToRead, path: `/friends/${friendId}/want-to-read` },
-              { emoji: '📕', name: 'DNF', count: listCounts.dnf, path: `/friends/${friendId}/dnf` },
+              { icon: Library, name: 'Completed', count: listCounts.completed, path: `/friends/${friendId}/completed` },
+              { icon: BookOpen, name: 'Reading', count: listCounts.currentlyReading, path: `/friends/${friendId}/currently-reading` },
+              { icon: ClipboardList, name: 'Want to Read', count: listCounts.wantToRead, path: `/friends/${friendId}/want-to-read` },
+              { icon: BookX, name: 'DNF', count: listCounts.dnf, path: `/friends/${friendId}/dnf` },
             ].map((list) => (
               <div
                 key={list.path}
@@ -189,7 +190,7 @@ export default function FriendProfilePage() {
                   boxShadow: '0 1px 3px var(--shadow)',
                 }}
               >
-                <div style={{ fontSize: 22, marginBottom: 6 }}>{list.emoji}</div>
+                <div style={{ marginBottom: 6 }}><list.icon size={22} color="var(--primary)" /></div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{list.name}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{list.count} books</div>
               </div>

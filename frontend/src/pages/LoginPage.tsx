@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { isPlatformAuthenticatorAvailable } from '../utils/webauthn';
 
@@ -190,7 +191,7 @@ export default function LoginPage() {
                 marginBottom: 12,
               }}
             >
-              {faceIdLoading ? 'Authenticating...' : `🔒 Sign in as ${lastWebAuthnUser} with Face ID`}
+              {faceIdLoading ? 'Authenticating...' : <><Lock size={14} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />Sign in as {lastWebAuthnUser} with Face ID</>}
             </button>
 
             {/* Divider */}

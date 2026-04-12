@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Search, ClipboardList } from 'lucide-react';
 import { api, GoogleBookResult } from '../services/api';
 import ConfirmWantToReadModal from '../components/ConfirmWantToReadModal';
 import ManualBookModal, { ManualBookData } from '../components/ManualBookModal';
@@ -137,13 +138,12 @@ export default function AddWantToReadPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.5rem' }}>Add to list</h1>
       </div>
@@ -160,7 +160,7 @@ export default function AddWantToReadPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? '...' : '🔍'}
+            {loading ? '...' : <Search size={16} />}
           </button>
         </div>
       </form>
@@ -209,7 +209,7 @@ export default function AddWantToReadPage() {
                     onClick={() => handleSelectBook(book)}
                     disabled={loadingBookId === book.id}
                   >
-                    {loadingBookId === book.id ? 'Loading...' : '➕ Add to Want to Read'}
+                    {loadingBookId === book.id ? 'Loading...' : <><ClipboardList size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />Add to Want to Read</>}
                   </button>
                 </div>
               </div>

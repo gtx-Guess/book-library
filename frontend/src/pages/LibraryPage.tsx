@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Library, Pencil, ShoppingCart, Link, Plus, ChevronDown } from 'lucide-react';
 import { api, CompletedBook, PaginatedBooks } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import RatingDisplay from '../components/RatingDisplay';
 import AddLinkModal from '../components/AddLinkModal';
 import BookCover from '../components/BookCover';
 import EditBookModal from '../components/EditBookModal';
+import GoalProgressBar from '../components/GoalProgressBar';
 
 export default function LibraryPage() {
   const navigate = useNavigate();
@@ -32,6 +34,7 @@ export default function LibraryPage() {
   const [filterOwn, setFilterOwn] = useState('');
   const [filterWillPurchase, setFilterWillPurchase] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [goalData, setGoalData] = useState<{ hasGoal: boolean; booksRead: number; goalCount: number } | null>(null);
 
   useEffect(() => {
     if (year) {
@@ -65,6 +68,14 @@ export default function LibraryPage() {
         const data = await api.getCompletedBooks(parseInt(year!));
         setAllBooks(data);
         setBooks(data);
+      }
+      if (!isGrandLibrary && year) {
+        try {
+          const stats = await api.getStats(parseInt(year));
+          setGoalData({ hasGoal: stats.hasGoal, booksRead: stats.booksRead, goalCount: stats.goalCount });
+        } catch (err) {
+          // Goal data is optional — don't block page load
+        }
       }
     } catch (err) {
       setError('Failed to load books');
@@ -316,17 +327,16 @@ export default function LibraryPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: '1.5rem' }}>
-            {isGrandLibrary ? '📚 Grand Library' : `${year} Library`}
+            {isGrandLibrary ? <><Library size={22} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />Grand Library</> : `${year} Library`}
           </h1>
           {isGrandLibrary && (
             <p className="text-secondary" style={{ fontSize: '0.9rem', marginTop: '0.25rem' }}>
@@ -335,6 +345,21 @@ export default function LibraryPage() {
           )}
         </div>
       </div>
+
+      {goalData?.hasGoal && (
+        <div style={{
+          background: 'var(--surface)',
+          borderRadius: 10,
+          padding: '10px 14px',
+          border: '1px solid var(--border)',
+          marginBottom: '1rem',
+        }}>
+          <div style={{ fontSize: 10, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, fontWeight: 600 }}>
+            {year} Reading Goal
+          </div>
+          <GoalProgressBar booksRead={goalData.booksRead} goalCount={goalData.goalCount} compact />
+        </div>
+      )}
 
       {error && <div className="error">{error}</div>}
 
@@ -377,14 +402,13 @@ export default function LibraryPage() {
                 border: '1px solid var(--border)',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                fontSize: '1.1rem',
                 padding: '0.35rem 0.6rem',
                 lineHeight: 1,
                 color: showFilters ? 'var(--primary)' : 'var(--text-secondary)',
               }}
               title="Toggle filters"
             >
-              {showFilters ? '▼' : '➕'}
+              {showFilters ? <ChevronDown size={16} /> : <Plus size={16} />}
             </button>
           </div>
 
@@ -542,7 +566,7 @@ export default function LibraryPage() {
                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
                     title="Edit book details"
                   >
-                    ✏️
+                    <Pencil size={18} />
                   </button>
                 )}
 
@@ -618,7 +642,7 @@ export default function LibraryPage() {
                             fontWeight: '500',
                           }}
                         >
-                          {completedBook.willPurchase === 'yes' ? '🛒 Will Buy' :
+                          {completedBook.willPurchase === 'yes' ? <><ShoppingCart size={12} style={{ marginRight: 3, verticalAlign: 'text-bottom' }} />Will Buy</> :
                            completedBook.willPurchase === 'maybe' ? 'Maybe Buy' :
                            'Won\'t Buy'}
                         </span>
@@ -632,19 +656,19 @@ export default function LibraryPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn btn-secondary"
-                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', textDecoration: 'none' }}
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            🔗 View Purchase Link
+                            <Link size={14} /> View Purchase Link
                           </a>
                         )}
                         {(completedBook.willPurchase === 'yes' || completedBook.willPurchase === 'maybe') && !completedBook.link && (
                           <button
                             className="btn btn-primary"
-                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                             onClick={() => handleAddLinkClick(completedBook)}
                           >
-                            ➕ Add Link
+                            <Plus size={14} /> Add Link
                           </button>
                         )}
                       </div>
@@ -664,7 +688,7 @@ export default function LibraryPage() {
                 disabled={pagination.page === 1}
                 style={{ padding: '0.5rem 1rem' }}
               >
-                ← Prev
+                Prev
               </button>
               <div style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center' }}>
                 Page {pagination.page} of {totalPages}
@@ -675,7 +699,7 @@ export default function LibraryPage() {
                 disabled={pagination.page === totalPages}
                 style={{ padding: '0.5rem 1rem' }}
               >
-                Next →
+                Next
               </button>
             </div>
           )}

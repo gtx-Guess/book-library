@@ -32,6 +32,8 @@ model User {
   friendOf             Friendship[]     @relation("FriendOf")
   sentFriendRequests   FriendRequest[]  @relation("SentFriendRequests")
   receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+  notifications          Notification[]
+  announcements          Announcement[] @relation("AnnouncementCreator")
 }
 
 model InviteCode {
@@ -219,4 +221,29 @@ model FriendRequest {
 
   @@unique([senderId, receiverId])
   @@index([receiverId])
+}
+
+model Notification {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String   // 'FRIEND_REQUEST' | 'FRIEND_ACCEPTED' | 'ANNOUNCEMENT'
+  title         String
+  message       String
+  read          Boolean  @default(false)
+  link          String?
+  relatedUserId String?
+  createdAt     DateTime @default(now())
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  createdBy String
+  creator   User     @relation("AnnouncementCreator", fields: [createdBy], references: [id])
+  createdAt DateTime @default(now())
 }

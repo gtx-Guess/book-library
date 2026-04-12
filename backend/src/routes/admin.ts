@@ -12,6 +12,11 @@ import {
   adminCreateFriendship,
   adminRemoveFriendship,
 } from '../controllers/adminController';
+import {
+  getAnnouncements,
+  createAnnouncement,
+  deleteAnnouncement,
+} from '../controllers/announcementsController';
 
 const router = Router();
 
@@ -26,5 +31,9 @@ router.patch('/invite-codes/:id/deactivate', adminDeactivateInviteCode);
 router.get('/friendships', getFriendships);
 router.post('/friendships', adminCreateFriendship);
 router.delete('/friendships/:userId/:friendId', adminRemoveFriendship);
+
+router.get('/announcements', getAnnouncements);
+router.post('/announcements', createAnnouncement);
+router.delete('/announcements/:id', deleteAnnouncement);
 
 export default router;

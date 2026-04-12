@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, BookOpen, Plus, Search, CheckCircle, ChevronDown } from 'lucide-react';
 import { api, CurrentlyReadingBook } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import BookCover from '../components/BookCover';
 import ConfirmBookModal from '../components/ConfirmBookModal';
+import GoalProgressBar from '../components/GoalProgressBar';
 
 export default function CurrentlyReadingPage() {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ export default function CurrentlyReadingPage() {
   const [filterAuthor, setFilterAuthor] = useState('');
   const [filterPublisher, setFilterPublisher] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [goalData, setGoalData] = useState<{ hasGoal: boolean; booksRead: number; goalCount: number } | null>(null);
 
   useEffect(() => {
     loadBooks();
@@ -25,6 +28,13 @@ export default function CurrentlyReadingPage() {
       setLoading(true);
       const data = await api.getAllCurrentlyReadingBooks();
       setAllBooks(data);
+      try {
+        const currentYear = new Date().getFullYear();
+        const stats = await api.getStats(currentYear);
+        setGoalData({ hasGoal: stats.hasGoal, booksRead: stats.booksRead, goalCount: stats.goalCount });
+      } catch (err) {
+        // Goal data is optional
+      }
     } catch (err) {
       setError('Failed to load currently reading books');
       console.error(err);
@@ -163,17 +173,16 @@ export default function CurrentlyReadingPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: '1.5rem' }}>
-            📖 Currently Reading
+            <BookOpen size={22} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />Currently Reading
           </h1>
           <p className="text-secondary" style={{ fontSize: '0.9rem', marginTop: '0.25rem' }}>
             {allBooks.length} {allBooks.length === 1 ? 'book' : 'books'}
@@ -182,11 +191,26 @@ export default function CurrentlyReadingPage() {
         <button
           className="btn btn-primary"
           onClick={() => navigate('/add-currently-reading')}
-          style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+          style={{ fontSize: '0.9rem', padding: '0.5rem 1rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}
         >
-          ➕ Add Book
+          <Plus size={14} /> Add Book
         </button>
       </div>
+
+      {goalData?.hasGoal && (
+        <div style={{
+          background: 'var(--surface)',
+          borderRadius: 10,
+          padding: '10px 14px',
+          border: '1px solid var(--border)',
+          marginBottom: '1rem',
+        }}>
+          <div style={{ fontSize: 10, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, fontWeight: 600 }}>
+            {new Date().getFullYear()} Reading Goal
+          </div>
+          <GoalProgressBar booksRead={goalData.booksRead} goalCount={goalData.goalCount} compact />
+        </div>
+      )}
 
       {error && <div className="error">{error}</div>}
 
@@ -202,8 +226,8 @@ export default function CurrentlyReadingPage() {
             }}
             onClick={() => setShowFilters(!showFilters)}
           >
-            <h2 style={{ fontSize: '1rem', fontWeight: '600' }}>
-              🔍 Filters
+            <h2 style={{ fontSize: '1rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Search size={14} /> Filters
               {hasActiveFilters && (
                 <span
                   style={{
@@ -219,8 +243,8 @@ export default function CurrentlyReadingPage() {
                 </span>
               )}
             </h2>
-            <span style={{ fontSize: '1.5rem' }}>
-              {showFilters ? '▼' : '➕'}
+            <span>
+              {showFilters ? <ChevronDown size={16} /> : <Plus size={16} />}
             </span>
           </div>
 
@@ -332,10 +356,10 @@ export default function CurrentlyReadingPage() {
                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
                       <button
                         className="btn btn-primary"
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         onClick={() => handleMarkFinishedClick(currentlyReadingBook)}
                       >
-                        ✅ Mark as Finished
+                        <CheckCircle size={14} /> Mark as Finished
                       </button>
                       {/* Remove button — hidden for seeded demo books */}
                       {!currentlyReadingBook.isSeeded && (

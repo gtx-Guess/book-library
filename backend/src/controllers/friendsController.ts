@@ -135,6 +135,23 @@ export async function sendFriendRequest(req: Request, res: Response) {
       },
     });
 
+    // Create notification for the receiver
+    try {
+      const senderDisplayName = friendRequest.sender.displayName || friendRequest.sender.username;
+      await prisma.notification.create({
+        data: {
+          userId: profile.userId,
+          type: 'FRIEND_REQUEST',
+          title: 'Friend Request',
+          message: `${senderDisplayName} sent you a friend request`,
+          link: '/social',
+          relatedUserId: userId,
+        },
+      });
+    } catch (err) {
+      console.error('Failed to create friend request notification:', err);
+    }
+
     res.status(201).json(friendRequest);
   } catch (error) {
     console.error('Error sending friend request:', error);
@@ -198,6 +215,27 @@ export async function acceptFriendRequest(req: Request, res: Response) {
         skipDuplicates: true,
       });
     });
+
+    // Create notification for the original sender
+    try {
+      const acceptor = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { displayName: true, username: true },
+      });
+      const acceptorDisplayName = acceptor?.displayName || acceptor?.username || 'Someone';
+      await prisma.notification.create({
+        data: {
+          userId: request.senderId,
+          type: 'FRIEND_ACCEPTED',
+          title: 'Friend Request Accepted',
+          message: `${acceptorDisplayName} accepted your friend request`,
+          link: '/social',
+          relatedUserId: userId,
+        },
+      });
+    } catch (err) {
+      console.error('Failed to create friend accepted notification:', err);
+    }
 
     res.json({ message: 'Friend request accepted' });
   } catch (error) {

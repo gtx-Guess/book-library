@@ -25,6 +25,11 @@ A mobile-first web app for tracking books — what you've read, what you've aban
   - Browse friends' libraries (completed, currently reading, DNF, want to read) in read-only mode
   - Privacy toggle to share full library or only goal + last book
   - Admin panel for managing friendships between any users
+- **Notifications** — bell icon with unread badge and shake animation on the dashboard
+  - Friend request and acceptance notifications
+  - Admin announcements broadcast to all users
+  - Mark as read / mark all as read with persistent read state
+- **Goal Progress Bars** — compact reading goal progress on library, history, and currently reading pages
 - JWT-based auth with admin, user, and demo accounts
 - WebAuthn / Face ID login support
 - Demo account includes a seeded library and a 10-book cap per list
