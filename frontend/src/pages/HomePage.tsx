@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { Bell, TrendingUp, Users, Shield } from 'lucide-react';
 import BookCover from '../components/BookCover';
 import RatingDisplay from '../components/RatingDisplay';
 import NotificationsModal from '../components/NotificationsModal';
@@ -74,7 +75,7 @@ export default function HomePage() {
             }}
             aria-label="Notifications"
           >
-            🔔
+            <Bell size={20} color="var(--text-secondary)" />
             {unreadCount > 0 && (
               <span style={{
                 position: 'absolute', top: -4, right: -4,
@@ -261,7 +262,7 @@ export default function HomePage() {
             textAlign: 'center',
           }}
         >
-          <div style={{ fontSize: 22, marginBottom: 6 }}>📈</div>
+          <TrendingUp size={22} color="var(--primary)" style={{ marginBottom: 6 }} />
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Reading History</div>
         </div>
         {user?.role !== 'demo' && (
@@ -277,7 +278,7 @@ export default function HomePage() {
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: 22, marginBottom: 6 }}>👥</div>
+            <Users size={22} color="var(--primary)" style={{ marginBottom: 6 }} />
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Friends</div>
           </div>
         )}
@@ -290,7 +291,7 @@ export default function HomePage() {
           className="btn btn-secondary btn-full"
           style={{ marginBottom: 12 }}
         >
-          🛡️ Admin Dashboard
+          <Shield size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} /> Admin Dashboard
         </button>
       )}
 

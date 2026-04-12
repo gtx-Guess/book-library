@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 
 interface QuickAddMenuProps {
   onClose: () => void;
@@ -121,7 +122,7 @@ export default function QuickAddMenu({ onClose, fabCenter }: QuickAddMenuProps) 
             zIndex: 9999,
           }}
         >
-          ✕
+          <X size={20} strokeWidth={3} />
         </button>,
         document.body
       )}

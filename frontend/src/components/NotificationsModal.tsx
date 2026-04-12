@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { X } from 'lucide-react';
 import { api, AppNotification } from '../services/api';
 
 interface NotificationsModalProps {
@@ -111,12 +112,12 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
             <button
               onClick={onClose}
               style={{
-                background: 'none', border: 'none', fontSize: '1.2rem',
+                background: 'none', border: 'none',
                 cursor: 'pointer', color: 'var(--text-secondary)', padding: '0.25rem',
-                lineHeight: 1,
+                lineHeight: 1, display: 'flex',
               }}
             >
-              ✕
+              <X size={18} />
             </button>
           </div>
         </div>

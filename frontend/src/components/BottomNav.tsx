@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useRef } from 'react';
+import { Home, Settings } from 'lucide-react';
 import QuickAddMenu from './QuickAddMenu';
 
 export default function BottomNav() {
@@ -70,7 +71,7 @@ export default function BottomNav() {
             padding: '4px 12px',
           }}
         >
-          <div style={{ fontSize: 20 }}>🏠</div>
+          <Home size={20} color={isHome ? 'var(--primary)' : 'var(--text-secondary)'} />
           <div style={{ fontSize: 9, color: isHome ? 'var(--primary)' : 'var(--text-secondary)', marginTop: 2 }}>Home</div>
         </button>
 
@@ -113,7 +114,7 @@ export default function BottomNav() {
             padding: '4px 12px',
           }}
         >
-          <div style={{ fontSize: 20 }}>⚙️</div>
+          <Settings size={20} color={isSettings ? 'var(--primary)' : 'var(--text-secondary)'} />
           <div style={{ fontSize: 9, color: isSettings ? 'var(--primary)' : 'var(--text-secondary)', marginTop: 2 }}>Settings</div>
         </button>
       </nav>
