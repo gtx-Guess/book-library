@@ -228,6 +228,31 @@ export default function HomePage() {
         <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>→</span>
       </div>
 
+      {/* Friends */}
+      {user?.role !== 'demo' && (
+        <div
+          onClick={() => navigate('/social')}
+          style={{
+            background: 'var(--surface)',
+            borderRadius: 10,
+            padding: '12px 14px',
+            border: '1px solid var(--border)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            cursor: 'pointer',
+            marginBottom: 12,
+            boxShadow: '0 1px 3px var(--shadow)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 16 }}>👥</span>
+            <span style={{ fontSize: 13, color: 'var(--text)' }}>Friends</span>
+          </div>
+          <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>→</span>
+        </div>
+      )}
+
       {/* Admin Dashboard */}
       {user?.role === 'admin' && (
         <button
