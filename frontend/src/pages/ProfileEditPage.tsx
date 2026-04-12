@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { ArrowLeft, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Search, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { api, UserProfile, Book } from '../services/api';
 import BookCover from '../components/BookCover';
 import { useAuth } from '../contexts/AuthContext';
@@ -158,18 +158,20 @@ export default function ProfileEditPage() {
             : `${favorites.length}/10 selected. Tap to toggle.`}
         </p>
         {favorites.length > 0 && (
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8, paddingTop: 12, marginBottom: '1rem' }}>
             {favorites.map((book) => (
-              <div key={book.id} onClick={() => toggleFavorite(book)} style={{ cursor: 'pointer', position: 'relative', flexShrink: 0 }}>
+              <div key={book.id} onClick={() => toggleFavorite(book)} style={{ cursor: 'pointer', position: 'relative', flexShrink: 0, overflow: 'visible' }}>
                 <BookCover src={book.coverImage} title={book.title} width={60} height={90} />
                 <div style={{
-                  position: 'absolute', top: -4, right: -4,
+                  position: 'absolute', top: -8, right: -8,
                   background: 'var(--danger)', color: 'white',
-                  width: 18, height: 18, borderRadius: '50%',
+                  width: 26, height: 26, borderRadius: '50%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 700,
+                  fontSize: 14, fontWeight: 700,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                  border: '2px solid var(--card-bg, #fff)',
                 }}>
-                  x
+                  <X size={14} />
                 </div>
               </div>
             ))}
