@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { api, FriendProfile, FriendStats, FavoritesResponse } from '../services/api';
 import BookCover from '../components/BookCover';
 import RatingDisplay from '../components/RatingDisplay';
@@ -74,10 +75,10 @@ export default function FriendProfilePage() {
       <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
         <button
           onClick={() => navigate('/social')}
-          style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-secondary)', padding: '0.25rem', lineHeight: 1 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: '0.25rem', lineHeight: 1 }}
           aria-label="Back"
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', margin: 0 }}>{displayName}</h1>
       </header>

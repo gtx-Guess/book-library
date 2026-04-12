@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { api, AllYearsStats } from '../services/api';
 import GoalProgressBar from '../components/GoalProgressBar';
 
@@ -43,13 +44,12 @@ export default function HistoryPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.75rem' }}>Reading History</h1>
       </div>

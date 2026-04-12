@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { api, CurrentlyReadingBook } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import BookCover from '../components/BookCover';
@@ -172,13 +173,12 @@ export default function CurrentlyReadingPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: '1.5rem' }}>

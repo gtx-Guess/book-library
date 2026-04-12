@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { api, YearlyStats } from '../services/api';
 import RatingDisplay from '../components/RatingDisplay';
 import BookCover from '../components/BookCover';
@@ -53,13 +54,12 @@ export default function YearDetailsPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <div style={{ flex: 1, textAlign: 'center', marginRight: '35pt'}}>
           <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>{yearNum}</h1>

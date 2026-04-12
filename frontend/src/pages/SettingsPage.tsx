@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { api, ImportSummary, SyncStatus } from '../services/api';
 // UserProfile type available from '../services/api' if needed
 import { useAuth } from '../contexts/AuthContext';
@@ -213,7 +214,6 @@ export default function SettingsPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             color: 'var(--text-secondary)',
             padding: '0.25rem',
@@ -221,7 +221,7 @@ export default function SettingsPage() {
           }}
           aria-label="Back"
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', margin: 0 }}>Settings</h1>
       </header>

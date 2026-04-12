@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Search } from 'lucide-react';
 import { api, GoogleBookResult } from '../services/api';
 import { getBookFromOpenLibrary } from '../services/openLibrary';
 import ConfirmBookModal from '../components/ConfirmBookModal';
@@ -203,13 +204,12 @@ export default function AddBookPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.5rem' }}>Add Book</h1>
       </div>
@@ -226,7 +226,7 @@ export default function AddBookPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? '...' : '🔍'}
+            {loading ? '...' : <Search size={16} />}
           </button>
         </div>
       </form>
