@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react';
 import { api, PlatformStats, AdminUser, AdminInviteCode, Announcement } from '../services/api';
 
 type Tab = 'stats' | 'users' | 'codes' | 'friends' | 'announcements';
@@ -150,9 +151,12 @@ export default function AdminPage() {
             cursor: 'pointer',
             padding: '0',
             marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
           }}
         >
-          ← Back
+          <ArrowLeft size={16} /> Back
         </button>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Admin Dashboard</h1>
       </header>
@@ -444,8 +448,8 @@ export default function AdminPage() {
                             {userFriends.length} friend{userFriends.length !== 1 ? 's' : ''}
                           </span>
                         </div>
-                        <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                          {isExpanded ? '▼' : '▶'}
+                        <span style={{ color: 'var(--text-secondary)' }}>
+                          {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         </span>
                       </div>
                       {isExpanded && (

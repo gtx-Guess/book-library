@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, BookX, Plus, Search, Pencil, ShoppingCart, ChevronDown } from 'lucide-react';
 import { api, DNFBook } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import BookCover from '../components/BookCover';
@@ -172,17 +173,16 @@ export default function DNFPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: '1.5rem' }}>
-            📕 Did Not Finish
+            <BookX size={22} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />Did Not Finish
           </h1>
           <p className="text-secondary" style={{ fontSize: '0.9rem', marginTop: '0.25rem' }}>
             {allBooks.length} {allBooks.length === 1 ? 'book' : 'books'}
@@ -191,9 +191,9 @@ export default function DNFPage() {
         <button
           className="btn btn-primary"
           onClick={() => navigate('/add-dnf')}
-          style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+          style={{ fontSize: '0.9rem', padding: '0.5rem 1rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}
         >
-          ➕ Add Book
+          <Plus size={14} /> Add Book
         </button>
       </div>
 
@@ -211,8 +211,8 @@ export default function DNFPage() {
             }}
             onClick={() => setShowFilters(!showFilters)}
           >
-            <h2 style={{ fontSize: '1rem', fontWeight: '600' }}>
-              🔍 Filters
+            <h2 style={{ fontSize: '1rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Search size={14} /> Filters
               {hasActiveFilters && (
                 <span
                   style={{
@@ -228,8 +228,8 @@ export default function DNFPage() {
                 </span>
               )}
             </h2>
-            <span style={{ fontSize: '1.5rem' }}>
-              {showFilters ? '▼' : '➕'}
+            <span>
+              {showFilters ? <ChevronDown size={16} /> : <Plus size={16} />}
             </span>
           </div>
 
@@ -369,7 +369,7 @@ export default function DNFPage() {
                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
                     title="Edit book details"
                   >
-                    ✏️
+                    <Pencil size={18} />
                   </button>
                 )}
 
@@ -421,7 +421,7 @@ export default function DNFPage() {
                             fontWeight: '500',
                           }}
                         >
-                          {dnfBook.willPurchase === 'yes' ? '🛒 Will Buy' :
+                          {dnfBook.willPurchase === 'yes' ? <><ShoppingCart size={12} style={{ marginRight: 3, verticalAlign: 'text-bottom' }} />Will Buy</> :
                            dnfBook.willPurchase === 'maybe' ? 'Maybe Buy' :
                            'Won\'t Buy'}
                         </span>

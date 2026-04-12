@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Plus, BookOpen } from 'lucide-react';
 import { api, YearlyStats } from '../services/api';
 
 export default function GoalDetailsPage() {
@@ -50,13 +51,12 @@ export default function GoalDetailsPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <div style={{ flex: 1, textAlign: 'center' }}>
           <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Goal Details</h1>
@@ -115,16 +115,16 @@ export default function GoalDetailsPage() {
             <button
               className="btn btn-primary btn-full"
               onClick={() => navigate(`/add?year=${currentYear}`)}
-              style={{ fontSize: '1.1rem', padding: '1rem' }}
+              style={{ fontSize: '1.1rem', padding: '1rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              ➕ Add Book
+              <Plus size={18} /> Add Book
             </button>
             <button
               className="btn btn-secondary btn-full"
               onClick={() => navigate(`/library/${currentYear}`)}
-              style={{ fontSize: '1.1rem', padding: '1rem' }}
+              style={{ fontSize: '1.1rem', padding: '1rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              📖 Library
+              <BookOpen size={18} /> Library
             </button>
           </div>
 

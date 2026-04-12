@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, HandMetal, Handshake, Megaphone, Bell } from 'lucide-react';
 import { api, AppNotification } from '../services/api';
 
 interface NotificationsModalProps {
@@ -70,10 +70,10 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
 
   const typeIcon = (type: string) => {
     switch (type) {
-      case 'FRIEND_REQUEST': return '👋';
-      case 'FRIEND_ACCEPTED': return '🤝';
-      case 'ANNOUNCEMENT': return '📢';
-      default: return '🔔';
+      case 'FRIEND_REQUEST': return <HandMetal size={14} />;
+      case 'FRIEND_ACCEPTED': return <Handshake size={14} />;
+      case 'ANNOUNCEMENT': return <Megaphone size={14} />;
+      default: return <Bell size={14} />;
     }
   };
 
@@ -130,7 +130,7 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
             </div>
           ) : notifications.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🔔</div>
+              <div style={{ marginBottom: 8 }}><Bell size={32} color="var(--text-secondary)" /></div>
               <p style={{ fontSize: '0.9rem' }}>No notifications yet</p>
             </div>
           ) : (

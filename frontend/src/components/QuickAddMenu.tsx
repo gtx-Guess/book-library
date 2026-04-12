@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { X, CheckCircle, BookOpen, ClipboardList, BookX } from 'lucide-react';
 
 interface QuickAddMenuProps {
   onClose: () => void;
@@ -9,10 +9,10 @@ interface QuickAddMenuProps {
 }
 
 const menuItems = [
-  { emoji: '✅', bg: '#064e3b', border: '#10b981', path: '/add', label: 'Mark as Finished' },
-  { emoji: '📖', bg: '#1e3a5f', border: '#3b82f6', path: '/add-currently-reading', label: 'Currently Reading' },
-  { emoji: '📋', bg: '#78350f', border: '#f59e0b', path: '/add-want-to-read', label: 'Want to Read' },
-  { emoji: '📕', bg: '#7f1d1d', border: '#ef4444', path: '/add-dnf', label: 'DNF' },
+  { icon: CheckCircle, bg: '#064e3b', border: '#10b981', path: '/add', label: 'Mark as Finished' },
+  { icon: BookOpen, bg: '#1e3a5f', border: '#3b82f6', path: '/add-currently-reading', label: 'Currently Reading' },
+  { icon: ClipboardList, bg: '#78350f', border: '#f59e0b', path: '/add-want-to-read', label: 'Want to Read' },
+  { icon: BookX, bg: '#7f1d1d', border: '#ef4444', path: '/add-dnf', label: 'DNF' },
 ];
 
 const radialPositions = [
@@ -83,7 +83,6 @@ export default function QuickAddMenu({ onClose, fabCenter }: QuickAddMenuProps) 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 26,
             cursor: 'pointer',
             boxShadow: '0 6px 24px rgba(0,0,0,0.6)',
             transform: visible ? 'scale(1)' : 'scale(0)',
@@ -93,7 +92,7 @@ export default function QuickAddMenu({ onClose, fabCenter }: QuickAddMenuProps) 
             padding: 0,
           }}
         >
-          {item.emoji}
+          <item.icon size={26} color="white" />
         </button>
       ))}
 

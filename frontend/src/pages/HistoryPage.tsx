@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BarChart3, Library, ChevronRight } from 'lucide-react';
 import { api, AllYearsStats } from '../services/api';
 import GoalProgressBar from '../components/GoalProgressBar';
 
@@ -60,8 +60,8 @@ export default function HistoryPage() {
       {data && (
         <>
           <div className="card mb-3" style={{ textAlign: 'center' }}>
-            <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              📊 All-Time Stats
+            <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <BarChart3 size={16} /> All-Time Stats
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div>
@@ -94,9 +94,9 @@ export default function HistoryPage() {
             <button
               className="btn btn-primary btn-full"
               onClick={() => navigate('/library/all')}
-              style={{ fontSize: '1.1rem', padding: '1rem' }}
+              style={{ fontSize: '1.1rem', padding: '1rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              📚 View Grand Library
+              <Library size={18} /> View Grand Library
             </button>
           </div>
 
@@ -141,8 +141,8 @@ export default function HistoryPage() {
                       </div>
                     )}
                   </div>
-                  <div style={{ fontSize: '1.5rem', color: 'var(--text-secondary)' }}>
-                    →
+                  <div style={{ color: 'var(--text-secondary)' }}>
+                    <ChevronRight size={20} />
                   </div>
                 </div>
               </div>

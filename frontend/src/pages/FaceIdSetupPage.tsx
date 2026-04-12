@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function FaceIdSetupPage() {
@@ -53,7 +54,7 @@ export default function FaceIdSetupPage() {
         padding: '2.5rem 2rem',
         textAlign: 'center',
       }}>
-        <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🔒</div>
+        <div style={{ marginBottom: '1rem' }}><Lock size={40} color="#6ee7b7" /></div>
         <h2 style={{
           fontSize: '1.5rem',
           fontWeight: 'bold',

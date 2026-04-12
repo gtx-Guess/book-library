@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft, Search, BookOpen } from 'lucide-react';
 import { api, GoogleBookResult } from '../services/api';
 import ConfirmCurrentlyReadingModal from '../components/ConfirmCurrentlyReadingModal';
 import ManualBookModal, { ManualBookData } from '../components/ManualBookModal';
@@ -211,7 +211,7 @@ export default function AddCurrentlyReadingPage() {
                     onClick={() => handleSelectBook(book)}
                     disabled={loadingBookId === book.id}
                   >
-                    {loadingBookId === book.id ? 'Loading...' : '📖 Add to Currently Reading'}
+                    {loadingBookId === book.id ? 'Loading...' : <><BookOpen size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />Add to Currently Reading</>}
                   </button>
                 </div>
               </div>

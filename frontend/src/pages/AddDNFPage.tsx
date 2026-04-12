@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Search, BookX } from 'lucide-react';
 import { api, GoogleBookResult } from '../services/api';
 import ConfirmDNFModal from '../components/ConfirmDNFModal';
 import ManualBookModal, { ManualBookData } from '../components/ManualBookModal';
@@ -137,13 +138,12 @@ export default function AddDNFPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '1.5rem',
             cursor: 'pointer',
             padding: '0.5rem',
             marginRight: '0.5rem',
           }}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1 style={{ fontSize: '1.5rem' }}>Add DNF Book</h1>
       </div>
@@ -160,7 +160,7 @@ export default function AddDNFPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? '...' : '🔍'}
+            {loading ? '...' : <Search size={16} />}
           </button>
         </div>
       </form>
@@ -209,7 +209,7 @@ export default function AddDNFPage() {
                     onClick={() => handleSelectBook(book)}
                     disabled={loadingBookId === book.id}
                   >
-                    {loadingBookId === book.id ? 'Loading...' : '➕ Add to DNF'}
+                    {loadingBookId === book.id ? 'Loading...' : <><BookX size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />Add to DNF</>}
                   </button>
                 </div>
               </div>

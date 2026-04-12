@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users, ChevronRight } from 'lucide-react';
 import { api, FriendInfo, FriendRequestInfo } from '../services/api';
 import BookCover from '../components/BookCover';
 import AddFriendModal from '../components/AddFriendModal';
@@ -119,7 +119,7 @@ export default function SocialPage() {
       {/* Friend List */}
       {friends.length === 0 && requests.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-secondary)' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>👥</div>
+          <div style={{ marginBottom: 12 }}><Users size={40} color="var(--text-secondary)" /></div>
           <p style={{ fontSize: '1rem', marginBottom: 4 }}>No friends yet</p>
           <p style={{ fontSize: '0.85rem' }}>Add friends with their friend code to see what they're reading.</p>
         </div>
@@ -163,7 +163,7 @@ export default function SocialPage() {
                     <div className="text-secondary" style={{ fontSize: '0.8rem', marginTop: 2 }}>No books yet</div>
                   )}
                 </div>
-                <span style={{ color: 'var(--text-secondary)', fontSize: 12, flexShrink: 0 }}>→</span>
+                <ChevronRight size={16} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
               </div>
             </div>
           ))}

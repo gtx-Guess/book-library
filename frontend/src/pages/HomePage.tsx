@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
-import { Bell, TrendingUp, Users, Shield } from 'lucide-react';
+import { Bell, TrendingUp, Users, Shield, Library, BookOpen, ClipboardList, BookX, HandMetal } from 'lucide-react';
 import BookCover from '../components/BookCover';
 import RatingDisplay from '../components/RatingDisplay';
 import NotificationsModal from '../components/NotificationsModal';
@@ -92,7 +92,7 @@ export default function HomePage() {
           </button>
         )}
         <h1 style={{ fontSize: '1.5rem', color: 'var(--text)', margin: 0 }}>
-          {user?.role === 'demo' ? 'Welcome! 👋' : `Welcome ${user?.username}!`}
+          {user?.role === 'demo' ? <><HandMetal size={18} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />Welcome!</> : `Welcome ${user?.username}!`}
         </h1>
         {user?.role === 'demo' && (
           <span style={{
@@ -222,10 +222,10 @@ export default function HomePage() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
         {[
-          { emoji: '📚', name: `${currentYear} Library`, count: stats?.booksRead || 0, path: `/library/${currentYear}` },
-          { emoji: '📖', name: 'Currently Reading', count: listCounts.currentlyReading, path: '/currently-reading' },
-          { emoji: '📋', name: 'Want to Read', count: listCounts.wantToRead, path: '/want-to-read' },
-          { emoji: '📕', name: 'DNF', count: listCounts.dnf, path: '/dnf' },
+          { icon: Library, name: `${currentYear} Library`, count: stats?.booksRead || 0, path: `/library/${currentYear}` },
+          { icon: BookOpen, name: 'Currently Reading', count: listCounts.currentlyReading, path: '/currently-reading' },
+          { icon: ClipboardList, name: 'Want to Read', count: listCounts.wantToRead, path: '/want-to-read' },
+          { icon: BookX, name: 'DNF', count: listCounts.dnf, path: '/dnf' },
         ].map((list) => (
           <div
             key={list.path}
@@ -239,7 +239,7 @@ export default function HomePage() {
               boxShadow: '0 1px 3px var(--shadow)',
             }}
           >
-            <div style={{ fontSize: 22, marginBottom: 6 }}>{list.emoji}</div>
+            <div style={{ marginBottom: 6 }}><list.icon size={22} color="var(--primary)" /></div>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{list.name}</div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{list.count} books</div>
           </div>
