@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import BookCover from '../components/BookCover';
 import RatingDisplay from '../components/RatingDisplay';
+import NotificationsModal from '../components/NotificationsModal';
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -13,6 +14,8 @@ export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
   const [listCounts, setListCounts] = useState({ currentlyReading: 0, wantToRead: 0, dnf: 0 });
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -29,6 +32,14 @@ export default function HomePage() {
           wantToRead: wtrBooks.length,
           dnf: dnfBooks.length,
         });
+        if (user?.role !== 'demo') {
+          try {
+            const { count } = await api.notifications.getUnreadCount();
+            setUnreadCount(count);
+          } catch (err) {
+            // Notifications are optional
+          }
+        }
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
       } finally {
@@ -49,7 +60,34 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '1rem' }}>
       {/* Header */}
-      <div style={{ marginBottom: 16, textAlign: 'center' }}>
+      <div style={{ marginBottom: 16, textAlign: 'center', position: 'relative' }}>
+        {user?.role !== 'demo' && (
+          <button
+            onClick={() => setShowNotifications(true)}
+            style={{
+              position: 'absolute', right: 0, top: 0,
+              background: 'none', border: 'none',
+              fontSize: '1.3rem', cursor: 'pointer',
+              padding: '0.25rem', lineHeight: 1,
+            }}
+            aria-label="Notifications"
+          >
+            🔔
+            {unreadCount > 0 && (
+              <span style={{
+                position: 'absolute', top: -4, right: -4,
+                background: '#ef4444', color: 'white',
+                fontSize: 10, fontWeight: 700,
+                minWidth: 16, height: 16,
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '0 4px',
+              }}>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+        )}
         <h1 style={{ fontSize: '1.5rem', color: 'var(--text)', margin: 0 }}>
           {user?.role === 'demo' ? 'Welcome! 👋' : `Welcome ${user?.username}!`}
         </h1>
@@ -252,6 +290,15 @@ export default function HomePage() {
         >
           🛡️ Admin Dashboard
         </button>
+      )}
+
+      {showNotifications && (
+        <NotificationsModal onClose={() => {
+          setShowNotifications(false);
+          if (user?.role !== 'demo') {
+            api.notifications.getUnreadCount().then(({ count }) => setUnreadCount(count)).catch(() => {});
+          }
+        }} />
       )}
     </div>
   );
