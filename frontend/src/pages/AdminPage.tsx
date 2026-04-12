@@ -519,6 +519,7 @@ export default function AdminPage() {
                   value={announcementTitle}
                   onChange={(e) => setAnnouncementTitle(e.target.value)}
                   style={{ marginBottom: '0.5rem' }}
+                  maxLength={100}
                 />
                 <textarea
                   className="input"
@@ -527,6 +528,7 @@ export default function AdminPage() {
                   onChange={(e) => setAnnouncementMessage(e.target.value)}
                   rows={3}
                   style={{ marginBottom: '0.5rem', resize: 'vertical' }}
+                  maxLength={500}
                 />
                 <button
                   className="btn btn-primary"

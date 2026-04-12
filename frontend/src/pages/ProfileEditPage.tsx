@@ -122,11 +122,11 @@ export default function ProfileEditPage() {
       <div className="card mb-3">
         <label style={{ display: 'block', marginBottom: '1rem' }}>
           <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Display Name</span>
-          <input className="input" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={profile?.username} />
+          <input className="input" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={profile?.username} maxLength={50} />
         </label>
         <label style={{ display: 'block', marginBottom: '1rem' }}>
           <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Bio</span>
-          <textarea className="input" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A short tagline about you..." rows={2} style={{ resize: 'vertical' }} />
+          <textarea className="input" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A short tagline about you..." rows={2} style={{ resize: 'vertical' }} maxLength={200} />
         </label>
         <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
           {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Profile'}

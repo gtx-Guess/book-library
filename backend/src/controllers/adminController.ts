@@ -183,20 +183,7 @@ export async function getAllInviteCodes(req: Request, res: Response) {
 
 export async function getFriendships(req: Request, res: Response) {
   try {
-    // Get all unique friendships (only one direction to avoid duplicates)
-    const friendships = await prisma.friendship.findMany({
-      where: {
-        userId: { lt: prisma.friendship.fields.friendId as any },
-      },
-      include: {
-        user: { select: { id: true, username: true, displayName: true } },
-        friend: { select: { id: true, username: true, displayName: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    // Fallback: if the field comparison doesn't work, deduplicate manually
-    // Get all friendships and deduplicate by sorting the pair
+    // Get all friendships and deduplicate (each friendship is stored bidirectionally)
     const all = await prisma.friendship.findMany({
       include: {
         user: { select: { id: true, username: true, displayName: true } },

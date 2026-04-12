@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import prisma from '../lib/prisma';
 
 export function generateFriendCode(): string {
-  return crypto.randomBytes(4).toString('hex');
+  return crypto.randomBytes(8).toString('hex');
 }
 
 export async function ensureProfile(userId: string) {

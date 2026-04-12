@@ -27,6 +27,10 @@ export async function addCompletedBook(req: Request, res: Response) {
       return res.status(400).json({ error: 'Title and completed date are required' });
     }
 
+    if (rating != null && (typeof rating !== 'number' || rating < 1 || rating > 10)) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 10' });
+    }
+
     const completedDateObj = new Date(completedDate);
     const year = completedDateObj.getUTCFullYear();
 
@@ -138,7 +142,12 @@ export async function updateCompletedBook(req: Request, res: Response) {
     if (link !== undefined) updateData.link = link || null;
     if (own !== undefined) updateData.own = own;
     if (willPurchase !== undefined) updateData.willPurchase = willPurchase;
-    if (rating !== undefined) updateData.rating = rating;
+    if (rating !== undefined) {
+      if (rating != null && (typeof rating !== 'number' || rating < 1 || rating > 10)) {
+        return res.status(400).json({ error: 'Rating must be between 1 and 10' });
+      }
+      updateData.rating = rating;
+    }
     if (completedDate !== undefined) {
       const parsed = new Date(completedDate);
       if (isNaN(parsed.getTime())) {
