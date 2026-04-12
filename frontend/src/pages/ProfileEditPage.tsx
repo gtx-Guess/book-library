@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api, UserProfile, Book } from '../services/api';
 import BookCover from '../components/BookCover';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,6 +21,9 @@ export default function ProfileEditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const booksPerPage = 20;
 
   useEffect(() => {
     async function loadData() {
@@ -28,7 +31,7 @@ export default function ProfileEditPage() {
         const [profileData, favData, allBooks] = await Promise.all([
           api.profile.getMe(),
           api.profile.getFavorites(),
-          api.getAllCompletedBooks(1, 100),
+          api.getAllCompletedBooks(1, 1000),
         ]);
         setProfile(profileData);
         setDisplayName(profileData.displayName || '');
@@ -60,6 +63,18 @@ export default function ProfileEditPage() {
       setSaving(false);
     }
   };
+
+  const filteredBooks = useMemo(() => {
+    if (!searchQuery.trim()) return completedBooks;
+    const q = searchQuery.toLowerCase();
+    return completedBooks.filter((item) =>
+      item.book.title.toLowerCase().includes(q) ||
+      item.book.authors?.some((a) => a.toLowerCase().includes(q))
+    );
+  }, [completedBooks, searchQuery]);
+
+  const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
+  const paginatedBooks = filteredBooks.slice((currentPage - 1) * booksPerPage, currentPage * booksPerPage);
 
   const isFavorite = (bookId: string) => favorites.some((f) => f.id === bookId);
 
@@ -163,8 +178,19 @@ export default function ProfileEditPage() {
         <div style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, fontWeight: 600 }}>
           Your Completed Books
         </div>
-        <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-          {completedBooks.map((item) => (
+        <div style={{ position: 'relative', marginBottom: 10 }}>
+          <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+          <input
+            className="input"
+            type="text"
+            placeholder="Search by title or author..."
+            value={searchQuery}
+            onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+            style={{ paddingLeft: 32 }}
+          />
+        </div>
+        <div>
+          {paginatedBooks.map((item) => (
             <div
               key={item.bookId}
               onClick={() => toggleFavorite(item.book)}
@@ -182,7 +208,33 @@ export default function ProfileEditPage() {
               {isFavorite(item.book.id) && <span style={{ color: 'var(--primary)', fontSize: 14 }}>✓</span>}
             </div>
           ))}
+          {filteredBooks.length === 0 && (
+            <p className="text-secondary" style={{ fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>
+              {searchQuery ? 'No books match your search.' : 'No completed books yet.'}
+            </p>
+          )}
         </div>
+        {totalPages > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 12 }}>
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              style={{ background: 'none', border: 'none', cursor: currentPage === 1 ? 'default' : 'pointer', color: currentPage === 1 ? 'var(--text-secondary)' : 'var(--primary)', padding: 4 }}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              style={{ background: 'none', border: 'none', cursor: currentPage === totalPages ? 'default' : 'pointer', color: currentPage === totalPages ? 'var(--text-secondary)' : 'var(--primary)', padding: 4 }}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
