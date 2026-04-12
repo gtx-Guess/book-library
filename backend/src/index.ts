@@ -14,6 +14,7 @@ import adminRouter from './routes/admin';
 import importRouter from './routes/import';
 import profileRouter from './routes/profile';
 import friendsRouter from './routes/friends';
+import notificationsRouter from './routes/notifications';
 
 dotenv.config();
 
@@ -97,6 +98,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/import', importRouter);
 app.use('/api/profile', profileRouter);
 app.use('/api/friends', friendsRouter);
+app.use('/api/notifications', notificationsRouter);
 
 app.listen(PORT, () => {
   console.log(`✅ Backend server running on port ${PORT}`);
