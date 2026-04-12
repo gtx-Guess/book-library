@@ -205,6 +205,8 @@ export default function HomePage() {
         ))}
       </div>
 
+      <div style={{ borderTop: '1px solid var(--border)', margin: '4px 0 12px' }} />
+
       {/* Reading History + Friends row */}
       <div style={{ display: 'grid', gridTemplateColumns: user?.role === 'demo' ? '1fr' : '1fr 1fr', gap: 8, marginBottom: 12 }}>
         <div
