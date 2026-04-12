@@ -570,6 +570,17 @@ export const api = {
     deactivateInviteCode: async (id: string): Promise<void> => {
       await axiosInstance.patch(`/admin/invite-codes/${id}/deactivate`);
     },
+    getFriendships: async (): Promise<Array<{ id: string; user: { id: string; username: string; displayName: string | null }; friend: { id: string; username: string; displayName: string | null }; createdAt: string }>> => {
+      const response = await axiosInstance.get('/admin/friendships');
+      return response.data;
+    },
+    createFriendship: async (userId: string, friendId: string): Promise<{ message: string }> => {
+      const response = await axiosInstance.post('/admin/friendships', { userId, friendId });
+      return response.data;
+    },
+    removeFriendship: async (userId: string, friendId: string): Promise<void> => {
+      await axiosInstance.delete(`/admin/friendships/${userId}/${friendId}`);
+    },
   },
 
   profile: {

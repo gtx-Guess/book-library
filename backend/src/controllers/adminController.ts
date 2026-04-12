@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -179,6 +180,124 @@ export async function getAllInviteCodes(req: Request, res: Response) {
   } catch (error) {
     console.error('Error fetching invite codes:', error);
     res.status(500).json({ error: 'Failed to fetch invite codes' });
+  }
+}
+
+export async function getFriendships(req: Request, res: Response) {
+  try {
+    // Get all unique friendships (only one direction to avoid duplicates)
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        userId: { lt: prisma.friendship.fields.friendId as any },
+      },
+      include: {
+        user: { select: { id: true, username: true, displayName: true } },
+        friend: { select: { id: true, username: true, displayName: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Fallback: if the field comparison doesn't work, deduplicate manually
+    // Get all friendships and deduplicate by sorting the pair
+    const all = await prisma.friendship.findMany({
+      include: {
+        user: { select: { id: true, username: true, displayName: true } },
+        friend: { select: { id: true, username: true, displayName: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const seen = new Set<string>();
+    const unique = all.filter((f) => {
+      const key = [f.userId, f.friendId].sort().join('-');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    res.json(unique.map((f) => ({
+      id: f.id,
+      user: f.user,
+      friend: f.friend,
+      createdAt: f.createdAt,
+    })));
+  } catch (error) {
+    console.error('Error fetching friendships:', error);
+    res.status(500).json({ error: 'Failed to fetch friendships' });
+  }
+}
+
+export async function adminCreateFriendship(req: Request, res: Response) {
+  try {
+    const { userId, friendId } = req.body;
+
+    if (!userId || !friendId) {
+      return res.status(400).json({ error: 'Both userId and friendId are required' });
+    }
+    if (userId === friendId) {
+      return res.status(400).json({ error: 'Cannot befriend a user with themselves' });
+    }
+
+    // Check both users exist
+    const [user, friend] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId }, select: { id: true, username: true } }),
+      prisma.user.findUnique({ where: { id: friendId }, select: { id: true, username: true } }),
+    ]);
+    if (!user || !friend) {
+      return res.status(404).json({ error: 'One or both users not found' });
+    }
+
+    // Check if already friends
+    const existing = await prisma.friendship.findUnique({
+      where: { userId_friendId: { userId, friendId } },
+    });
+    if (existing) {
+      return res.status(400).json({ error: 'These users are already friends' });
+    }
+
+    // Create bidirectional friendship
+    await prisma.friendship.createMany({
+      data: [
+        { userId, friendId },
+        { userId: friendId, friendId: userId },
+      ],
+      skipDuplicates: true,
+    });
+
+    // Ensure both users have profiles
+    for (const uid of [userId, friendId]) {
+      const profile = await prisma.userProfile.findUnique({ where: { userId: uid } });
+      if (!profile) {
+        await prisma.userProfile.create({
+          data: { userId: uid, friendCode: crypto.randomBytes(4).toString('hex') },
+        });
+      }
+    }
+
+    res.status(201).json({ message: `${user.username} and ${friend.username} are now friends` });
+  } catch (error) {
+    console.error('Error creating friendship:', error);
+    res.status(500).json({ error: 'Failed to create friendship' });
+  }
+}
+
+export async function adminRemoveFriendship(req: Request, res: Response) {
+  try {
+    const { userId, friendId } = req.params;
+
+    await prisma.friendship.deleteMany({
+      where: {
+        OR: [
+          { userId, friendId },
+          { userId: friendId, friendId: userId },
+        ],
+      },
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error removing friendship:', error);
+    res.status(500).json({ error: 'Failed to remove friendship' });
   }
 }
 

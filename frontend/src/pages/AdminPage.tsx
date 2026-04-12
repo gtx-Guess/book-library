@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, PlatformStats, AdminUser, AdminInviteCode } from '../services/api';
 
-type Tab = 'stats' | 'users' | 'codes';
+type Tab = 'stats' | 'users' | 'codes' | 'friends';
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -18,6 +18,12 @@ export default function AdminPage() {
   const [newPassword, setNewPassword] = useState('');
   const [resetMsg, setResetMsg] = useState('');
 
+  // Friendships state
+  const [friendships, setFriendships] = useState<Array<{ id: string; user: { id: string; username: string; displayName: string | null }; friend: { id: string; username: string; displayName: string | null }; createdAt: string }>>([]);
+  const [friendUser1, setFriendUser1] = useState('');
+  const [friendUser2, setFriendUser2] = useState('');
+  const [friendMsg, setFriendMsg] = useState('');
+
   useEffect(() => {
     loadData(activeTab);
   }, [activeTab]);
@@ -30,8 +36,15 @@ export default function AdminPage() {
         setStats(await api.admin.getStats());
       } else if (tab === 'users') {
         setUsers(await api.admin.getUsers());
-      } else {
+      } else if (tab === 'codes') {
         setCodes(await api.admin.getInviteCodes());
+      } else if (tab === 'friends') {
+        const [friendshipsData, usersData] = await Promise.all([
+          api.admin.getFriendships(),
+          api.admin.getUsers(),
+        ]);
+        setFriendships(friendshipsData);
+        setUsers(usersData);
       }
     } catch {
       setError('Failed to load data');
@@ -139,7 +152,8 @@ export default function AdminPage() {
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
         <button style={tabStyle('stats')} onClick={() => setActiveTab('stats')}>Stats</button>
         <button style={tabStyle('users')} onClick={() => setActiveTab('users')}>Users</button>
-        <button style={tabStyle('codes')} onClick={() => setActiveTab('codes')}>Invite Codes</button>
+        <button style={tabStyle('codes')} onClick={() => setActiveTab('codes')}>Codes</button>
+        <button style={tabStyle('friends')} onClick={() => setActiveTab('friends')}>Friends</button>
       </div>
 
       {error && <div className="error" style={{ marginBottom: '1rem' }}>{error}</div>}
@@ -297,6 +311,111 @@ export default function AdminPage() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Friends Tab */}
+          {activeTab === 'friends' && (
+            <div>
+              {/* Add Friendship */}
+              <div className="card" style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                  Add Friendship
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <select
+                    className="input"
+                    value={friendUser1}
+                    onChange={(e) => setFriendUser1(e.target.value)}
+                  >
+                    <option value="">Select first user...</option>
+                    {users.filter((u) => u.role !== 'demo' && u.id !== friendUser2).map((u) => (
+                      <option key={u.id} value={u.id}>{u.username}</option>
+                    ))}
+                  </select>
+                  <select
+                    className="input"
+                    value={friendUser2}
+                    onChange={(e) => setFriendUser2(e.target.value)}
+                  >
+                    <option value="">Select second user...</option>
+                    {users.filter((u) => u.role !== 'demo' && u.id !== friendUser1).map((u) => (
+                      <option key={u.id} value={u.id}>{u.username}</option>
+                    ))}
+                  </select>
+                  <button
+                    className="btn btn-primary"
+                    style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                    disabled={!friendUser1 || !friendUser2}
+                    onClick={async () => {
+                      setFriendMsg('');
+                      try {
+                        const result = await api.admin.createFriendship(friendUser1, friendUser2);
+                        setFriendMsg(result.message);
+                        setFriendUser1('');
+                        setFriendUser2('');
+                        setFriendships(await api.admin.getFriendships());
+                      } catch (err: any) {
+                        setFriendMsg(err.response?.data?.error || 'Failed to create friendship');
+                      }
+                    }}
+                  >
+                    Make Friends
+                  </button>
+                  {friendMsg && (
+                    <span style={{ fontSize: '0.85rem', color: friendMsg.includes('now friends') ? '#6ee7b7' : '#f87171' }}>
+                      {friendMsg}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Existing Friendships */}
+              <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                All Friendships ({friendships.length})
+              </h3>
+              {friendships.length === 0 ? (
+                <div className="card" style={{ textAlign: 'center' }}>
+                  <p className="text-secondary">No friendships yet.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {friendships.map((f) => (
+                    <div key={f.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <span style={{ fontWeight: 600 }}>{f.user.displayName || f.user.username}</span>
+                        <span className="text-secondary" style={{ margin: '0 0.5rem' }}>↔</span>
+                        <span style={{ fontWeight: 600 }}>{f.friend.displayName || f.friend.username}</span>
+                        <div className="text-secondary" style={{ fontSize: '0.75rem', marginTop: 2 }}>
+                          Since {formatDate(f.createdAt)}
+                        </div>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.admin.removeFriendship(f.user.id, f.friend.id);
+                            setFriendships((prev) => prev.filter((x) => x.id !== f.id));
+                          } catch {
+                            setError('Failed to remove friendship');
+                          }
+                        }}
+                        style={{
+                          background: 'none',
+                          border: '1px solid #7f1d1d',
+                          borderRadius: '6px',
+                          padding: '0.3rem 0.6rem',
+                          fontSize: '0.75rem',
+                          color: '#f87171',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
