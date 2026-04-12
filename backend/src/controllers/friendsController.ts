@@ -419,10 +419,18 @@ export async function getFriendStats(req: Request, res: Response) {
       checkShareLibrary(friendId),
     ]);
 
+    const goalData = goal
+      ? {
+          goalCount: goal.goalCount,
+          booksRead: booksThisYear,
+          progress: goal.goalCount > 0 ? Math.round((booksThisYear / goal.goalCount) * 100) : 0,
+        }
+      : null;
+
     if (!shareLibrary) {
       return res.json({
         shareLibrary: false,
-        goal: goal || null,
+        goal: goalData,
         lastBook: lastBook
           ? {
               title: lastBook.book.title,
@@ -444,7 +452,7 @@ export async function getFriendStats(req: Request, res: Response) {
 
     res.json({
       shareLibrary: true,
-      goal: goal || null,
+      goal: goalData,
       lastBook: lastBook
         ? {
             title: lastBook.book.title,
