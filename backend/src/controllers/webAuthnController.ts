@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
@@ -12,8 +11,7 @@ import type {
   AuthenticatorTransportFuture,
 } from '@simplewebauthn/server';
 import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
 const JWT_EXPIRES_IN = '7d';
 
@@ -190,6 +188,10 @@ export async function webAuthnAuthFinish(req: Request, res: Response) {
     const user = await prisma.user.findUnique({ where: { username } });
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (!user.isActive) {
+      return res.status(401).json({ error: 'Account is deactivated' });
     }
 
     const storedChallenge = await prisma.webAuthnChallenge.findFirst({

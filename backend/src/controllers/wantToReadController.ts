@@ -1,11 +1,33 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 export const getAllWantToReadBooks = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
+    const { page, limit } = req.query;
+
+    if (page && limit) {
+      const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20));
+      const skip = (pageNum - 1) * limitNum;
+
+      const [books, totalCount] = await Promise.all([
+        prisma.wantToReadBook.findMany({
+          where: { userId },
+          include: { book: true },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limitNum,
+        }),
+        prisma.wantToReadBook.count({ where: { userId } }),
+      ]);
+
+      return res.json({
+        books,
+        pagination: { page: pageNum, limit: limitNum, totalCount, totalPages: Math.ceil(totalCount / limitNum) },
+      });
+    }
+
     const books = await prisma.wantToReadBook.findMany({
       where: { userId },
       include: { book: true },

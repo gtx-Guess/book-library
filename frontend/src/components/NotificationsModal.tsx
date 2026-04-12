@@ -62,7 +62,7 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
         console.error('Failed to mark as read:', err);
       }
     }
-    if (notification.link) {
+    if (notification.link && notification.link.startsWith('/')) {
       onClose();
       navigate(notification.link);
     }

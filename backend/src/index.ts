@@ -18,6 +18,12 @@ import notificationsRouter from './routes/notifications';
 
 dotenv.config();
 
+// Require JWT_SECRET in production — never fall back to a hardcoded secret
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable is required in production');
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 

@@ -1,11 +1,33 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 export const getAllCurrentlyReadingBooks = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
+    const { page, limit } = req.query;
+
+    if (page && limit) {
+      const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20));
+      const skip = (pageNum - 1) * limitNum;
+
+      const [books, totalCount] = await Promise.all([
+        prisma.currentlyReadingBook.findMany({
+          where: { userId },
+          include: { book: true },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limitNum,
+        }),
+        prisma.currentlyReadingBook.count({ where: { userId } }),
+      ]);
+
+      return res.json({
+        books,
+        pagination: { page: pageNum, limit: limitNum, totalCount, totalPages: Math.ceil(totalCount / limitNum) },
+      });
+    }
+
     const books = await prisma.currentlyReadingBook.findMany({
       where: { userId },
       include: { book: true },
@@ -77,21 +99,21 @@ export const addCurrentlyReadingBook = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'This book is already in your "DNF list"' });
     }
 
-    // Remove from Want to Read list for this user
-    await prisma.wantToReadBook.deleteMany({
-      where: { bookId: book.id, userId },
-    });
+    const currentlyReadingBook = await prisma.$transaction(async (tx) => {
+      // Remove from Want to Read list atomically
+      await tx.wantToReadBook.deleteMany({ where: { bookId: book.id, userId } });
 
-    const currentlyReadingBook = await prisma.currentlyReadingBook.create({
-      data: {
-        bookId: book.id,
-        userId,
-        own: own !== undefined ? own : null,
-        willPurchase: willPurchase !== undefined ? willPurchase : null,
-        startedDate: startedDate ? new Date(startedDate) : null,
-        currentPage: currentPage !== undefined ? currentPage : null,
-      },
-      include: { book: true },
+      return tx.currentlyReadingBook.create({
+        data: {
+          bookId: book.id,
+          userId,
+          own: own !== undefined ? own : null,
+          willPurchase: willPurchase !== undefined ? willPurchase : null,
+          startedDate: startedDate ? new Date(startedDate) : null,
+          currentPage: currentPage !== undefined ? currentPage : null,
+        },
+        include: { book: true },
+      });
     });
 
     res.status(201).json(currentlyReadingBook);

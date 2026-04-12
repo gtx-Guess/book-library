@@ -17,7 +17,7 @@ services:
       - backend_node_modules:/app/node_modules
     environment:
       - NODE_ENV=development
-    command: ["sh", "-c", "npm ci && npx prisma generate && npx prisma migrate deploy && npm run prisma:seed && npm run dev"]
+    command: ["sh", "-c", "npm ci && npx prisma generate && npx prisma migrate deploy && npm run prisma:seed && npm run prisma:seed-dev && npm run dev"]
 
 volumes:
   frontend_node_modules:

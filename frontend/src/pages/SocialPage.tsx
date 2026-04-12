@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { ArrowLeft, Users, ChevronRight } from 'lucide-react';
 import { api, FriendInfo, FriendRequestInfo } from '../services/api';
 import BookCover from '../components/BookCover';
 import AddFriendModal from '../components/AddFriendModal';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function SocialPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  if (user?.role === 'demo') {
+    return <Navigate to="/" replace />;
+  }
   const [friends, setFriends] = useState<FriendInfo[]>([]);
   const [requests, setRequests] = useState<FriendRequestInfo[]>([]);
   const [loading, setLoading] = useState(true);

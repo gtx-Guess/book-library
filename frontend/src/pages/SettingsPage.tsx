@@ -334,7 +334,11 @@ export default function SettingsPage() {
               onClick={async () => {
                 const next = !shareLibrary;
                 setShareLibrary(next);
-                await api.profile.updateMe({ shareLibrary: next });
+                try {
+                  await api.profile.updateMe({ shareLibrary: next });
+                } catch {
+                  setShareLibrary(!next);
+                }
               }}
               style={{
                 width: 52, height: 28, borderRadius: 14,

@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react';
 import { api, PlatformStats, AdminUser, AdminInviteCode, Announcement } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 type Tab = 'stats' | 'users' | 'codes' | 'friends' | 'announcements';
 
 export default function AdminPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
   const [activeTab, setActiveTab] = useState<Tab>('stats');
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -513,6 +519,7 @@ export default function AdminPage() {
                   value={announcementTitle}
                   onChange={(e) => setAnnouncementTitle(e.target.value)}
                   style={{ marginBottom: '0.5rem' }}
+                  maxLength={100}
                 />
                 <textarea
                   className="input"
@@ -521,6 +528,7 @@ export default function AdminPage() {
                   onChange={(e) => setAnnouncementMessage(e.target.value)}
                   rows={3}
                   style={{ marginBottom: '0.5rem', resize: 'vertical' }}
+                  maxLength={500}
                 />
                 <button
                   className="btn btn-primary"

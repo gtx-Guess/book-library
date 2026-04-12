@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { api, UserProfile, Book } from '../services/api';
 import BookCover from '../components/BookCover';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProfileEditPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  if (user?.role === 'demo') {
+    return <Navigate to="/" replace />;
+  }
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
@@ -116,11 +122,11 @@ export default function ProfileEditPage() {
       <div className="card mb-3">
         <label style={{ display: 'block', marginBottom: '1rem' }}>
           <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Display Name</span>
-          <input className="input" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={profile?.username} />
+          <input className="input" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={profile?.username} maxLength={50} />
         </label>
         <label style={{ display: 'block', marginBottom: '1rem' }}>
           <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Bio</span>
-          <textarea className="input" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A short tagline about you..." rows={2} style={{ resize: 'vertical' }} />
+          <textarea className="input" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A short tagline about you..." rows={2} style={{ resize: 'vertical' }} maxLength={200} />
         </label>
         <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
           {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Profile'}

@@ -12,7 +12,7 @@ const STORAGE_KEY = 'addBookPage_searchState';
 export default function AddBookPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const targetYear = searchParams.get('year') ? parseInt(searchParams.get('year')!) : new Date().getFullYear();
+  const targetYear = parseInt(searchParams.get('year') || '', 10) || new Date().getFullYear();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<GoogleBookResult[]>([]);
   const [loading, setLoading] = useState(false);

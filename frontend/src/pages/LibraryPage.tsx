@@ -650,7 +650,7 @@ export default function LibraryPage() {
                     </div>
                     {(completedBook.link || ((completedBook.willPurchase === 'yes' || completedBook.willPurchase === 'maybe') && !completedBook.link)) && (
                       <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-                        {completedBook.link && (
+                        {completedBook.link && /^https?:\/\//i.test(completedBook.link) && (
                           <a
                             href={completedBook.link}
                             target="_blank"

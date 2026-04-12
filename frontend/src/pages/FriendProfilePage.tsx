@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { ArrowLeft, Library, BookOpen, ClipboardList, BookX } from 'lucide-react';
 import { api, FriendProfile, FriendStats, FavoritesResponse } from '../services/api';
 import BookCover from '../components/BookCover';
 import RatingDisplay from '../components/RatingDisplay';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function FriendProfilePage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  if (user?.role === 'demo') {
+    return <Navigate to="/" replace />;
+  }
   const { friendId } = useParams<{ friendId: string }>();
   const [profile, setProfile] = useState<FriendProfile | null>(null);
   const [stats, setStats] = useState<FriendStats | null>(null);
