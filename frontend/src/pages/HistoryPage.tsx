@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, AllYearsStats } from '../services/api';
+import GoalProgressBar from '../components/GoalProgressBar';
 
 export default function HistoryPage() {
   const navigate = useNavigate();
@@ -135,8 +136,8 @@ export default function HistoryPage() {
                       {yearData.booksRead} books • {yearData.totalPagesRead.toLocaleString()} pages
                     </div>
                     {yearData.hasGoal && (
-                      <div className="text-secondary" style={{ fontSize: '0.9rem' }}>
-                        Goal: {yearData.booksRead}/{yearData.goalCount} ({yearData.progress}%)
+                      <div style={{ marginTop: 4 }}>
+                        <GoalProgressBar booksRead={yearData.booksRead} goalCount={yearData.goalCount} compact />
                       </div>
                     )}
                   </div>
