@@ -64,11 +64,13 @@ export default function HomePage() {
         {user?.role !== 'demo' && (
           <button
             onClick={() => setShowNotifications(true)}
+            className={unreadCount > 0 ? 'bell-shake' : ''}
             style={{
               position: 'absolute', right: 0, top: 0,
               background: 'none', border: 'none',
-              fontSize: '1.3rem', cursor: 'pointer',
+              fontSize: 20, cursor: 'pointer',
               padding: '0.25rem', lineHeight: 1,
+              transformOrigin: 'top center',
             }}
             aria-label="Notifications"
           >
