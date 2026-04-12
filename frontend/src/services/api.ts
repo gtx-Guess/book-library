@@ -308,6 +308,24 @@ export interface FavoritesResponse {
   books: Book[];
 }
 
+export interface AppNotification {
+  id: string;
+  type: 'FRIEND_REQUEST' | 'FRIEND_ACCEPTED' | 'ANNOUNCEMENT';
+  title: string;
+  message: string;
+  read: boolean;
+  link?: string;
+  createdAt: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  message: string;
+  createdBy: string;
+  createdAt: string;
+}
+
 export const api = {
   auth: {
     login: async (username: string, password: string): Promise<{ token: string; user: AuthUser }> => {
@@ -581,6 +599,17 @@ export const api = {
     removeFriendship: async (userId: string, friendId: string): Promise<void> => {
       await axiosInstance.delete(`/admin/friendships/${userId}/${friendId}`);
     },
+    getAnnouncements: async (): Promise<Announcement[]> => {
+      const response = await axiosInstance.get('/admin/announcements');
+      return response.data;
+    },
+    createAnnouncement: async (data: { title: string; message: string }): Promise<Announcement> => {
+      const response = await axiosInstance.post('/admin/announcements', data);
+      return response.data;
+    },
+    deleteAnnouncement: async (id: string): Promise<void> => {
+      await axiosInstance.delete(`/admin/announcements/${id}`);
+    },
   },
 
   profile: {
@@ -662,6 +691,23 @@ export const api = {
     getFavorites: async (friendId: string): Promise<FavoritesResponse> => {
       const response = await axiosInstance.get(`/friends/${friendId}/library/favorites`);
       return response.data;
+    },
+  },
+
+  notifications: {
+    getAll: async (): Promise<AppNotification[]> => {
+      const response = await axiosInstance.get('/notifications');
+      return response.data;
+    },
+    getUnreadCount: async (): Promise<{ count: number }> => {
+      const response = await axiosInstance.get('/notifications/unread-count');
+      return response.data;
+    },
+    markAsRead: async (id: string): Promise<void> => {
+      await axiosInstance.patch(`/notifications/${id}/read`);
+    },
+    markAllAsRead: async (): Promise<void> => {
+      await axiosInstance.patch('/notifications/read-all');
     },
   },
 };
