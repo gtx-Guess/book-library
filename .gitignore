@@ -21,6 +21,30 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.playwright/
+.playwright-cli/
+coverage/
+*.lcov
+
+# TypeScript
+*.tsbuildinfo
+
+# Docker
+*.pid
+
+# Images (screenshots, mockups)
+*.png
+*.jpg
+*.jpeg
+
 # Claude Code
 .claude/
 docs/superpowers/
