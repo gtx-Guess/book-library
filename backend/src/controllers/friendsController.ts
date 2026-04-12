@@ -494,7 +494,7 @@ export async function getFriendFavorites(req: Request, res: Response) {
     });
 
     if (manualFavorites.length > 0) {
-      return res.json({ source: 'manual', books: manualFavorites });
+      return res.json({ source: 'manual', books: manualFavorites.map((f) => f.book) });
     }
 
     // Fall back to top 5 by rating
@@ -505,7 +505,7 @@ export async function getFriendFavorites(req: Request, res: Response) {
       take: 5,
     });
 
-    res.json({ source: 'rating', books: topRated });
+    res.json({ source: 'auto', books: topRated.map((cb) => cb.book) });
   } catch (error) {
     console.error('Error fetching friend favorites:', error);
     res.status(500).json({ error: 'Failed to fetch friend favorites' });
