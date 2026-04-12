@@ -4,6 +4,7 @@ import { api, CurrentlyReadingBook } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import BookCover from '../components/BookCover';
 import ConfirmBookModal from '../components/ConfirmBookModal';
+import GoalProgressBar from '../components/GoalProgressBar';
 
 export default function CurrentlyReadingPage() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function CurrentlyReadingPage() {
   const [filterAuthor, setFilterAuthor] = useState('');
   const [filterPublisher, setFilterPublisher] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [goalData, setGoalData] = useState<{ hasGoal: boolean; booksRead: number; goalCount: number } | null>(null);
 
   useEffect(() => {
     loadBooks();
@@ -25,6 +27,13 @@ export default function CurrentlyReadingPage() {
       setLoading(true);
       const data = await api.getAllCurrentlyReadingBooks();
       setAllBooks(data);
+      try {
+        const currentYear = new Date().getFullYear();
+        const stats = await api.getStats(currentYear);
+        setGoalData({ hasGoal: stats.hasGoal, booksRead: stats.booksRead, goalCount: stats.goalCount });
+      } catch (err) {
+        // Goal data is optional
+      }
     } catch (err) {
       setError('Failed to load currently reading books');
       console.error(err);
@@ -187,6 +196,21 @@ export default function CurrentlyReadingPage() {
           ➕ Add Book
         </button>
       </div>
+
+      {goalData?.hasGoal && (
+        <div style={{
+          background: 'var(--surface)',
+          borderRadius: 10,
+          padding: '10px 14px',
+          border: '1px solid var(--border)',
+          marginBottom: '1rem',
+        }}>
+          <div style={{ fontSize: 10, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, fontWeight: 600 }}>
+            {new Date().getFullYear()} Reading Goal
+          </div>
+          <GoalProgressBar booksRead={goalData.booksRead} goalCount={goalData.goalCount} compact />
+        </div>
+      )}
 
       {error && <div className="error">{error}</div>}
 
