@@ -26,6 +26,12 @@ model User {
   webAuthnCreds         WebAuthnCredential[]
   webAuthnChallenges    WebAuthnChallenge[]
   createdInvites        InviteCode[] @relation("InviteCodeCreator")
+  profile              UserProfile?
+  favoriteBooks        FavoriteBook[]
+  friendships          Friendship[]     @relation("UserFriendships")
+  friendOf             Friendship[]     @relation("FriendOf")
+  sentFriendRequests   FriendRequest[]  @relation("SentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
 }
 
 model InviteCode {
@@ -86,6 +92,7 @@ model Book {
   dnfBooks              DNFBook[]
   wantToReadBooks       WantToReadBook[]
   currentlyReadingBooks CurrentlyReadingBook[]
+  favoritedBy          FavoriteBook[]
 }
 
 model CompletedBook {
@@ -162,4 +169,54 @@ model CurrentlyReadingBook {
   createdAt    DateTime  @default(now())
 
   @@index([userId])
+}
+
+model UserProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio          String?
+  avatarUrl    String?
+  shareLibrary Boolean  @default(true)
+  friendCode   String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FavoriteBook {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  order  Int
+
+  @@unique([userId, bookId])
+  @@index([userId])
+}
+
+model Friendship {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("UserFriendships", fields: [userId], references: [id], onDelete: Cascade)
+  friendId  String
+  friend    User     @relation("FriendOf", fields: [friendId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+}
+
+model FriendRequest {
+  id         String   @id @default(cuid())
+  senderId   String
+  sender     User     @relation("SentFriendRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedFriendRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  status     String   @default("PENDING") // PENDING, ACCEPTED, DECLINED
+  createdAt  DateTime @default(now())
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId])
 }
