@@ -12,6 +12,8 @@ import currentlyReadingRouter from './routes/currentlyReading';
 import authRouter from './routes/auth';
 import adminRouter from './routes/admin';
 import importRouter from './routes/import';
+import profileRouter from './routes/profile';
+import friendsRouter from './routes/friends';
 
 dotenv.config();
 
@@ -93,6 +95,8 @@ app.use('/api/want-to-read', wantToReadRouter);
 app.use('/api/currently-reading', currentlyReadingRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/import', importRouter);
+app.use('/api/profile', profileRouter);
+app.use('/api/friends', friendsRouter);
 
 app.listen(PORT, () => {
   console.log(`✅ Backend server running on port ${PORT}`);

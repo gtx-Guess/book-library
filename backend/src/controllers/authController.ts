@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import { generateFriendCode } from './profileController';
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
@@ -102,6 +103,29 @@ export async function register(req: Request, res: Response) {
 
       return newUser;
     });
+
+    // Auto-friend: connect new user with the invite code creator
+    try {
+      // Create profile for new user with friend code
+      await prisma.userProfile.create({
+        data: {
+          userId: user.id,
+          friendCode: generateFriendCode(),
+        },
+      });
+
+      // Create bidirectional friendship with invite creator
+      await prisma.friendship.createMany({
+        data: [
+          { userId: user.id, friendId: invite.creatorId },
+          { userId: invite.creatorId, friendId: user.id },
+        ],
+        skipDuplicates: true,
+      });
+    } catch (autoFriendError) {
+      // Non-critical: log but don't fail registration
+      console.error('Auto-friend setup failed:', autoFriendError);
+    }
 
     const token = jwt.sign(
       { userId: user.id, username: user.username, role: user.role },
