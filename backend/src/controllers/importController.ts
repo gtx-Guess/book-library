@@ -126,7 +126,8 @@ export async function importGoodReads(req: Request, res: Response) {
       const publisher = (row['Publisher'] || '').trim() || null;
       const publishedDate = (row['Year Published'] || '').trim() || null;
       const ratingRaw = parseInt(row['My Rating'], 10);
-      const rating = ratingRaw > 0 ? ratingRaw : null;
+      // GoodReads uses 1-5 scale; convert to app's 1-10 scale
+      const rating = ratingRaw > 0 ? ratingRaw * 2 : null;
 
       // Upsert Book — find by case-insensitive title + exact author list match
       let book = await prisma.book.findFirst({
