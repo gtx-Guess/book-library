@@ -20,6 +20,10 @@ import RegisterPage from './pages/RegisterPage';
 import InviteCodesPage from './pages/InviteCodesPage';
 import AdminPage from './pages/AdminPage';
 import SettingsPage from './pages/SettingsPage';
+import SocialPage from './pages/SocialPage';
+import FriendProfilePage from './pages/FriendProfilePage';
+import FriendLibraryPage from './pages/FriendLibraryPage';
+import ProfileEditPage from './pages/ProfileEditPage';
 
 function App() {
   return (
@@ -46,6 +50,10 @@ function App() {
             <Route path="/invite-codes" element={<InviteCodesPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/social" element={<SocialPage />} />
+            <Route path="/friends/:friendId" element={<FriendProfilePage />} />
+            <Route path="/friends/:friendId/:listType" element={<FriendLibraryPage />} />
+            <Route path="/profile/edit" element={<ProfileEditPage />} />
           </Route>
         </Routes>
       </Router>

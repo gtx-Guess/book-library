@@ -181,7 +181,7 @@ export default function HomePage() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
         {[
-          { emoji: '📚', name: 'Library', count: stats?.booksRead || 0, path: `/library/${currentYear}` },
+          { emoji: '📚', name: `${currentYear} Library`, count: stats?.booksRead || 0, path: `/library/${currentYear}` },
           { emoji: '📖', name: 'Currently Reading', count: listCounts.currentlyReading, path: '/currently-reading' },
           { emoji: '📋', name: 'Want to Read', count: listCounts.wantToRead, path: '/want-to-read' },
           { emoji: '📕', name: 'DNF', count: listCounts.dnf, path: '/dnf' },
@@ -205,27 +205,42 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* Reading History */}
-      <div
-        onClick={() => navigate('/history')}
-        style={{
-          background: 'var(--surface)',
-          borderRadius: 10,
-          padding: '12px 14px',
-          border: '1px solid var(--border)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          cursor: 'pointer',
-          marginBottom: 12,
-          boxShadow: '0 1px 3px var(--shadow)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 16 }}>📈</span>
-          <span style={{ fontSize: 13, color: 'var(--text)' }}>Reading History</span>
+      <div style={{ borderTop: '1px solid var(--border)', margin: '4px 0 12px' }} />
+
+      {/* Reading History + Friends row */}
+      <div style={{ display: 'grid', gridTemplateColumns: user?.role === 'demo' ? '1fr' : '1fr 1fr', gap: 8, marginBottom: 12 }}>
+        <div
+          onClick={() => navigate('/history')}
+          style={{
+            background: 'var(--surface)',
+            borderRadius: 10,
+            padding: 14,
+            border: '1px solid var(--border)',
+            cursor: 'pointer',
+            boxShadow: '0 1px 3px var(--shadow)',
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: 22, marginBottom: 6 }}>📈</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Reading History</div>
         </div>
-        <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>→</span>
+        {user?.role !== 'demo' && (
+          <div
+            onClick={() => navigate('/social')}
+            style={{
+              background: 'var(--surface)',
+              borderRadius: 10,
+              padding: 14,
+              border: '1px solid var(--border)',
+              cursor: 'pointer',
+              boxShadow: '0 1px 3px var(--shadow)',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 22, marginBottom: 6 }}>👥</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Friends</div>
+          </div>
+        )}
       </div>
 
       {/* Admin Dashboard */}

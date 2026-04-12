@@ -237,6 +237,77 @@ export interface AdminInviteCode {
   usedByUsernames: string[];
 }
 
+export interface UserProfile {
+  id: string;
+  userId: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  shareLibrary: boolean;
+  friendCode: string;
+  displayName: string | null;
+  username: string;
+}
+
+export interface FriendInfo {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  shareLibrary: boolean;
+  lastBook: {
+    title: string;
+    coverImage: string | null;
+    completedDate: string;
+    rating: number | null;
+  } | null;
+  friendSince: string;
+}
+
+export interface FriendRequestInfo {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  status: string;
+  createdAt: string;
+  sender: {
+    id: string;
+    username: string;
+    displayName: string | null;
+  };
+}
+
+export interface FriendProfile {
+  id: string;
+  username: string;
+  displayName: string | null;
+  bio: string | null;
+  avatarUrl: string | null;
+  shareLibrary: boolean;
+}
+
+export interface FriendStats {
+  shareLibrary: boolean;
+  booksThisYear?: number;
+  totalBooks?: number;
+  pagesThisYear?: number;
+  goal: {
+    goalCount: number;
+    booksRead: number;
+    progress: number;
+  } | null;
+  lastBook: {
+    title: string;
+    coverImage: string | null;
+    completedDate: string;
+    rating: number | null;
+  } | null;
+}
+
+export interface FavoritesResponse {
+  source: 'manual' | 'auto';
+  books: Book[];
+}
+
 export const api = {
   auth: {
     login: async (username: string, password: string): Promise<{ token: string; user: AuthUser }> => {
@@ -498,6 +569,99 @@ export const api = {
     },
     deactivateInviteCode: async (id: string): Promise<void> => {
       await axiosInstance.patch(`/admin/invite-codes/${id}/deactivate`);
+    },
+    getFriendships: async (): Promise<Array<{ id: string; user: { id: string; username: string; displayName: string | null }; friend: { id: string; username: string; displayName: string | null }; createdAt: string }>> => {
+      const response = await axiosInstance.get('/admin/friendships');
+      return response.data;
+    },
+    createFriendship: async (userId: string, friendId: string): Promise<{ message: string }> => {
+      const response = await axiosInstance.post('/admin/friendships', { userId, friendId });
+      return response.data;
+    },
+    removeFriendship: async (userId: string, friendId: string): Promise<void> => {
+      await axiosInstance.delete(`/admin/friendships/${userId}/${friendId}`);
+    },
+  },
+
+  profile: {
+    getMe: async (): Promise<UserProfile> => {
+      const response = await axiosInstance.get('/profile/me');
+      return response.data;
+    },
+    updateMe: async (data: { displayName?: string; bio?: string; shareLibrary?: boolean }): Promise<UserProfile> => {
+      const response = await axiosInstance.patch('/profile/me', data);
+      return response.data;
+    },
+    getFriendCode: async (): Promise<{ friendCode: string }> => {
+      const response = await axiosInstance.get('/profile/friend-code');
+      return response.data;
+    },
+    regenerateFriendCode: async (): Promise<{ friendCode: string }> => {
+      const response = await axiosInstance.post('/profile/regenerate-friend-code');
+      return response.data;
+    },
+    getFriend: async (userId: string): Promise<FriendProfile> => {
+      const response = await axiosInstance.get(`/profile/${userId}`);
+      return response.data;
+    },
+    getFavorites: async (): Promise<FavoritesResponse> => {
+      const response = await axiosInstance.get('/profile/favorites');
+      return response.data;
+    },
+    setFavorites: async (bookIds: string[]): Promise<FavoritesResponse> => {
+      const response = await axiosInstance.put('/profile/favorites', { bookIds });
+      return response.data;
+    },
+    clearFavorites: async (): Promise<void> => {
+      await axiosInstance.delete('/profile/favorites');
+    },
+  },
+
+  friends: {
+    getAll: async (): Promise<FriendInfo[]> => {
+      const response = await axiosInstance.get('/friends');
+      return response.data;
+    },
+    sendRequest: async (friendCode: string): Promise<FriendRequestInfo> => {
+      const response = await axiosInstance.post('/friends/request', { friendCode });
+      return response.data;
+    },
+    getPendingRequests: async (): Promise<FriendRequestInfo[]> => {
+      const response = await axiosInstance.get('/friends/requests');
+      return response.data;
+    },
+    acceptRequest: async (id: string): Promise<void> => {
+      await axiosInstance.post(`/friends/requests/${id}/accept`);
+    },
+    declineRequest: async (id: string): Promise<void> => {
+      await axiosInstance.post(`/friends/requests/${id}/decline`);
+    },
+    remove: async (friendId: string): Promise<void> => {
+      await axiosInstance.delete(`/friends/${friendId}`);
+    },
+    getCompleted: async (friendId: string, page: number = 1, limit: number = 20): Promise<PaginatedBooks> => {
+      const response = await axiosInstance.get(`/friends/${friendId}/library/completed`, { params: { page, limit } });
+      return response.data;
+    },
+    getCurrentlyReading: async (friendId: string): Promise<CurrentlyReadingBook[]> => {
+      const response = await axiosInstance.get(`/friends/${friendId}/library/currently-reading`);
+      return response.data;
+    },
+    getDNF: async (friendId: string): Promise<DNFBook[]> => {
+      const response = await axiosInstance.get(`/friends/${friendId}/library/dnf`);
+      return response.data;
+    },
+    getWantToRead: async (friendId: string): Promise<WantToReadBook[]> => {
+      const response = await axiosInstance.get(`/friends/${friendId}/library/want-to-read`);
+      return response.data;
+    },
+    getStats: async (friendId: string): Promise<FriendStats> => {
+      const response = await axiosInstance.get(`/friends/${friendId}/library/stats`);
+      return response.data;
+    },
+    getFavorites: async (friendId: string): Promise<FavoritesResponse> => {
+      const response = await axiosInstance.get(`/friends/${friendId}/library/favorites`);
+      return response.data;
     },
   },
 };

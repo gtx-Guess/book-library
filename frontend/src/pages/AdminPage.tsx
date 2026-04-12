@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, PlatformStats, AdminUser, AdminInviteCode } from '../services/api';
 
-type Tab = 'stats' | 'users' | 'codes';
+type Tab = 'stats' | 'users' | 'codes' | 'friends';
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -18,6 +18,13 @@ export default function AdminPage() {
   const [newPassword, setNewPassword] = useState('');
   const [resetMsg, setResetMsg] = useState('');
 
+  // Friendships state
+  const [friendships, setFriendships] = useState<Array<{ id: string; user: { id: string; username: string; displayName: string | null }; friend: { id: string; username: string; displayName: string | null }; createdAt: string }>>([]);
+  const [friendUser1, setFriendUser1] = useState('');
+  const [friendUser2s, setFriendUser2s] = useState<string[]>([]);
+  const [friendMsg, setFriendMsg] = useState('');
+  const [expandedUser, setExpandedUser] = useState<string | null>(null);
+
   useEffect(() => {
     loadData(activeTab);
   }, [activeTab]);
@@ -30,8 +37,15 @@ export default function AdminPage() {
         setStats(await api.admin.getStats());
       } else if (tab === 'users') {
         setUsers(await api.admin.getUsers());
-      } else {
+      } else if (tab === 'codes') {
         setCodes(await api.admin.getInviteCodes());
+      } else if (tab === 'friends') {
+        const [friendshipsData, usersData] = await Promise.all([
+          api.admin.getFriendships(),
+          api.admin.getUsers(),
+        ]);
+        setFriendships(friendshipsData);
+        setUsers(usersData);
       }
     } catch {
       setError('Failed to load data');
@@ -139,7 +153,8 @@ export default function AdminPage() {
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
         <button style={tabStyle('stats')} onClick={() => setActiveTab('stats')}>Stats</button>
         <button style={tabStyle('users')} onClick={() => setActiveTab('users')}>Users</button>
-        <button style={tabStyle('codes')} onClick={() => setActiveTab('codes')}>Invite Codes</button>
+        <button style={tabStyle('codes')} onClick={() => setActiveTab('codes')}>Codes</button>
+        <button style={tabStyle('friends')} onClick={() => setActiveTab('friends')}>Friends</button>
       </div>
 
       {error && <div className="error" style={{ marginBottom: '1rem' }}>{error}</div>}
@@ -297,6 +312,176 @@ export default function AdminPage() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Friends Tab */}
+          {activeTab === 'friends' && (
+            <div>
+              {/* Add Friendships */}
+              <div className="card" style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                  Add Friends
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <select
+                    className="input"
+                    value={friendUser1}
+                    onChange={(e) => { setFriendUser1(e.target.value); setFriendUser2s([]); }}
+                  >
+                    <option value="">Select user...</option>
+                    {users.filter((u) => u.role !== 'demo').map((u) => (
+                      <option key={u.id} value={u.id}>{u.username}</option>
+                    ))}
+                  </select>
+                  {friendUser1 && (
+                    <>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 4 }}>
+                        Add as friends with:
+                      </div>
+                      <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 6, padding: '0.25rem 0' }}>
+                        {users
+                          .filter((u) => u.role !== 'demo' && u.id !== friendUser1)
+                          .filter((u) => {
+                            // Hide users who are already friends
+                            const existingFriends = friendships
+                              .filter((f) => f.user.id === friendUser1 || f.friend.id === friendUser1)
+                              .map((f) => f.user.id === friendUser1 ? f.friend.id : f.user.id);
+                            return !existingFriends.includes(u.id);
+                          })
+                          .map((u) => (
+                            <label
+                              key={u.id}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                padding: '0.4rem 0.75rem', cursor: 'pointer',
+                                background: friendUser2s.includes(u.id) ? 'var(--border)' : 'transparent',
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={friendUser2s.includes(u.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFriendUser2s((prev) => [...prev, u.id]);
+                                  } else {
+                                    setFriendUser2s((prev) => prev.filter((id) => id !== u.id));
+                                  }
+                                }}
+                              />
+                              <span style={{ fontSize: '0.9rem' }}>{u.username}</span>
+                            </label>
+                          ))}
+                      </div>
+                      <button
+                        className="btn btn-primary"
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                        disabled={friendUser2s.length === 0}
+                        onClick={async () => {
+                          setFriendMsg('');
+                          const results: string[] = [];
+                          for (const fid of friendUser2s) {
+                            try {
+                              const result = await api.admin.createFriendship(friendUser1, fid);
+                              results.push(result.message);
+                            } catch (err: any) {
+                              results.push(err.response?.data?.error || 'Failed');
+                            }
+                          }
+                          setFriendMsg(results.join(', '));
+                          setFriendUser2s([]);
+                          setFriendships(await api.admin.getFriendships());
+                        }}
+                      >
+                        Add {friendUser2s.length} friend{friendUser2s.length !== 1 ? 's' : ''}
+                      </button>
+                    </>
+                  )}
+                  {friendMsg && (
+                    <span style={{ fontSize: '0.85rem', color: friendMsg.includes('now friends') ? '#6ee7b7' : '#f87171' }}>
+                      {friendMsg}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Users with friend lists */}
+              <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                Users
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {users.filter((u) => u.role !== 'demo').map((u) => {
+                  const userFriends = friendships
+                    .filter((f) => f.user.id === u.id || f.friend.id === u.id)
+                    .map((f) => ({
+                      friendshipId: f.id,
+                      friend: f.user.id === u.id ? f.friend : f.user,
+                      createdAt: f.createdAt,
+                    }));
+                  const isExpanded = expandedUser === u.id;
+
+                  return (
+                    <div key={u.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                      <div
+                        onClick={() => setExpandedUser(isExpanded ? null : u.id)}
+                        style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          padding: '0.75rem 1rem', cursor: 'pointer',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontWeight: 600 }}>{u.username}</span>
+                          <span className="text-secondary" style={{ fontSize: '0.8rem' }}>
+                            {userFriends.length} friend{userFriends.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                          {isExpanded ? '▼' : '▶'}
+                        </span>
+                      </div>
+                      {isExpanded && (
+                        <div style={{ borderTop: '1px solid var(--border)', padding: '0.5rem 1rem' }}>
+                          {userFriends.length === 0 ? (
+                            <p className="text-secondary" style={{ fontSize: '0.85rem', margin: '0.25rem 0' }}>No friends yet</p>
+                          ) : (
+                            userFriends.map((uf) => (
+                              <div key={uf.friendshipId} style={{
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                padding: '0.35rem 0', borderBottom: '1px solid var(--border)',
+                              }}>
+                                <div>
+                                  <span style={{ fontSize: '0.9rem' }}>{uf.friend.displayName || uf.friend.username}</span>
+                                  <span className="text-secondary" style={{ fontSize: '0.75rem', marginLeft: '0.5rem' }}>
+                                    since {formatDate(uf.createdAt)}
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      await api.admin.removeFriendship(u.id, uf.friend.id);
+                                      setFriendships(await api.admin.getFriendships());
+                                    } catch {
+                                      setError('Failed to remove friendship');
+                                    }
+                                  }}
+                                  style={{
+                                    background: 'none', border: 'none',
+                                    fontSize: '0.75rem', color: '#f87171',
+                                    cursor: 'pointer', padding: '0.2rem 0.4rem',
+                                  }}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
