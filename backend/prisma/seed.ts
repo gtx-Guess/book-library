@@ -483,13 +483,13 @@ async function main() {
       year: 2026,
     },
     {
-      googleBooksId: 'k_IPYgSCIMkC',
-      title: 'The Great Gatsby',
-      authors: ['F. Scott Fitzgerald'],
-      description: 'The story of the mysteriously wealthy Jay Gatsby and his love for Daisy Buchanan.',
-      coverImage: 'http://books.google.com/books/content?id=k_IPYgSCIMkC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
-      pageCount: 180,
-      publishedDate: '1925-04-10',
+      googleBooksId: 'lFkBDgAAQBAJ',
+      title: 'The Silent Patient',
+      authors: ['Alex Michaelides'],
+      description: 'A woman shoots her husband and then never speaks another word. A criminal psychotherapist becomes obsessed with uncovering her motive.',
+      coverImage: 'http://books.google.com/books/content?id=lFkBDgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
+      pageCount: 336,
+      publishedDate: '2019-02-05',
       categories: ['Fiction'],
       completedDate: new Date('2026-02-20'),
       rating: 4,
@@ -556,13 +556,13 @@ async function main() {
   // Seed Marcus's completed books
   const marcusBooks = [
     {
-      googleBooksId: 'sazytgAACAAJ',
+      googleBooksId: 'B1hSG45JCX4C',
       title: 'Dune',
       authors: ['Frank Herbert'],
       description: 'Set on the desert planet Arrakis, Dune is the story of Paul Atreides.',
-      coverImage: 'http://books.google.com/books/content?id=sazytgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
-      pageCount: 688,
-      publishedDate: '1965-08-01',
+      coverImage: 'http://books.google.com/books/content?id=B1hSG45JCX4C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
+      pageCount: 687,
+      publishedDate: '2005-08-02',
       categories: ['Fiction'],
       completedDate: new Date('2026-01-28'),
       rating: 5,
@@ -615,14 +615,14 @@ async function main() {
 
   // Marcus's DNF
   const marcusDnfBook = {
-    googleBooksId: 'aYkEzgEACAAJ',
-    title: 'Finnegans Wake',
-    authors: ['James Joyce'],
-    description: 'Joyce\'s final work, famous for its experimental style.',
-    coverImage: 'http://books.google.com/books/content?id=aYkEzgEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
-    pageCount: 628,
-    publishedDate: '1939-05-04',
-    categories: ['Fiction'],
+    googleBooksId: 'LuZ1zN4MXJYC',
+    title: 'A Brief History of Time',
+    authors: ['Stephen Hawking'],
+    description: 'A landmark volume in science writing exploring the big bang, black holes, and the nature of time.',
+    coverImage: 'http://books.google.com/books/content?id=LuZ1zN4MXJYC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
+    pageCount: 212,
+    publishedDate: '1998-09-01',
+    categories: ['Science'],
   };
   const marcusDnf = await prisma.book.upsert({
     where: { googleBooksId: marcusDnfBook.googleBooksId },
