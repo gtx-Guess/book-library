@@ -37,7 +37,7 @@ backend/
 frontend/
   src/
     pages/         # HomePage, LoginPage, RegisterPage, AdminPage, LibraryPage, SettingsPage, CurrentlyReadingPage, AddCurrentlyReadingPage, SocialPage, FriendProfilePage, FriendLibraryPage, ProfileEditPage, etc.
-    components/    # ProtectedRoute, BookCover, ImportSummaryModal, ConfirmCurrentlyReadingModal, AddFriendModal, modals, etc.
+    components/    # ProtectedRoute, BottomNav, QuickAddMenu, BookCover, ImportSummaryModal, ConfirmCurrentlyReadingModal, AddFriendModal, modals, etc.
     contexts/      # AuthContext (user state, login/logout/register)
     services/      # api.ts (axios instance, all API calls), openLibrary.ts
 ```
@@ -50,21 +50,27 @@ frontend/
 - Admin routes use `authenticate` + `requireAdmin` middleware chain
 - Social routes use `authenticate` + `requireNonDemo` middleware chain
 - Backend `CMD` in Dockerfile runs `prisma migrate deploy` + `prisma db seed` on every container start
+- **Navigation:** Persistent `BottomNav` component rendered inside `ProtectedRoute` on all authenticated pages (Home, Quick Add +, Settings). The + button opens a `QuickAddMenu` radial burst overlay with `createPortal` for the close button (escapes stacking context for backdrop blur).
+- **Theming:** Light/dark mode via CSS variables on `:root` / `:root[data-theme="dark"]`. Toggle in Settings, persisted in localStorage, initialized in `index.html` before React loads to prevent flash.
 - **Social/Friends:** User profiles (bio, friend code, favorites, share library toggle). Friend connections via friend codes or admin panel. Auto-friend on invite-code registration. Friends can browse each other's libraries (read-only). Privacy toggle hides library, showing only goal + last book. Admin can manage friendships (create/remove) for any users via the Friends tab in admin dashboard.
 
 ## Running Locally
 ```bash
-docker compose up --build -d
+make dev
 ```
 Frontend: `localhost:4000` | Backend: `localhost:4001` | pgAdmin: `localhost:5050`
+
+Use `make clean` to nuke Docker volumes and rebuild from scratch (fixes stale `node_modules` issues).
 
 ## Database
 - `DATABASE_URL` is set in docker-compose.yml, not in `.env`
 - To run Prisma commands locally: `DATABASE_URL="postgresql://booktracker:booktracker_password@localhost:5432/booktracker" npx prisma ...`
 - Migrations auto-apply on container start
 
-## Navigation
+## UI Architecture
+- **Login page** — hero bookshelf illustration (CSS book spines), form section below. Dark themed standalone page.
+- **Dashboard (HomePage)** — consolidated stats card (pages read, last book finished, goal progress), 2x2 "Your Lists" grid (year-specific library, Currently Reading, Want to Read, DNF), divider, then Reading History + Friends tiles side by side. Admin Dashboard button for admins.
 - **Bottom nav bar** — persistent on all authenticated pages: Home, Quick Add (+), Settings. The + opens a radial burst menu with 4 icon bubbles (Finished, Currently Reading, Want to Read, DNF) and backdrop blur scrim.
-- **Dashboard (HomePage)** — consolidated stats card, 2x2 "Your Lists" grid (year-specific library, Currently Reading, Want to Read, DNF), divider, then Reading History + Friends tiles side by side. Admin Dashboard button for admins.
-- **Settings page** — appearance toggle, reading goal, edit profile, friend code, share library toggle, security, invite codes, GoodReads import, metadata sync, sign out.
+- **Settings page** — appearance toggle (light/dark), reading goal, edit profile, friend code, share library toggle, Face ID/security, invite codes, GoodReads import, metadata sync, sign out.
 - **Social pages** — `/social` (friend list + requests), `/friends/:friendId` (profile), `/friends/:friendId/:listType` (read-only library), `/profile/edit` (edit own profile + favorites).
+- **Sub-pages** — back arrow for navigation, no home icon (home is in bottom nav).
