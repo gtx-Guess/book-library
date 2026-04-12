@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, PlatformStats, AdminUser, AdminInviteCode } from '../services/api';
+import { api, PlatformStats, AdminUser, AdminInviteCode, Announcement } from '../services/api';
 
-type Tab = 'stats' | 'users' | 'codes' | 'friends';
+type Tab = 'stats' | 'users' | 'codes' | 'friends' | 'announcements';
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -25,6 +25,12 @@ export default function AdminPage() {
   const [friendMsg, setFriendMsg] = useState('');
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
 
+  // Announcements state
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [announcementTitle, setAnnouncementTitle] = useState('');
+  const [announcementMessage, setAnnouncementMessage] = useState('');
+  const [announcementMsg, setAnnouncementMsg] = useState('');
+
   useEffect(() => {
     loadData(activeTab);
   }, [activeTab]);
@@ -46,6 +52,8 @@ export default function AdminPage() {
         ]);
         setFriendships(friendshipsData);
         setUsers(usersData);
+      } else if (tab === 'announcements') {
+        setAnnouncements(await api.admin.getAnnouncements());
       }
     } catch {
       setError('Failed to load data');
@@ -155,6 +163,7 @@ export default function AdminPage() {
         <button style={tabStyle('users')} onClick={() => setActiveTab('users')}>Users</button>
         <button style={tabStyle('codes')} onClick={() => setActiveTab('codes')}>Codes</button>
         <button style={tabStyle('friends')} onClick={() => setActiveTab('friends')}>Friends</button>
+        <button style={tabStyle('announcements')} onClick={() => setActiveTab('announcements')}>Announce</button>
       </div>
 
       {error && <div className="error" style={{ marginBottom: '1rem' }}>{error}</div>}
@@ -482,6 +491,111 @@ export default function AdminPage() {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Announcements Tab */}
+          {activeTab === 'announcements' && (
+            <div>
+              {/* Create Announcement */}
+              <div className="card" style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                  Create Announcement
+                </h3>
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="Title"
+                  value={announcementTitle}
+                  onChange={(e) => setAnnouncementTitle(e.target.value)}
+                  style={{ marginBottom: '0.5rem' }}
+                />
+                <textarea
+                  className="input"
+                  placeholder="Message"
+                  value={announcementMessage}
+                  onChange={(e) => setAnnouncementMessage(e.target.value)}
+                  rows={3}
+                  style={{ marginBottom: '0.5rem', resize: 'vertical' }}
+                />
+                <button
+                  className="btn btn-primary"
+                  style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                  disabled={!announcementTitle.trim() || !announcementMessage.trim()}
+                  onClick={async () => {
+                    try {
+                      await api.admin.createAnnouncement({
+                        title: announcementTitle.trim(),
+                        message: announcementMessage.trim(),
+                      });
+                      setAnnouncementTitle('');
+                      setAnnouncementMessage('');
+                      setAnnouncementMsg('Announcement sent to all users!');
+                      setAnnouncements(await api.admin.getAnnouncements());
+                      setTimeout(() => setAnnouncementMsg(''), 3000);
+                    } catch {
+                      setAnnouncementMsg('Failed to create announcement');
+                    }
+                  }}
+                >
+                  Send to All Users
+                </button>
+                {announcementMsg && (
+                  <span style={{
+                    display: 'block', marginTop: '0.5rem', fontSize: '0.85rem',
+                    color: announcementMsg.includes('sent') ? '#6ee7b7' : '#f87171',
+                  }}>
+                    {announcementMsg}
+                  </span>
+                )}
+              </div>
+
+              {/* Past Announcements */}
+              <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                Past Announcements
+              </h3>
+              {announcements.length === 0 ? (
+                <div className="card" style={{ textAlign: 'center' }}>
+                  <p className="text-secondary">No announcements yet.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {announcements.map((a) => (
+                    <div key={a.id} className="card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 600, fontSize: '1rem', marginBottom: '0.25rem' }}>
+                            {a.title}
+                          </div>
+                          <p className="text-secondary" style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                            {a.message}
+                          </p>
+                          <span className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                            {formatDate(a.createdAt)}
+                          </span>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.admin.deleteAnnouncement(a.id);
+                              setAnnouncements((prev) => prev.filter((ann) => ann.id !== a.id));
+                            } catch {
+                              setError('Failed to delete announcement');
+                            }
+                          }}
+                          style={{
+                            background: 'none', border: 'none',
+                            fontSize: '0.75rem', color: '#f87171',
+                            cursor: 'pointer', padding: '0.2rem 0.4rem',
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
