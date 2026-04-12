@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 export async function getPlatformStats(req: Request, res: Response) {
   try {

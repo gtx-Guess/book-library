@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { api, UserProfile, Book } from '../services/api';
 import BookCover from '../components/BookCover';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProfileEditPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  if (user?.role === 'demo') {
+    return <Navigate to="/" replace />;
+  }
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');

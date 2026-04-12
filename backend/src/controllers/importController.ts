@@ -1,20 +1,29 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { Readable } from 'stream';
 import csv from 'csv-parser';
+import prisma from '../lib/prisma';
 import { searchBooks } from '../services/googleBooks';
 import { randomUUID } from 'crypto';
-
-const prisma = new PrismaClient();
 
 interface SyncJob {
   userId: string;
   status: 'running' | 'completed' | 'failed';
   total: number;
   processed: number;
+  createdAt: number;
 }
 
 const syncJobs = new Map<string, SyncJob>();
+const SYNC_JOB_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+function cleanupSyncJobs() {
+  const now = Date.now();
+  for (const [id, job] of syncJobs) {
+    if (now - job.createdAt > SYNC_JOB_TTL_MS) {
+      syncJobs.delete(id);
+    }
+  }
+}
 
 const KNOWN_SHELVES = new Set(['read', 'did-not-finish', 'currently-reading', 'to-read']);
 
@@ -157,6 +166,11 @@ export async function importGoodReads(req: Request, res: Response) {
         const completedDate = dateRead || dateAdded || new Date();
         const year = completedDate.getUTCFullYear();
 
+        // Remove from other lists before adding to completed
+        await prisma.dNFBook.deleteMany({ where: { bookId, userId } });
+        await prisma.wantToReadBook.deleteMany({ where: { bookId, userId } });
+        await prisma.currentlyReadingBook.deleteMany({ where: { bookId, userId } });
+
         await prisma.completedBook.create({
           data: {
             bookId,
@@ -178,6 +192,19 @@ export async function importGoodReads(req: Request, res: Response) {
           continue;
         }
 
+        // Skip if already completed (completed takes priority)
+        const existingCompleted = await prisma.completedBook.findFirst({
+          where: { userId, bookId },
+        });
+        if (existingCompleted) {
+          summary.skipped.duplicates++;
+          continue;
+        }
+
+        // Remove from other lists
+        await prisma.wantToReadBook.deleteMany({ where: { bookId, userId } });
+        await prisma.currentlyReadingBook.deleteMany({ where: { bookId, userId } });
+
         await prisma.dNFBook.create({
           data: { bookId, userId },
         });
@@ -189,6 +216,15 @@ export async function importGoodReads(req: Request, res: Response) {
           where: { userId, bookId },
         });
         if (existing) {
+          summary.skipped.duplicates++;
+          continue;
+        }
+
+        // Skip if already on a higher-priority list
+        const existingCompleted = await prisma.completedBook.findFirst({ where: { userId, bookId } });
+        const existingDnf = await prisma.dNFBook.findFirst({ where: { userId, bookId } });
+        const existingCr = await prisma.currentlyReadingBook.findFirst({ where: { userId, bookId } });
+        if (existingCompleted || existingDnf || existingCr) {
           summary.skipped.duplicates++;
           continue;
         }
@@ -207,6 +243,16 @@ export async function importGoodReads(req: Request, res: Response) {
           summary.skipped.duplicates++;
           continue;
         }
+
+        // Skip if already completed (completed takes priority)
+        const existingCompleted = await prisma.completedBook.findFirst({ where: { userId, bookId } });
+        if (existingCompleted) {
+          summary.skipped.duplicates++;
+          continue;
+        }
+
+        // Remove from want-to-read (currently-reading supersedes it)
+        await prisma.wantToReadBook.deleteMany({ where: { bookId, userId } });
 
         await prisma.currentlyReadingBook.create({
           data: { bookId, userId },
@@ -231,6 +277,10 @@ export async function importGoodReads(req: Request, res: Response) {
 
 export async function startSync(req: Request, res: Response) {
   try {
+    if (req.user!.role === 'demo') {
+      return res.status(403).json({ error: 'Sync is not available for demo accounts' });
+    }
+
     const userId = req.user!.id;
     const { bookIds } = req.body as { bookIds: string[] };
 
@@ -239,11 +289,13 @@ export async function startSync(req: Request, res: Response) {
     }
 
     const syncId = randomUUID();
+    cleanupSyncJobs();
     const job: SyncJob = {
       userId,
       status: 'running',
       total: bookIds.length,
       processed: 0,
+      createdAt: Date.now(),
     };
 
     syncJobs.set(syncId, job);
@@ -299,12 +351,14 @@ export async function syncAll(req: Request, res: Response) {
       return res.json({ syncId: null, message: 'All books already have metadata', total: 0 });
     }
 
+    cleanupSyncJobs();
     const syncId = randomUUID();
     const job: SyncJob = {
       userId,
       status: 'running',
       total: bookIds.length,
       processed: 0,
+      createdAt: Date.now(),
     };
 
     syncJobs.set(syncId, job);

@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 // ─── Helper Functions ───────────────────────────────────────────────
 
@@ -46,13 +44,15 @@ export async function getFriends(req: Request, res: Response) {
           orderBy: { completedDate: 'desc' },
         });
 
+        const shareLibrary = profile?.shareLibrary ?? true;
+
         return {
           id: f.friend.id,
           username: f.friend.username,
           displayName: f.friend.displayName,
           avatarUrl: profile?.avatarUrl || null,
-          shareLibrary: profile?.shareLibrary ?? true,
-          lastBook: lastCompleted
+          shareLibrary,
+          lastBook: shareLibrary && lastCompleted
             ? {
                 title: lastCompleted.book.title,
                 coverImage: lastCompleted.book.coverImage,
@@ -282,13 +282,26 @@ export async function removeFriend(req: Request, res: Response) {
     const userId = req.user!.id;
     const { friendId } = req.params;
 
-    await prisma.friendship.deleteMany({
-      where: {
-        OR: [
-          { userId, friendId },
-          { userId: friendId, friendId: userId },
-        ],
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.friendship.deleteMany({
+        where: {
+          OR: [
+            { userId, friendId },
+            { userId: friendId, friendId: userId },
+          ],
+        },
+      });
+
+      // Clean up accepted friend requests so re-friending works
+      await tx.friendRequest.deleteMany({
+        where: {
+          status: 'ACCEPTED',
+          OR: [
+            { senderId: userId, receiverId: friendId },
+            { senderId: friendId, receiverId: userId },
+          ],
+        },
+      });
     });
 
     res.status(204).send();
@@ -316,8 +329,8 @@ export async function getFriendCompleted(req: Request, res: Response) {
       return res.status(403).json({ error: 'This user has disabled library sharing' });
     }
 
-    const pageNum = parseInt(page as string, 10);
-    const limitNum = parseInt(limit as string, 10);
+    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20));
     const skip = (pageNum - 1) * limitNum;
 
     const [completedBooks, totalCount] = await Promise.all([

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { api, FriendProfile } from '../services/api';
 import BookCover from '../components/BookCover';
 import RatingDisplay from '../components/RatingDisplay';
+import { useAuth } from '../contexts/AuthContext';
 
 type ListType = 'completed' | 'currently-reading' | 'dnf' | 'want-to-read';
 
@@ -15,7 +16,12 @@ const LIST_TITLES: Record<ListType, string> = {
 };
 
 export default function FriendLibraryPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  if (user?.role === 'demo') {
+    return <Navigate to="/" replace />;
+  }
   const { friendId, listType } = useParams<{ friendId: string; listType: string }>();
   const [books, setBooks] = useState<any[]>([]);
   const [friendProfile, setFriendProfile] = useState<FriendProfile | null>(null);

@@ -1,11 +1,9 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import prisma from '../lib/prisma';
 import { generateFriendCode } from './profileController';
-
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
 const JWT_EXPIRES_IN = '7d';
 
@@ -24,6 +22,10 @@ export async function login(req: Request, res: Response) {
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (!user.isActive) {
+      return res.status(401).json({ error: 'Account is deactivated' });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.passwordHash);

@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 export function generateFriendCode(): string {
   return crypto.randomBytes(4).toString('hex');

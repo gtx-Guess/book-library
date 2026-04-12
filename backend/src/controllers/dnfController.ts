@@ -1,11 +1,33 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 export async function getAllDNFBooks(req: Request, res: Response) {
   try {
     const userId = req.user!.id;
+    const { page, limit } = req.query;
+
+    if (page && limit) {
+      const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20));
+      const skip = (pageNum - 1) * limitNum;
+
+      const [books, totalCount] = await Promise.all([
+        prisma.dNFBook.findMany({
+          where: { userId },
+          include: { book: true },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limitNum,
+        }),
+        prisma.dNFBook.count({ where: { userId } }),
+      ]);
+
+      return res.json({
+        books,
+        pagination: { page: pageNum, limit: limitNum, totalCount, totalPages: Math.ceil(totalCount / limitNum) },
+      });
+    }
+
     const dnfBooks = await prisma.dNFBook.findMany({
       where: { userId },
       include: { book: true },
@@ -67,23 +89,20 @@ export async function addDNFBook(req: Request, res: Response) {
       });
     }
 
-    // Remove from Want to Read list for this user
-    await prisma.wantToReadBook.deleteMany({
-      where: { bookId: book.id, userId },
-    });
+    const dnfBook = await prisma.$transaction(async (tx) => {
+      // Remove from other lists atomically
+      await tx.wantToReadBook.deleteMany({ where: { bookId: book.id, userId } });
+      await tx.currentlyReadingBook.deleteMany({ where: { bookId: book.id, userId } });
 
-    await prisma.currentlyReadingBook.deleteMany({
-      where: { bookId: book.id, userId },
-    });
-
-    const dnfBook = await prisma.dNFBook.create({
-      data: {
-        bookId: book.id,
-        userId,
-        own: own !== undefined ? own : null,
-        willPurchase: willPurchase !== undefined ? willPurchase : null,
-      },
-      include: { book: true },
+      return tx.dNFBook.create({
+        data: {
+          bookId: book.id,
+          userId,
+          own: own !== undefined ? own : null,
+          willPurchase: willPurchase !== undefined ? willPurchase : null,
+        },
+        include: { book: true },
+      });
     });
 
     res.status(201).json(dnfBook);

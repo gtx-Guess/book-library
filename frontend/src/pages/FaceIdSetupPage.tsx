@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function FaceIdSetupPage() {
   const { registerFaceId, user } = useAuth();
   const navigate = useNavigate();
+
+  if (user?.role === 'demo') {
+    return <Navigate to="/" replace />;
+  }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

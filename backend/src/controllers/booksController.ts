@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { searchBooks, getBookById } from '../services/googleBooks';
-
-const prisma = new PrismaClient();
 
 export async function searchBooksFromAPI(req: Request, res: Response) {
   try {
@@ -30,7 +28,7 @@ export async function addCompletedBook(req: Request, res: Response) {
     }
 
     const completedDateObj = new Date(completedDate);
-    const year = completedDateObj.getFullYear();
+    const year = completedDateObj.getUTCFullYear();
 
     let book = googleBooksId
       ? await prisma.book.findUnique({ where: { googleBooksId } })
@@ -52,34 +50,42 @@ export async function addCompletedBook(req: Request, res: Response) {
       });
     }
 
-    const completedBook = await prisma.completedBook.create({
-      data: {
-        bookId: book.id,
-        userId,
-        completedDate: completedDateObj,
-        year,
-        pageCount: pageCount || null,
-        rating: rating || null,
-        own: own !== undefined ? own : null,
-        willPurchase: willPurchase !== undefined ? willPurchase : null,
-        link: link || null,
-      },
-      include: {
-        book: true,
-      },
-    });
-
-    // Remove from DNF and Want to Read lists for this user
-    await prisma.dNFBook.deleteMany({
+    // Check for duplicate in completed list
+    const existingCompleted = await prisma.completedBook.findFirst({
       where: { bookId: book.id, userId },
     });
 
-    await prisma.wantToReadBook.deleteMany({
-      where: { bookId: book.id, userId },
-    });
+    if (existingCompleted) {
+      return res.status(400).json({
+        error: 'This book is already in your completed list',
+        year: existingCompleted.year,
+      });
+    }
 
-    await prisma.currentlyReadingBook.deleteMany({
-      where: { bookId: book.id, userId },
+    const completedBook = await prisma.$transaction(async (tx) => {
+      const created = await tx.completedBook.create({
+        data: {
+          bookId: book.id,
+          userId,
+          completedDate: completedDateObj,
+          year,
+          pageCount: pageCount || null,
+          rating: rating != null ? rating : null,
+          own: own !== undefined ? own : null,
+          willPurchase: willPurchase !== undefined ? willPurchase : null,
+          link: link || null,
+        },
+        include: {
+          book: true,
+        },
+      });
+
+      // Remove from other lists atomically
+      await tx.dNFBook.deleteMany({ where: { bookId: book.id, userId } });
+      await tx.wantToReadBook.deleteMany({ where: { bookId: book.id, userId } });
+      await tx.currentlyReadingBook.deleteMany({ where: { bookId: book.id, userId } });
+
+      return created;
     });
 
     res.status(201).json(completedBook);
@@ -139,7 +145,7 @@ export async function updateCompletedBook(req: Request, res: Response) {
         return res.status(400).json({ error: 'Invalid completedDate' });
       }
       updateData.completedDate = parsed;
-      updateData.year = parsed.getFullYear();
+      updateData.year = parsed.getUTCFullYear();
     }
     if (pageCount !== undefined) {
       if (pageCount !== null && (typeof pageCount !== 'number' || !Number.isInteger(pageCount) || pageCount < 1)) {
@@ -189,8 +195,8 @@ export async function getAllCompletedBooks(req: Request, res: Response) {
   try {
     const userId = req.user!.id;
     const { page = '1', limit = '20' } = req.query;
-    const pageNum = parseInt(page as string, 10);
-    const limitNum = parseInt(limit as string, 10);
+    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20));
     const skip = (pageNum - 1) * limitNum;
 
     const [completedBooks, totalCount] = await Promise.all([
