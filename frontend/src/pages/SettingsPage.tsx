@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, ImportSummary, SyncStatus } from '../services/api';
+// UserProfile type available from '../services/api' if needed
 import { useAuth } from '../contexts/AuthContext';
 import ImportSummaryModal from '../components/ImportSummaryModal';
 
@@ -30,6 +31,9 @@ export default function SettingsPage() {
   const [hasWebAuthn, setHasWebAuthn] = useState(false);
   const [inviteCodeCount, setInviteCodeCount] = useState(0);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [friendCode, setFriendCode] = useState('');
+  const [shareLibrary, setShareLibrary] = useState(true);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   // Clean up polling on unmount
   useEffect(() => {
@@ -61,6 +65,16 @@ export default function SettingsPage() {
           setInviteCodeCount(activeCount);
         } catch (err) {
           console.error('Failed to load invite codes:', err);
+        }
+      }
+
+      if (user?.role !== 'demo') {
+        try {
+          const profile = await api.profile.getMe();
+          setFriendCode(profile.friendCode);
+          setShareLibrary(profile.shareLibrary);
+        } catch (err) {
+          console.error('Failed to load profile:', err);
         }
       }
 
@@ -251,6 +265,95 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
+
+      {/* Edit Profile */}
+      {!isDemo && (
+        <div className="card mb-3">
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+            👤 Profile
+          </h2>
+          <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+            Set your display name, bio, and favorite books.
+          </p>
+          <button className="btn btn-secondary" onClick={() => navigate('/profile/edit')}>
+            Edit Profile
+          </button>
+        </div>
+      )}
+
+      {/* Friend Code */}
+      {!isDemo && (
+        <div className="card mb-3">
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+            🔗 Friend Code
+          </h2>
+          <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+            Share this code with friends so they can add you.
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <code style={{
+              flex: 1,
+              background: 'var(--border)',
+              padding: '0.6rem 0.75rem',
+              borderRadius: '0.5rem',
+              fontSize: '1rem',
+              fontWeight: 600,
+              letterSpacing: 1,
+              color: 'var(--text)',
+            }}>
+              {friendCode || '...'}
+            </code>
+            <button
+              className="btn btn-primary"
+              style={{ padding: '0.6rem 1rem', whiteSpace: 'nowrap' }}
+              onClick={() => {
+                navigator.clipboard.writeText(friendCode);
+                setCodeCopied(true);
+                setTimeout(() => setCodeCopied(false), 2000);
+              }}
+            >
+              {codeCopied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Share Library Toggle */}
+      {!isDemo && (
+        <div className="card mb-3">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+                📚 Share Library
+              </h2>
+              <p className="text-secondary" style={{ fontSize: '0.9rem', margin: 0 }}>
+                {shareLibrary ? 'Friends can browse your lists' : 'Only your goal and last read are visible'}
+              </p>
+            </div>
+            <button
+              onClick={async () => {
+                const next = !shareLibrary;
+                setShareLibrary(next);
+                await api.profile.updateMe({ shareLibrary: next });
+              }}
+              style={{
+                width: 52, height: 28, borderRadius: 14,
+                background: shareLibrary ? 'var(--primary)' : 'var(--border)',
+                border: 'none', cursor: 'pointer', position: 'relative',
+                transition: 'background 0.2s', flexShrink: 0,
+              }}
+            >
+              <div style={{
+                width: 22, height: 22, borderRadius: '50%', background: 'white',
+                position: 'absolute', top: 3,
+                left: shareLibrary ? 27 : 3,
+                transition: 'left 0.2s',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              }} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Reading Goal */}
       <div className="card mb-3">
