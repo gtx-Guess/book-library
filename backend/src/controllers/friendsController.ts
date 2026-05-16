@@ -41,7 +41,7 @@ export async function getFriends(req: Request, res: Response) {
         const lastCompleted = await prisma.completedBook.findFirst({
           where: { userId: f.friendId },
           include: { book: true },
-          orderBy: { completedDate: 'desc' },
+          orderBy: [{ completedDate: 'desc' }, { createdAt: 'desc' }],
         });
 
         const shareLibrary = profile?.shareLibrary ?? true;
@@ -337,7 +337,7 @@ export async function getFriendCompleted(req: Request, res: Response) {
       prisma.completedBook.findMany({
         where: { userId: friendId },
         include: { book: true },
-        orderBy: { completedDate: 'desc' },
+        orderBy: [{ completedDate: 'desc' }, { createdAt: 'desc' }],
         skip,
         take: limitNum,
       }),
@@ -462,7 +462,7 @@ export async function getFriendStats(req: Request, res: Response) {
       prisma.completedBook.findFirst({
         where: { userId: friendId },
         include: { book: true },
-        orderBy: { completedDate: 'desc' },
+        orderBy: [{ completedDate: 'desc' }, { createdAt: 'desc' }],
       }),
       prisma.completedBook.count({
         where: { userId: friendId, year: currentYear },

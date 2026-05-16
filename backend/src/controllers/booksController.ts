@@ -112,7 +112,7 @@ export async function getCompletedBooksByYear(req: Request, res: Response) {
     const completedBooks = await prisma.completedBook.findMany({
       where: { year: yearNum, userId },
       include: { book: true },
-      orderBy: { completedDate: 'desc' },
+      orderBy: [{ completedDate: 'desc' }, { createdAt: 'desc' }],
     });
 
     res.json(completedBooks);
@@ -212,7 +212,7 @@ export async function getAllCompletedBooks(req: Request, res: Response) {
       prisma.completedBook.findMany({
         where: { userId },
         include: { book: true },
-        orderBy: { completedDate: 'desc' },
+        orderBy: [{ completedDate: 'desc' }, { createdAt: 'desc' }],
         skip,
         take: limitNum,
       }),
