@@ -22,7 +22,7 @@ export async function getYearlyStats(req: Request, res: Response) {
       prisma.completedBook.findFirst({
         where: { year: yearNum, userId },
         include: { book: true },
-        orderBy: { completedDate: 'desc' },
+        orderBy: [{ completedDate: 'desc' }, { createdAt: 'desc' }],
       }),
     ]);
 

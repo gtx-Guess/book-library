@@ -2,6 +2,10 @@ dev:
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
+dev-local:
+	VITE_API_URL= docker compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
+	VITE_API_URL= docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
 prod:
 	docker compose build --no-cache
 	docker compose up -d
